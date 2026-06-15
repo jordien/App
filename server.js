@@ -253,14 +253,35 @@ app.get('/api/verificar-sesion', (req, res) => {
         res.json({ autenticado: true, usuario: decoded });
     });
 });
+// ================= SISTEMA QR PARA VENDEDORES (UN SOLO USO) =================
 
-// ================= QR VENDEDORES =================
+function generarCodigoUnico(idVendedor) {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const hash = crypto.createHash('md5').update(`${idVendedor}${timestamp}${random}`).digest('hex').substring(0, 8);
+    return `CHP${idVendedor}${timestamp}${hash}`;
+}
+
+function crearTablaQRVendedores() {
+    db.query(`
+        CREATE TABLE IF NOT EXISTS qr_vendedores (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            codigo VARCHAR(100) NOT NULL UNIQUE,
+            id_vendedor INT NOT NULL,
+            nombre_vendedor VARCHAR(100),
+            generado_en DATETIME DEFAULT NOW(),
+            usado TINYINT DEFAULT 0,
+            FOREIGN KEY (id_vendedor) REFERENCES trabajadores(Id_Trabajador)
+        )
+    `);
+}
+
 app.get('/api/vendedor/qr-activo/:id', (req, res) => {
     const { id } = req.params;
     
     db.query(`
-        SELECT codigo, expira_en FROM qr_vendedores 
-        WHERE id_vendedor = ? AND usado = 0 AND expira_en > NOW()
+        SELECT codigo, usado FROM qr_vendedores 
+        WHERE id_vendedor = ? AND usado = 0
         ORDER BY generado_en DESC LIMIT 1
     `, [id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -269,11 +290,90 @@ app.get('/api/vendedor/qr-activo/:id', (req, res) => {
             res.json({
                 tiene_qr_activo: true,
                 codigo: results[0].codigo,
-                expira: results[0].expira_en
+                usado: results[0].usado === 1
             });
         } else {
             res.json({ tiene_qr_activo: false });
         }
+    });
+});
+
+app.post('/api/vendedor/generar-qr', verificarTokenTrabajador, (req, res) => {
+    const { id_vendedor } = req.body;
+    
+    if (!id_vendedor) {
+        return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
+    }
+    
+    if (req.usuario.id !== id_vendedor) {
+        return res.status(403).json({ success: false, message: 'No autorizado' });
+    }
+    
+    const codigo = generarCodigoUnico(id_vendedor);
+    
+    db.query(`SELECT NombreCompleto FROM trabajadores WHERE Id_Trabajador = ?`, [id_vendedor], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: 'Error en servidor' });
+        }
+        
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Vendedor no encontrado' });
+        }
+        
+        const nombreVendedor = results[0].NombreCompleto;
+        
+        // Marcar todos los QR anteriores como usados
+        db.query(`UPDATE qr_vendedores SET usado = 1 WHERE id_vendedor = ? AND usado = 0`, [id_vendedor], (err) => {
+            if (err) console.error('Error actualizando QR anteriores:', err);
+            
+            db.query(`
+                INSERT INTO qr_vendedores (codigo, id_vendedor, nombre_vendedor, usado) 
+                VALUES (?, ?, ?, 0)
+            `, [codigo, id_vendedor, nombreVendedor], (err2) => {
+                if (err2) {
+                    return res.status(500).json({ success: false, message: 'Error guardando QR: ' + err2.message });
+                }
+                
+                res.json({
+                    success: true,
+                    codigo: codigo,
+                    vendedor: nombreVendedor
+                });
+            });
+        });
+    });
+});
+
+// Endpoint para validar QR (para la caja)
+app.post('/api/validar-qr-vendedor', (req, res) => {
+    const { codigo } = req.body;
+    
+    if (!codigo) {
+        return res.json({ valido: false, message: 'Codigo invalido' });
+    }
+    
+    db.query(`
+        SELECT q.*, t.NombreCompleto 
+        FROM qr_vendedores q
+        JOIN trabajadores t ON q.id_vendedor = t.Id_Trabajador
+        WHERE q.codigo = ? AND q.usado = 0
+    `, [codigo], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        if (results.length === 0) {
+            return res.json({ valido: false, message: 'QR invalido o ya fue usado' });
+        }
+        
+        const qr = results[0];
+        
+        // Marcar como usado
+        db.query(`UPDATE qr_vendedores SET usado = 1 WHERE id = ?`, [qr.id]);
+        
+        res.json({
+            valido: true,
+            id_vendedor: qr.id_vendedor,
+            nombre_vendedor: qr.NombreCompleto
+        });
     });
 });
 
