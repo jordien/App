@@ -36,7 +36,7 @@ db.connect(err => {
 const SECRET_KEY = 'chepita_secret_key_2025';
 const resetTokens = {};
 
-// ================= CREAR TABLAS EXISTENTES =================
+// ================= CREAR TABLAS =================
 function crearTablas() {
     db.query(`
         CREATE TABLE IF NOT EXISTS trabajador_recuperacion_tokens (
@@ -65,7 +65,6 @@ function crearTablas() {
     });
 }
 
-// ================= TABLA DE ASISTENCIA MANUAL =================
 function crearTablaAsistencia() {
     db.query(`
         CREATE TABLE IF NOT EXISTS asistencia_registros (
@@ -244,7 +243,7 @@ app.get('/api/verificar-sesion', (req, res) => {
     });
 });
 
-// ================= SISTEMA QR PARA VENDEDORES (VENTAS) =================
+// ================= SISTEMA QR PARA VENDEDORES =================
 function generarCodigoUnico(idVendedor) {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -252,6 +251,7 @@ function generarCodigoUnico(idVendedor) {
     return `CHP${idVendedor}${timestamp}${hash}`;
 }
 
+// Endpoint para validar QR (usado por nueva_compra.html)
 app.post('/api/validar-qr-vendedor', (req, res) => {
     const { codigo } = req.body;
     
@@ -259,13 +259,18 @@ app.post('/api/validar-qr-vendedor', (req, res) => {
         return res.json({ valido: false, message: 'Código inválido' });
     }
     
+    console.log('🔍 Validando QR:', codigo);
+    
     db.query(`
         SELECT q.*, t.NombreCompleto 
         FROM qr_vendedores q
         JOIN trabajadores t ON q.id_vendedor = t.Id_Trabajador
         WHERE q.codigo = ? AND q.usado = 0 AND q.expira_en > NOW()
     `, [codigo], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) {
+            console.error('Error DB:', err);
+            return res.status(500).json({ error: err.message });
+        }
         
         if (results.length === 0) {
             db.query(`SELECT usado, expira_en FROM qr_vendedores WHERE codigo = ?`, [codigo], (err2, checkResults) => {
@@ -297,6 +302,7 @@ app.post('/api/validar-qr-vendedor', (req, res) => {
     });
 });
 
+// Obtener QR activo del vendedor
 app.get('/api/vendedor/qr-activo/:id', (req, res) => {
     const { id } = req.params;
     
@@ -320,6 +326,7 @@ app.get('/api/vendedor/qr-activo/:id', (req, res) => {
     });
 });
 
+// Generar nuevo QR
 app.post('/api/vendedor/generar-qr', verificarTokenTrabajador, (req, res) => {
     const { id_vendedor, duracion_minutos = 60 } = req.body;
     
@@ -369,21 +376,15 @@ app.post('/api/vendedor/enviar-qr-email', (req, res) => {
     });
 });
 
-// ================= SISTEMA DE ASISTENCIA MANUAL =================
+// ================= ASISTENCIA MANUAL =================
 
-// Vendedor marca entrada
 app.post('/api/asistencia/marcar-entrada', verificarTokenTrabajador, (req, res) => {
     const { id_vendedor } = req.body;
     const hoy = new Date().toISOString().split('T')[0];
     const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
-    if (!id_vendedor) {
-        return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
-    }
-    
-    if (req.usuario.id !== id_vendedor) {
-        return res.status(403).json({ success: false, message: 'No autorizado' });
-    }
+    if (!id_vendedor) return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
+    if (req.usuario.id !== id_vendedor) return res.status(403).json({ success: false, message: 'No autorizado' });
     
     db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id_vendedor, hoy], (err, results) => {
         if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
@@ -414,35 +415,21 @@ app.post('/api/asistencia/marcar-entrada', verificarTokenTrabajador, (req, res) 
     });
 });
 
-// Vendedor marca salida
 app.post('/api/asistencia/marcar-salida', verificarTokenTrabajador, (req, res) => {
     const { id_vendedor } = req.body;
     const hoy = new Date().toISOString().split('T')[0];
     const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
-    if (!id_vendedor) {
-        return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
-    }
-    
-    if (req.usuario.id !== id_vendedor) {
-        return res.status(403).json({ success: false, message: 'No autorizado' });
-    }
+    if (!id_vendedor) return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
+    if (req.usuario.id !== id_vendedor) return res.status(403).json({ success: false, message: 'No autorizado' });
     
     db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id_vendedor, hoy], (err, results) => {
         if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
-        
-        if (results.length === 0) {
-            return res.json({ success: false, message: 'Primero debes marcar tu entrada' });
-        }
+        if (results.length === 0) return res.json({ success: false, message: 'Primero debes marcar tu entrada' });
         
         const registro = results[0];
-        if (registro.hora_salida) {
-            return res.json({ success: false, message: 'Ya marcaste salida hoy' });
-        }
-        
-        if (!registro.hora_entrada) {
-            return res.json({ success: false, message: 'Primero debes marcar tu entrada' });
-        }
+        if (registro.hora_salida) return res.json({ success: false, message: 'Ya marcaste salida hoy' });
+        if (!registro.hora_entrada) return res.json({ success: false, message: 'Primero debes marcar tu entrada' });
         
         db.query(`UPDATE asistencia_registros SET hora_salida = ?, estado = 'completo' WHERE id_vendedor = ? AND fecha = ?`, 
             [horaActual, id_vendedor, hoy], (err) => {
@@ -452,7 +439,6 @@ app.post('/api/asistencia/marcar-salida', verificarTokenTrabajador, (req, res) =
     });
 });
 
-// Obtener estado de asistencia del vendedor
 app.get('/api/asistencia/estado/:id', (req, res) => {
     const { id } = req.params;
     const hoy = new Date().toISOString().split('T')[0];
@@ -461,19 +447,11 @@ app.get('/api/asistencia/estado/:id', (req, res) => {
         if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
         
         if (results.length === 0) {
-            return res.json({
-                success: true,
-                tiene_registro: false,
-                entrada: null,
-                salida: null,
-                estado: 'pendiente',
-                mensaje: 'No has marcado asistencia hoy'
-            });
+            return res.json({ success: true, tiene_registro: false, entrada: null, salida: null, estado: 'pendiente', mensaje: 'No has marcado asistencia hoy' });
         }
         
         const registro = results[0];
-        let estado = 'pendiente';
-        let mensaje = '';
+        let estado = 'pendiente', mensaje = '';
         
         if (registro.hora_entrada && !registro.hora_salida) {
             estado = 'en_jornada';
@@ -483,26 +461,16 @@ app.get('/api/asistencia/estado/:id', (req, res) => {
             mensaje = `Entrada: ${registro.hora_entrada} | Salida: ${registro.hora_salida}`;
         }
         
-        res.json({
-            success: true,
-            tiene_registro: true,
-            entrada: registro.hora_entrada,
-            salida: registro.hora_salida,
-            estado: estado,
-            mensaje: mensaje
-        });
+        res.json({ success: true, tiene_registro: true, entrada: registro.hora_entrada, salida: registro.hora_salida, estado: estado, mensaje: mensaje });
     });
 });
 
-// Admin marca asistencia manualmente
 app.post('/api/asistencia/admin-marcar', async (req, res) => {
     const { id_vendedor, tipo, hora } = req.body;
     const hoy = new Date().toISOString().split('T')[0];
     const horaMarcar = hora || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
-    if (!id_vendedor || !tipo) {
-        return res.status(400).json({ success: false, message: 'Datos incompletos' });
-    }
+    if (!id_vendedor || !tipo) return res.status(400).json({ success: false, message: 'Datos incompletos' });
     
     db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id_vendedor, hoy], (err, results) => {
         if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
@@ -538,7 +506,6 @@ app.post('/api/asistencia/admin-marcar', async (req, res) => {
     });
 });
 
-// Obtener registro de asistencia para ADMIN
 app.get('/api/asistencia/registro', (req, res) => {
     const { fecha } = req.query;
     const fechaBuscar = fecha || new Date().toISOString().split('T')[0];
@@ -550,10 +517,7 @@ app.get('/api/asistencia/registro', (req, res) => {
         WHERE a.fecha = ?
         ORDER BY a.hora_entrada DESC
     `, [fechaBuscar], (err, results) => {
-        if (err) {
-            console.error('Error:', err);
-            return res.status(500).json({ error: err.message });
-        }
+        if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });
 });
@@ -595,9 +559,7 @@ app.post('/api/productos', (req, res) => {
     
     db.query(`SELECT Id_Proveedor FROM proveedores WHERE Id_Proveedor = ?`, [Id_Proveedor], (err, provResults) => {
         if (err) return res.status(500).json({ error: err.message });
-        if (provResults.length === 0) {
-            return res.status(400).json({ error: 'Proveedor no existe' });
-        }
+        if (provResults.length === 0) return res.status(400).json({ error: 'Proveedor no existe' });
         
         db.query(`INSERT INTO producto (Nombre, Precio, Marca, Id_Categoria, Id_Estado) VALUES (?, ?, ?, ?, 1)`, 
             [Nombre, Precio, Marca || null, Id_Categoria || null], (err, result) => {
@@ -702,9 +664,7 @@ app.get('/api/estadisticas-ventas', (req, res) => {
 app.get('/api/top-productos', (req, res) => {
     const { limite = 5 } = req.query;
     db.query(`
-        SELECT 
-            p.Nombre as nombre, 
-            SUM(o.CantidadVendida) as cantidad
+        SELECT p.Nombre as nombre, SUM(o.CantidadVendida) as cantidad
         FROM orden o
         JOIN producto p ON o.Id_Producto = p.Id_Producto
         GROUP BY p.Id_Producto, p.Nombre
@@ -727,6 +687,38 @@ app.get('/api/puntos-vendedores', (req, res) => {
     `, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
+    });
+});
+
+app.get('/api/puntos-vendedor/:id', (req, res) => {
+    const { id } = req.params;
+    
+    const sql = `
+        SELECT 
+            t.Id_Trabajador as id_trabajador,
+            t.NombreCompleto as nombre_completo,
+            COUNT(c.Num_Factura) as total_ventas,
+            COUNT(DISTINCT DATE(c.Fecha)) as dias_activos,
+            ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) as promedio_diario,
+            ROUND(
+                (COUNT(c.Num_Factura) * 0.4) + 
+                (COUNT(DISTINCT DATE(c.Fecha)) * 0.3) + 
+                (ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) * 0.3), 
+                2
+            ) as puntaje_total,
+            COALESCE(SUM(c.Monto), 0) as total_ventas_cordobas
+        FROM compra c
+        INNER JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
+        WHERE t.Id_Trabajador = ?
+        GROUP BY t.Id_Trabajador, t.NombreCompleto
+    `;
+    
+    db.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (results.length === 0) {
+            return res.json({ success: true, total_ventas: 0, dias_activos: 0, promedio_diario: 0, puntaje_total: 0, total_ventas_cordobas: 0 });
+        }
+        res.json({ success: true, ...results[0] });
     });
 });
 
@@ -862,7 +854,7 @@ app.listen(PORT, '0.0.0.0', () => {
     ╠══════════════════════════════════════════════════════════╣
     ║  Puerto: ${PORT}                                          ║
     ║  QR Ventas: ACTIVADO                                     ║
-    ║  Asistencia Manual: ACTIVADO                             ║
+    ║  Asistencia: ACTIVADO                                    ║
     ║  Login Admin: admin / admin (MD5)                        ║
     ╚══════════════════════════════════════════════════════════╝
     `);
