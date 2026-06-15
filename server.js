@@ -113,7 +113,7 @@ app.post('/api/admin/login', async (req, res) => {
     db.query(`SELECT * FROM usuarios_admin WHERE usuario = ?`, [usuario], async (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) {
-            return res.status(401).json({ success: false, message: "Usuario o contrasena incorrectos" });
+            return res.status(401).json({ success: false, message: "Usuario o contraseña incorrectos" });
         }
         
         const admin = results[0];
@@ -132,7 +132,7 @@ app.post('/api/admin/login', async (req, res) => {
             return res.json({ success: true, token: token, user: admin.usuario });
         }
         
-        res.status(401).json({ success: false, message: "Contrasena incorrecta" });
+        res.status(401).json({ success: false, message: "Contraseña incorrecta" });
     });
 });
 
@@ -158,12 +158,12 @@ app.post('/api/admin/recuperar-email', (req, res) => {
         
         db.query(`UPDATE usuarios_admin SET password = ? WHERE email = ?`, [hashedPassword, email], (err) => {
             if (err) {
-                return res.status(500).json({ success: false, message: 'Error actualizando contrasena' });
+                return res.status(500).json({ success: false, message: 'Error actualizando contraseña' });
             }
             
             res.json({ 
                 success: true, 
-                message: `Nueva contrasena temporal: ${nuevaPassword}`,
+                message: `Nueva contraseña temporal: ${nuevaPassword}`,
                 nuevaPassword: nuevaPassword
             });
         });
@@ -178,7 +178,7 @@ app.post('/api/trabajadores/login', async (req, res) => {
         [nombre_usuario, nombre_usuario], async (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) {
-            return res.status(401).json({ success: false, message: "Usuario o contrasena incorrectos" });
+            return res.status(401).json({ success: false, message: "Usuario o contraseña incorrectos" });
         }
         
         const trabajador = results[0];
@@ -215,7 +215,7 @@ app.post('/api/trabajadores/login', async (req, res) => {
             });
         }
         
-        res.status(401).json({ success: false, message: "Contrasena incorrecta" });
+        res.status(401).json({ success: false, message: "Contraseña incorrecta" });
     });
 });
 
@@ -246,7 +246,7 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
             
             res.json({ 
                 success: true, 
-                message: `Nueva contrasena temporal: ${nuevaPassword}`,
+                message: `Nueva contraseña temporal: ${nuevaPassword}`,
                 nuevaPassword: nuevaPassword,
                 nombre: results[0].NombreCompleto
             });
@@ -414,7 +414,6 @@ app.post('/api/asistencia/generar-qr', verificarTokenTrabajador, (req, res) => {
 app.get('/api/asistencia/vendedor/:id', (req, res) => {
     const { id } = req.params;
     const hoy = new Date().toISOString().split('T')[0];
-    const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     
     db.query(`SELECT codigo FROM vendedor_qr_asistencia WHERE id_vendedor = ?`, [id], (err, qrResults) => {
         const codigoQR = qrResults.length > 0 ? qrResults[0].codigo : null;
@@ -450,6 +449,66 @@ app.get('/api/asistencia/vendedor/:id', (req, res) => {
                 registros_hoy: registrosHoy
             });
         });
+    });
+});
+
+app.post('/api/asistencia/escanear', (req, res) => {
+    const { codigo } = req.body;
+    const hoy = new Date().toISOString().split('T')[0];
+    const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    if (!codigo) {
+        return res.status(400).json({ success: false, message: 'Codigo QR requerido' });
+    }
+    
+    db.query(`SELECT id_vendedor FROM vendedor_qr_asistencia WHERE codigo = ?`, [codigo], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (results.length === 0) {
+            return res.json({ success: false, message: 'QR invalido' });
+        }
+        
+        const idVendedor = results[0].id_vendedor;
+        
+        db.query(`SELECT * FROM asistencia_vendedores WHERE id_vendedor = ? AND fecha = ?`, [idVendedor, hoy], (err, existing) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+            
+            if (existing.length === 0) {
+                db.query(`INSERT INTO asistencia_vendedores (id_vendedor, fecha, hora_entrada, estado) 
+                          VALUES (?, ?, ?, 'presente')`, 
+                          [idVendedor, hoy, horaActual], (err) => {
+                    if (err) return res.status(500).json({ success: false, message: err.message });
+                    res.json({ success: true, message: 'Entrada registrada', tipo: 'entrada', hora: horaActual });
+                });
+            } else {
+                const registro = existing[0];
+                if (!registro.hora_salida) {
+                    db.query(`UPDATE asistencia_vendedores SET hora_salida = ?, estado = 'completo' 
+                              WHERE id_vendedor = ? AND fecha = ?`, 
+                              [horaActual, idVendedor, hoy], (err) => {
+                        if (err) return res.status(500).json({ success: false, message: err.message });
+                        res.json({ success: true, message: 'Salida registrada', tipo: 'salida', hora: horaActual });
+                    });
+                } else {
+                    res.json({ success: false, message: 'Ya registro entrada y salida hoy' });
+                }
+            }
+        });
+    });
+});
+
+app.get('/api/asistencia/registro', (req, res) => {
+    const { fecha } = req.query;
+    const fechaBuscar = fecha || new Date().toISOString().split('T')[0];
+    
+    db.query(`
+        SELECT a.*, t.NombreCompleto as vendedor 
+        FROM asistencia_vendedores a
+        JOIN trabajadores t ON a.id_vendedor = t.Id_Trabajador
+        WHERE a.fecha = ?
+        ORDER BY a.hora_entrada DESC
+    `, [fechaBuscar], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
     });
 });
 
@@ -541,6 +600,14 @@ app.get('/api/puntos-vendedores', (req, res) => {
     });
 });
 
+// ================= AÑOS DISPONIBLES =================
+app.get('/api/anios-disponibles', (req, res) => {
+    db.query(`SELECT DISTINCT YEAR(Fecha) as anio FROM compra ORDER BY anio DESC`, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results.map(r => r.anio));
+    });
+});
+
 // ================= PRODUCTOS =================
 app.get('/api/productos', (req, res) => {
     db.query(`
@@ -566,6 +633,46 @@ app.get('/api/productos/bajo-stock', (req, res) => {
     `, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
+    });
+});
+
+app.post('/api/productos', (req, res) => {
+    const { Nombre, Stock, Precio, Marca, Id_Proveedor, Id_Categoria } = req.body;
+    
+    if (!Nombre || !Stock || !Precio || !Id_Proveedor) {
+        return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+    
+    db.query(`SELECT Id_Proveedor FROM proveedores WHERE Id_Proveedor = ?`, [Id_Proveedor], (err, provResults) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (provResults.length === 0) {
+            return res.status(400).json({ error: 'Proveedor no existe' });
+        }
+        
+        db.query(`INSERT INTO producto (Nombre, Precio, Marca, Id_Categoria, Id_Estado) VALUES (?, ?, ?, ?, 1)`, 
+            [Nombre, Precio, Marca || null, Id_Categoria || null], (err, result) => {
+            if (err) return res.status(500).json({ error: err.message });
+            
+            const idProducto = result.insertId;
+            db.query(`INSERT INTO stock (Id_Inventario, Id_Producto, Cantidad, FechaEntrada) VALUES (1, ?, ?, CURDATE())`, 
+                [idProducto, Stock], (err2) => {
+                if (err2) return res.status(500).json({ error: err2.message });
+                
+                db.query(`INSERT INTO abastecimiento (Id_Producto, Id_Proveedor, Precio_Compra, FechaEntrada, Cantidad_Entrada) VALUES (?, ?, ?, CURDATE(), ?)`, 
+                    [idProducto, Id_Proveedor, Precio, Stock], (err3) => {
+                    if (err3) return res.status(500).json({ error: err3.message });
+                    res.json({ message: "Producto agregado", Id_Producto: idProducto });
+                });
+            });
+        });
+    });
+});
+
+app.delete('/api/productos/:id', (req, res) => {
+    const { id } = req.params;
+    db.query(`DELETE FROM producto WHERE Id_Producto = ?`, [id], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Producto eliminado" });
     });
 });
 
@@ -619,6 +726,16 @@ app.post('/api/trabajadores', async (req, res) => {
         });
 });
 
+app.put('/api/trabajadores/:id', (req, res) => {
+    const { id } = req.params;
+    const { Activo } = req.body;
+    
+    db.query(`UPDATE trabajadores SET Activo = ? WHERE Id_Trabajador = ?`, [Activo, id], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Estado actualizado" });
+    });
+});
+
 // ================= ESTADISTICAS =================
 app.get('/api/estadisticas-ventas', (req, res) => {
     db.query(`
@@ -633,14 +750,15 @@ app.get('/api/estadisticas-ventas', (req, res) => {
 });
 
 app.get('/api/top-productos', (req, res) => {
+    const { limite = 5 } = req.query;
     db.query(`
         SELECT p.Nombre, SUM(o.CantidadVendida) as cantidad
         FROM orden o
         JOIN producto p ON o.Id_Producto = p.Id_Producto
         GROUP BY p.Id_Producto
         ORDER BY cantidad DESC
-        LIMIT 5
-    `, (err, results) => {
+        LIMIT ?
+    `, [parseInt(limite)], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });
@@ -668,13 +786,29 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.get('/admin_App.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin_App.html'));
+});
+
+app.get('/vendedor_app.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'vendedor_app.html'));
+});
+
 app.get('/reset-password.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'reset-password.html'));
 });
 
+// ================= INICIAR SERVIDOR =================
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor Chepita corriendo en puerto ${PORT}`);
-    console.log(`QR de un solo uso activado`);
-    console.log(`Sistema de asistencia activado`);
-    console.log(`Sistema de puntos activado`);
+    console.log(`
+    ╔══════════════════════════════════════════════════════════╗
+    ║     SERVIDOR CHEPITA CORRIENDO                           ║
+    ╠══════════════════════════════════════════════════════════╣
+    ║  Puerto: ${PORT}                                          ║
+    ║  Base de datos: Railway                                  ║
+    ║  QR un solo uso activado                                 ║
+    ║  Sistema de asistencia activado                          ║
+    ║  Sistema de puntos activado                              ║
+    ╚══════════════════════════════════════════════════════════╝
+    `);
 });
