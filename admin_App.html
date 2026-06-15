@@ -194,11 +194,11 @@
         }
 
         .btn {
-            padding: 12px 20px;
+            padding: 14px 24px;
             border: none;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -215,13 +215,13 @@
         }
 
         .btn-danger {
-            background: #fee2e2;
-            color: #dc2626;
+            background: #c62828;
+            color: white;
         }
 
         .btn-success {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: #2e7d32;
+            color: white;
         }
 
         .btn-sm {
@@ -238,10 +238,73 @@
         .marcacion-container .btn {
             flex: 1;
             margin: 0;
+            font-size: 18px;
+            padding: 16px;
         }
 
-        .vendedor-select {
+        /* Buscador de vendedores */
+        .buscador-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .buscador-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e8e8f0;
+            border-radius: 24px;
+            font-size: 16px;
+        }
+
+        .buscador-input:focus {
+            outline: none;
+            border-color: #A63C89;
+        }
+
+        .sugerencias {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e8e8f0;
+            border-radius: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .sugerencia-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .sugerencia-item:hover {
+            background: #f5f0ff;
+        }
+
+        .sugerencia-nombre {
+            font-weight: 600;
+            color: #4a1d6d;
+        }
+
+        .sugerencia-email {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .vendedor-seleccionado {
+            background: #f5f0ff;
+            padding: 12px;
+            border-radius: 20px;
             margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .login-container {
@@ -429,19 +492,37 @@
                 </div>
             </div>
 
-            <!-- Panel Asistencia Manual -->
+            <!-- Panel Asistencia Manual con Buscador -->
             <div id="asistencia" class="panel">
                 <div class="card">
                     <h3>Marcar Asistencia Manual</h3>
-                    <div class="vendedor-select">
-                        <label>Seleccionar Vendedor</label>
-                        <select id="adminVendedorSelect" class="form-group" style="width:100%"></select>
+                    
+                    <!-- Buscador de vendedores -->
+                    <div class="buscador-container">
+                        <label>Buscar Vendedor</label>
+                        <input type="text" id="buscarVendedor" class="buscador-input" placeholder="Escribe el nombre del vendedor... ej: jordy, maria" autocomplete="off">
+                        <div id="sugerenciasLista" class="sugerencias"></div>
                     </div>
+                    
+                    <!-- Vendedor seleccionado -->
+                    <div id="vendedorSeleccionado" class="vendedor-seleccionado" style="display: none;">
+                        <span id="nombreSeleccionado"></span>
+                        <button class="btn btn-sm" onclick="limpiarSeleccionVendedor()" style="background:#fee2e2; color:#c62828;">X</button>
+                    </div>
+                    <input type="hidden" id="idVendedorSeleccionado" value="">
+                    
+                    <!-- Estado actual del vendedor -->
+                    <div id="estadoActualVendedor" style="margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 16px; display: none;">
+                        <div id="infoEstado"></div>
+                    </div>
+                    
+                    <!-- Botones de asistencia -->
                     <div class="marcacion-container">
-                        <button class="btn btn-success" onclick="marcarEntradaAdmin()" style="background:#2e7d32;">Marcar Entrada</button>
-                        <button class="btn btn-danger" onclick="marcarSalidaAdmin()" style="background:#c62828;">Marcar Salida</button>
+                        <button class="btn btn-success" onclick="marcarEntradaAdmin()" id="btnEntradaAdmin" style="background:#2e7d32;">Marcar Entrada</button>
+                        <button class="btn btn-danger" onclick="marcarSalidaAdmin()" id="btnSalidaAdmin" style="background:#c62828;">Marcar Salida</button>
                     </div>
                 </div>
+                
                 <div class="card">
                     <h3>Registro de Asistencia</h3>
                     <div class="form-group">
@@ -460,7 +541,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td colspan="5">Cargando...</td></tr>
+                                <tr><td colspan="5">Cargando...</span></td></tbody>
                             </tbody>
                         </table>
                     </div>
@@ -476,7 +557,7 @@
                             <thead>
                                 <tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr>
                             </thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="5">Cargando...</span></td></tbody>
                         </table>
                     </div>
                 </div>
@@ -502,7 +583,7 @@
                             <thead>
                                 <tr><th>Vendedor</th><th>Ventas</th><th>Días Activos</th><th>Promedio</th><th>Puntaje</th><th>Premio</th></tr>
                             </thead>
-                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="6">Cargando...</span></td></tbody>
                         </table>
                     </div>
                 </div>
@@ -522,7 +603,7 @@
                             <thead>
                                 <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Celular</th><th>Estado</th><th></th></tr>
                             </thead>
-                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="6">Cargando...</span></td></tbody>
                         </table>
                     </div>
                 </div>
@@ -558,6 +639,7 @@
 
     <script>
         let token = null;
+        let listaVendedores = [];
 
         function togglePassword() {
             const passwordInput = document.getElementById('adminPassword');
@@ -659,7 +741,7 @@
                 
                 if (tabId === 'asistencia') {
                     cargarRegistroAsistencia();
-                    cargarVendedoresSelect();
+                    cargarVendedoresLista();
                 }
                 if (tabId === 'vendedores') cargarRendimientoVendedores();
             });
@@ -673,7 +755,7 @@
                 cargarCategorias(),
                 cargarProveedores(),
                 cargarRendimientoVendedores(),
-                cargarVendedoresSelect()
+                cargarVendedoresLista()
             ]);
         }
 
@@ -697,7 +779,7 @@
 
                 const topRes = await fetch('/api/top-productos?limite=5');
                 const topProductos = await topRes.json();
-                document.querySelector('#topProductos tbody').innerHTML = topProductos.map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`).join('') || '<tr><td colspan="2">Sin datos</td></table>';
+                document.querySelector('#topProductos tbody').innerHTML = topProductos.map(p => `<tr><td><strong>${p.nombre}</strong></td><td>${p.cantidad}</td></tr>`).join('') || '<tr><td colspan="2">Sin datos</td></tr>';
             } catch (error) {
                 console.error('Error cargando dashboard:', error);
             }
@@ -708,11 +790,11 @@
                 const response = await fetch('/api/productos');
                 const productos = await response.json();
                 document.querySelector('#listaProductos tbody').innerHTML = productos.map(p => `
-                    <table>
+                    <tr>
                         <td>${p.Id_Producto}</td>
-                        <td>${p.Nombre}</td>
-                        <td>C$${p.Precio}</td>
-                        <td><span class="badge ${p.Stock <= 10 ? 'badge-warning' : 'badge-success'}">${p.Stock}</span></td>
+                        <td>${p.Nombre}</span></td>
+                        <td>C$${p.Precio}</span></td>
+                        <td><span class="badge ${p.Stock <= 10 ? 'badge-warning' : 'badge-success'}">${p.Stock}</span></span></td>
                         <td><button class="btn btn-danger btn-sm" onclick="eliminarProducto(${p.Id_Producto})">Eliminar</button></td>
                     </tr>
                 `).join('');
@@ -795,9 +877,9 @@
                 document.querySelector('#listaVendedores tbody').innerHTML = vendedores.map(v => `
                     <tr>
                         <td>${v.Id_Trabajador}</td>
-                        <td>${v.NombreCompleto}</td>
-                        <td>${v.email || '-'}</td>
-                        <td>${v.Celular || '-'}</td>
+                        <td>${v.NombreCompleto}</span></td>
+                        <td>${v.email || '-'}</span></td>
+                        <td>${v.Celular || '-'}</span></td>
                         <td><span class="badge ${v.Activo ? 'badge-success' : 'badge-danger'}">${v.Activo ? 'Activo' : 'Inactivo'}</span></td>
                         <td><button class="btn btn-danger btn-sm" onclick="toggleVendedor(${v.Id_Trabajador}, ${v.Activo})">${v.Activo ? 'Desactivar' : 'Activar'}</button></td>
                     </tr>
@@ -807,14 +889,86 @@
             }
         }
 
-        async function cargarVendedoresSelect() {
+        async function cargarVendedoresLista() {
             try {
                 const response = await fetch('/api/trabajadores/activos');
-                const vendedores = await response.json();
-                const select = document.getElementById('adminVendedorSelect');
-                select.innerHTML = '<option value="">Seleccionar vendedor</option>' + vendedores.map(v => `<option value="${v.Id_Trabajador}">${v.NombreCompleto}</option>`).join('');
+                listaVendedores = await response.json();
             } catch (error) {
-                console.error('Error cargando vendedores select:', error);
+                console.error('Error cargando vendedores:', error);
+            }
+        }
+
+        // Buscador de vendedores
+        const buscadorInput = document.getElementById('buscarVendedor');
+        const sugerenciasDiv = document.getElementById('sugerenciasLista');
+
+        if (buscadorInput) {
+            buscadorInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                if (query.length < 1) {
+                    sugerenciasDiv.style.display = 'none';
+                    return;
+                }
+                
+                const filtered = listaVendedores.filter(v => 
+                    v.NombreCompleto.toLowerCase().includes(query) ||
+                    (v.nombre_usuario && v.nombre_usuario.toLowerCase().includes(query))
+                );
+                
+                if (filtered.length > 0) {
+                    sugerenciasDiv.innerHTML = filtered.map(v => `
+                        <div class="sugerencia-item" onclick="seleccionarVendedor(${v.Id_Trabajador}, '${v.NombreCompleto.replace(/'/g, "\\'")}')">
+                            <div class="sugerencia-nombre">${v.NombreCompleto}</div>
+                            <div class="sugerencia-email">${v.email || 'Sin email'} | Usuario: ${v.nombre_usuario || 'Sin usuario'}</div>
+                        </div>
+                    `).join('');
+                    sugerenciasDiv.style.display = 'block';
+                } else {
+                    sugerenciasDiv.style.display = 'none';
+                }
+            });
+        }
+
+        async function seleccionarVendedor(id, nombre) {
+            document.getElementById('idVendedorSeleccionado').value = id;
+            document.getElementById('nombreSeleccionado').innerHTML = nombre;
+            document.getElementById('vendedorSeleccionado').style.display = 'flex';
+            document.getElementById('buscarVendedor').value = nombre;
+            sugerenciasDiv.style.display = 'none';
+            
+            // Cargar estado actual del vendedor
+            await cargarEstadoVendedor(id);
+        }
+
+        function limpiarSeleccionVendedor() {
+            document.getElementById('idVendedorSeleccionado').value = '';
+            document.getElementById('buscarVendedor').value = '';
+            document.getElementById('vendedorSeleccionado').style.display = 'none';
+            document.getElementById('estadoActualVendedor').style.display = 'none';
+        }
+
+        async function cargarEstadoVendedor(id) {
+            try {
+                const response = await fetch(`/api/asistencia/estado/${id}`);
+                const data = await response.json();
+                const estadoDiv = document.getElementById('estadoActualVendedor');
+                
+                if (data.tiene_registro) {
+                    let estadoTexto = '';
+                    if (data.estado === 'en_jornada') {
+                        estadoTexto = `Entrada: ${data.entrada} - Aún no marca salida`;
+                    } else if (data.estado === 'completo') {
+                        estadoTexto = `Entrada: ${data.entrada} | Salida: ${data.salida} - Jornada completada`;
+                    } else {
+                        estadoTexto = data.mensaje;
+                    }
+                    document.getElementById('infoEstado').innerHTML = `<strong>Estado actual:</strong> ${estadoTexto}`;
+                    estadoDiv.style.display = 'block';
+                } else {
+                    estadoDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error cargando estado:', error);
             }
         }
 
@@ -863,7 +1017,7 @@
                     cargarVendedores();
                     cargarDashboard();
                     cargarRendimientoVendedores();
-                    cargarVendedoresSelect();
+                    cargarVendedoresLista();
                 } else {
                     mostrarMensaje(data.error || 'Error al registrar');
                 }
@@ -882,18 +1036,23 @@
                 cargarVendedores();
                 cargarDashboard();
                 cargarRendimientoVendedores();
-                cargarVendedoresSelect();
+                cargarVendedoresLista();
             } catch (error) {
                 mostrarMensaje('Error: ' + error.message);
             }
         }
 
         async function marcarEntradaAdmin() {
-            const idVendedor = document.getElementById('adminVendedorSelect').value;
+            const idVendedor = document.getElementById('idVendedorSeleccionado').value;
             if (!idVendedor) {
                 mostrarMensaje('Seleccione un vendedor');
                 return;
             }
+
+            const btn = document.getElementById('btnEntradaAdmin');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Procesando...';
+            btn.disabled = true;
 
             try {
                 const response = await fetch('/api/asistencia/admin-marcar', {
@@ -904,21 +1063,30 @@
                 const data = await response.json();
                 if (data.success) {
                     mostrarMensaje(data.message, false);
+                    await cargarEstadoVendedor(idVendedor);
                     cargarRegistroAsistencia();
                 } else {
                     mostrarMensaje(data.message, true);
                 }
             } catch (error) {
                 mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
         async function marcarSalidaAdmin() {
-            const idVendedor = document.getElementById('adminVendedorSelect').value;
+            const idVendedor = document.getElementById('idVendedorSeleccionado').value;
             if (!idVendedor) {
                 mostrarMensaje('Seleccione un vendedor');
                 return;
             }
+
+            const btn = document.getElementById('btnSalidaAdmin');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Procesando...';
+            btn.disabled = true;
 
             try {
                 const response = await fetch('/api/asistencia/admin-marcar', {
@@ -929,12 +1097,16 @@
                 const data = await response.json();
                 if (data.success) {
                     mostrarMensaje(data.message, false);
+                    await cargarEstadoVendedor(idVendedor);
                     cargarRegistroAsistencia();
                 } else {
                     mostrarMensaje(data.message, true);
                 }
             } catch (error) {
                 mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
@@ -947,15 +1119,15 @@
                 const data = await response.json();
                 
                 if (data.length === 0) {
-                    document.querySelector('#tablaAsistencia tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay registros de asistencia para esta fecha</td></tr>';
+                    document.querySelector('#tablaAsistencia tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay registros de asistencia para esta fecha</span></td></tbody>';
                 } else {
                     document.querySelector('#tablaAsistencia tbody').innerHTML = data.map(a => `
                         <tr>
                             <td><strong>${a.vendedor}</strong></td>
-                            <td>${a.fecha}</td>
-                            <td>${a.hora_entrada || '-'}</td>
-                            <td>${a.hora_salida || '-'}</td>
-                            <td><span class="badge ${a.estado === 'completo' ? 'badge-success' : 'badge-warning'}">${a.estado === 'completo' ? 'Completo' : 'Pendiente'}</span></td>
+                            <td>${a.fecha}</span></td>
+                            <td>${a.hora_entrada || '-'}</span></td>
+                            <td>${a.hora_salida || '-'}</span></td>
+                            <td><span class="badge ${a.estado === 'completo' ? 'badge-success' : 'badge-warning'}">${a.estado === 'completo' ? 'Completo' : 'Pendiente'}</span></span></td>
                         </tr>
                     `).join('');
                 }
