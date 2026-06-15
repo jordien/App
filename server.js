@@ -25,16 +25,48 @@ const db = mysql.createConnection({
 
 db.connect(err => {
     if (err) {
-        console.error('Error de conexión:', err);
+        console.error('❌ Error de conexión:', err);
         return;
     }
-    console.log('Conectado a MySQL');
-    crearTablasAsistencia();
+    console.log('✅ Conectado a MySQL');
+    crearTablas();
+    crearTablasAsistencia(); // ← Agregado: crea tablas de asistencia
 });
 
-// ================= CREAR TABLAS DE ASISTENCIA =================
+const SECRET_KEY = 'chepita_secret_key_2025';
+const resetTokens = {};
+
+// ================= CREAR TABLAS EXISTENTES =================
+function crearTablas() {
+    db.query(`
+        CREATE TABLE IF NOT EXISTS trabajador_recuperacion_tokens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            id_trabajador INT NOT NULL,
+            token VARCHAR(255) NOT NULL,
+            expira_en DATETIME NOT NULL,
+            usado TINYINT DEFAULT 0
+        )
+    `);
+    
+    db.query(`
+        CREATE TABLE IF NOT EXISTS qr_vendedores (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            codigo VARCHAR(100) NOT NULL UNIQUE,
+            id_vendedor INT NOT NULL,
+            nombre_vendedor VARCHAR(100),
+            generado_en DATETIME DEFAULT NOW(),
+            expira_en DATETIME NOT NULL,
+            usado TINYINT DEFAULT 0,
+            FOREIGN KEY (id_vendedor) REFERENCES trabajadores(Id_Trabajador)
+        )
+    `, (err) => {
+        if (err) console.error('Error creando qr_vendedores:', err);
+        else console.log('✅ Tabla qr_vendedores lista');
+    });
+}
+
+// ================= NUEVAS TABLAS DE ASISTENCIA =================
 function crearTablasAsistencia() {
-    // Tabla para guardar QR fijo de cada vendedor (para asistencia)
     db.query(`
         CREATE TABLE IF NOT EXISTS asistencia_qr_vendedores (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -44,11 +76,10 @@ function crearTablasAsistencia() {
             FOREIGN KEY (id_vendedor) REFERENCES trabajadores(Id_Trabajador)
         )
     `, (err) => {
-        if (err) console.error('Error:', err);
-        else console.log('Tabla asistencia_qr_vendedores lista');
+        if (err) console.error('Error creando asistencia_qr_vendedores:', err);
+        else console.log('✅ Tabla asistencia_qr_vendedores lista');
     });
     
-    // Tabla para registrar entrada/salida
     db.query(`
         CREATE TABLE IF NOT EXISTS asistencia_registros (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -60,12 +91,10 @@ function crearTablasAsistencia() {
             FOREIGN KEY (id_vendedor) REFERENCES trabajadores(Id_Trabajador)
         )
     `, (err) => {
-        if (err) console.error('Error:', err);
-        else console.log('Tabla asistencia_registros lista');
+        if (err) console.error('Error creando asistencia_registros:', err);
+        else console.log('✅ Tabla asistencia_registros lista');
     });
 }
-
-const SECRET_KEY = 'chepita_secret_key_2025';
 
 // ================= VERIFICAR TOKEN =================
 function verificarTokenTrabajador(req, res, next) {
@@ -120,6 +149,30 @@ app.post('/api/admin/login', async (req, res) => {
     });
 });
 
+// ================= RECUPERACION ADMIN =================
+app.post('/api/admin/recuperar-email', (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'Ingresa tu correo electrónico' });
+    }
+    
+    db.query(`SELECT usuario FROM usuarios_admin WHERE email = ?`, [email], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en el servidor' });
+        if (results.length === 0) {
+            return res.json({ success: false, message: 'No existe una cuenta con ese correo' });
+        }
+        
+        const nuevaPassword = crypto.randomBytes(4).toString('hex').toUpperCase();
+        const hashedPassword = bcrypt.hashSync(nuevaPassword, 10);
+        
+        db.query(`UPDATE usuarios_admin SET password = ? WHERE email = ?`, [hashedPassword, email], (err) => {
+            if (err) return res.status(500).json({ success: false, message: 'Error actualizando' });
+            res.json({ success: true, message: `Nueva contraseña temporal: ${nuevaPassword}`, nuevaPassword });
+        });
+    });
+});
+
 // ================= LOGIN TRABAJADOR =================
 app.post('/api/trabajadores/login', async (req, res) => {
     const { nombre_usuario, password } = req.body;
@@ -169,6 +222,30 @@ app.post('/api/trabajadores/login', async (req, res) => {
     });
 });
 
+// ================= RECUPERACION TRABAJADOR =================
+app.post('/api/trabajadores/recuperar-password', (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'Ingresa tu correo' });
+    }
+    
+    db.query(`SELECT Id_Trabajador, NombreCompleto, email FROM trabajadores WHERE email = ? AND Activo = 1`, [email], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en el servidor' });
+        if (results.length === 0) {
+            return res.json({ success: false, message: 'No existe una cuenta con ese correo' });
+        }
+        
+        const nuevaPassword = Math.random().toString(36).slice(-6);
+        const md5pass = crypto.createHash('md5').update(nuevaPassword).digest('hex');
+        
+        db.query(`UPDATE trabajadores SET password_hash = ?, debe_cambiar_password = 1 WHERE Id_Trabajador = ?`, [md5pass, results[0].Id_Trabajador], (err) => {
+            if (err) return res.status(500).json({ success: false, message: 'Error actualizando' });
+            res.json({ success: true, message: `Nueva contraseña temporal: ${nuevaPassword}`, nuevaPassword, nombre: results[0].NombreCompleto });
+        });
+    });
+});
+
 // ================= VERIFICAR SESION =================
 app.get('/api/verificar-sesion', (req, res) => {
     const token = req.headers['x-auth-token'];
@@ -180,7 +257,134 @@ app.get('/api/verificar-sesion', (req, res) => {
     });
 });
 
-// ================= QR ASISTENCIA - GENERAR QR FIJO PARA VENDEDOR =================
+// ================= SISTEMA QR PARA VENDEDORES (VENTAS) =================
+function generarCodigoUnico(idVendedor) {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const hash = crypto.createHash('md5').update(`${idVendedor}${timestamp}${random}`).digest('hex').substring(0, 8);
+    return `CHP${idVendedor}${timestamp}${hash}`;
+}
+
+app.post('/api/validar-qr-vendedor', (req, res) => {
+    const { codigo } = req.body;
+    
+    if (!codigo) {
+        return res.json({ valido: false, message: 'Código inválido' });
+    }
+    
+    db.query(`
+        SELECT q.*, t.NombreCompleto 
+        FROM qr_vendedores q
+        JOIN trabajadores t ON q.id_vendedor = t.Id_Trabajador
+        WHERE q.codigo = ? AND q.usado = 0 AND q.expira_en > NOW()
+    `, [codigo], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        if (results.length === 0) {
+            db.query(`SELECT usado, expira_en FROM qr_vendedores WHERE codigo = ?`, [codigo], (err2, checkResults) => {
+                if (checkResults.length > 0) {
+                    const check = checkResults[0];
+                    if (check.usado === 1) {
+                        return res.json({ valido: false, message: 'QR ya usado. Genere uno nuevo.' });
+                    }
+                    if (new Date(check.expira_en) < new Date()) {
+                        return res.json({ valido: false, message: 'QR expirado. Genere uno nuevo.' });
+                    }
+                }
+                return res.json({ valido: false, message: 'QR inválido' });
+            });
+            return;
+        }
+        
+        const qr = results[0];
+        db.query(`UPDATE qr_vendedores SET usado = 1 WHERE id = ?`, [qr.id]);
+        
+        console.log(`✅ QR válido - Vendedor: ${qr.NombreCompleto}`);
+        
+        res.json({
+            valido: true,
+            id_vendedor: qr.id_vendedor,
+            nombre_vendedor: qr.NombreCompleto,
+            expira: qr.expira_en
+        });
+    });
+});
+
+app.get('/api/vendedor/qr-activo/:id', (req, res) => {
+    const { id } = req.params;
+    
+    db.query(`
+        SELECT codigo, expira_en, usado FROM qr_vendedores 
+        WHERE id_vendedor = ? AND usado = 0 AND expira_en > NOW()
+        ORDER BY generado_en DESC LIMIT 1
+    `, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        if (results.length > 0) {
+            res.json({
+                tiene_qr_activo: true,
+                codigo: results[0].codigo,
+                expira: results[0].expira_en,
+                usado: results[0].usado === 1
+            });
+        } else {
+            res.json({ tiene_qr_activo: false });
+        }
+    });
+});
+
+app.post('/api/vendedor/generar-qr', verificarTokenTrabajador, (req, res) => {
+    const { id_vendedor, duracion_minutos = 60 } = req.body;
+    
+    if (!id_vendedor) {
+        return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
+    }
+    
+    if (req.usuario.id !== id_vendedor) {
+        return res.status(403).json({ success: false, message: 'No autorizado' });
+    }
+    
+    const codigo = generarCodigoUnico(id_vendedor);
+    const expiraEn = new Date(Date.now() + duracion_minutos * 60000);
+    
+    db.query(`SELECT NombreCompleto FROM trabajadores WHERE Id_Trabajador = ?`, [id_vendedor], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        if (results.length === 0) return res.status(404).json({ success: false, message: 'Vendedor no encontrado' });
+        
+        const nombreVendedor = results[0].NombreCompleto;
+        
+        db.query(`UPDATE qr_vendedores SET usado = 1 WHERE id_vendedor = ? AND usado = 0`, [id_vendedor], (err) => {
+            if (err) console.error('Error actualizando QR anteriores:', err);
+            
+            db.query(`
+                INSERT INTO qr_vendedores (codigo, id_vendedor, nombre_vendedor, expira_en, usado) 
+                VALUES (?, ?, ?, ?, 0)
+            `, [codigo, id_vendedor, nombreVendedor, expiraEn], (err2) => {
+                if (err2) return res.status(500).json({ success: false, message: 'Error guardando QR' });
+                res.json({ success: true, codigo: codigo, expira: expiraEn, vendedor: nombreVendedor });
+            });
+        });
+    });
+});
+
+app.post('/api/vendedor/enviar-qr-email', (req, res) => {
+    const { email, codigo, nombre_vendedor } = req.body;
+    
+    if (!email || !codigo) {
+        return res.status(400).json({ success: false, message: 'Datos incompletos' });
+    }
+    
+    qrcode.toBuffer(codigo, { errorCorrectionLevel: 'H' }, (err, qrBuffer) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error generando QR' });
+        
+        const qrBase64 = qrBuffer.toString('base64');
+        res.json({ success: true, message: 'QR generado correctamente', qrImage: qrBase64 });
+    });
+});
+
+// ================= NUEVO: SISTEMA DE ASISTENCIA QR =================
+
+// Generar QR de asistencia para vendedor (QR permanente)
 app.post('/api/asistencia/generar-qr', verificarTokenTrabajador, (req, res) => {
     const { id_vendedor } = req.body;
     
@@ -199,22 +403,20 @@ app.post('/api/asistencia/generar-qr', verificarTokenTrabajador, (req, res) => {
               [id_vendedor, codigo, codigo], (err) => {
         if (err) {
             console.error('Error:', err);
-            return res.status(500).json({ success: false, message: 'Error generando QR' });
+            return res.status(500).json({ success: false, message: 'Error generando QR de asistencia' });
         }
         res.json({ success: true, codigo: codigo });
     });
 });
 
-// ================= OBTENER QR DE ASISTENCIA DEL VENDEDOR =================
+// Obtener QR de asistencia del vendedor
 app.get('/api/asistencia/vendedor/:id', (req, res) => {
     const { id } = req.params;
     const hoy = new Date().toISOString().split('T')[0];
     
-    // Obtener QR del vendedor
     db.query(`SELECT codigo FROM asistencia_qr_vendedores WHERE id_vendedor = ?`, [id], (err, qrResults) => {
         const codigoQR = qrResults.length > 0 ? qrResults[0].codigo : null;
         
-        // Obtener registro de hoy
         db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id, hoy], (err, results) => {
             let estado = 'ausente';
             let estadoTexto = 'Sin registro hoy';
@@ -249,7 +451,7 @@ app.get('/api/asistencia/vendedor/:id', (req, res) => {
     });
 });
 
-// ================= ESCANEAR QR DE ASISTENCIA (para ADMIN/CAJA) =================
+// Escanear QR de asistencia (para ADMIN/CAJA)
 app.post('/api/asistencia/escanear', (req, res) => {
     const { codigo } = req.body;
     const hoy = new Date().toISOString().split('T')[0];
@@ -259,7 +461,6 @@ app.post('/api/asistencia/escanear', (req, res) => {
         return res.status(400).json({ success: false, message: 'Código QR requerido' });
     }
     
-    // Buscar vendedor por código QR
     db.query(`SELECT id_vendedor FROM asistencia_qr_vendedores WHERE codigo = ?`, [codigo], (err, results) => {
         if (err) {
             console.error('Error:', err);
@@ -272,14 +473,12 @@ app.post('/api/asistencia/escanear', (req, res) => {
         
         const idVendedor = results[0].id_vendedor;
         
-        // Verificar si ya tiene registro hoy
         db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [idVendedor, hoy], (err, existing) => {
             if (err) {
                 return res.status(500).json({ success: false, message: 'Error en servidor' });
             }
             
             if (existing.length === 0) {
-                // Primer registro del día - entrada
                 db.query(`INSERT INTO asistencia_registros (id_vendedor, fecha, hora_entrada, estado) 
                           VALUES (?, ?, ?, 'presente')`, 
                           [idVendedor, hoy, horaActual], (err) => {
@@ -288,7 +487,6 @@ app.post('/api/asistencia/escanear', (req, res) => {
                         return res.status(500).json({ success: false, message: 'Error registrando entrada' });
                     }
                     
-                    // Obtener nombre del vendedor
                     db.query(`SELECT NombreCompleto FROM trabajadores WHERE Id_Trabajador = ?`, [idVendedor], (err, nombreResults) => {
                         const nombreVendedor = nombreResults.length > 0 ? nombreResults[0].NombreCompleto : 'Vendedor';
                         res.json({ success: true, message: `Entrada registrada: ${nombreVendedor}`, tipo: 'entrada', hora: horaActual, vendedor: nombreVendedor });
@@ -297,7 +495,6 @@ app.post('/api/asistencia/escanear', (req, res) => {
             } else {
                 const registro = existing[0];
                 if (!registro.hora_salida) {
-                    // Registrar salida
                     db.query(`UPDATE asistencia_registros SET hora_salida = ?, estado = 'completo' 
                               WHERE id_vendedor = ? AND fecha = ?`, 
                               [horaActual, idVendedor, hoy], (err) => {
@@ -318,7 +515,7 @@ app.post('/api/asistencia/escanear', (req, res) => {
     });
 });
 
-// ================= OBTENER REGISTRO DE ASISTENCIA (para ADMIN) =================
+// Obtener registro de asistencia (para ADMIN)
 app.get('/api/asistencia/registro', (req, res) => {
     const { fecha } = req.query;
     const fechaBuscar = fecha || new Date().toISOString().split('T')[0];
@@ -334,6 +531,90 @@ app.get('/api/asistencia/registro', (req, res) => {
             console.error('Error:', err);
             return res.status(500).json({ error: err.message });
         }
+        res.json(results);
+    });
+});
+
+// ================= PRODUCTOS =================
+app.get('/api/productos', (req, res) => {
+    db.query(`
+        SELECT p.Id_Producto, p.Nombre, p.Precio, p.Marca,
+               COALESCE(SUM(s.Cantidad), 0) AS Stock
+        FROM producto p
+        LEFT JOIN stock s ON p.Id_Producto = s.Id_Producto
+        GROUP BY p.Id_Producto
+        ORDER BY p.Id_Producto DESC
+    `, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.get('/api/productos/bajo-stock', (req, res) => {
+    db.query(`
+        SELECT p.Id_Producto, p.Nombre, p.Precio, COALESCE(SUM(s.Cantidad), 0) AS Stock
+        FROM producto p
+        LEFT JOIN stock s ON p.Id_Producto = s.Id_Producto
+        GROUP BY p.Id_Producto
+        HAVING Stock < 10
+    `, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.post('/api/productos', (req, res) => {
+    const { Nombre, Stock, Precio, Marca, Id_Proveedor, Id_Categoria } = req.body;
+    
+    if (!Nombre || !Stock || !Precio || !Id_Proveedor) {
+        return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+    
+    db.query(`SELECT Id_Proveedor FROM proveedores WHERE Id_Proveedor = ?`, [Id_Proveedor], (err, provResults) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (provResults.length === 0) {
+            return res.status(400).json({ error: 'Proveedor no existe' });
+        }
+        
+        db.query(`INSERT INTO producto (Nombre, Precio, Marca, Id_Categoria, Id_Estado) VALUES (?, ?, ?, ?, 1)`, 
+            [Nombre, Precio, Marca || null, Id_Categoria || null], (err, result) => {
+            if (err) return res.status(500).json({ error: err.message });
+            
+            const idProducto = result.insertId;
+            db.query(`INSERT INTO stock (Id_Inventario, Id_Producto, Cantidad, FechaEntrada) VALUES (1, ?, ?, CURDATE())`, 
+                [idProducto, Stock], (err2) => {
+                if (err2) return res.status(500).json({ error: err2.message });
+                
+                db.query(`INSERT INTO abastecimiento (Id_Producto, Id_Proveedor, Precio_Compra, FechaEntrada, Cantidad_Entrada) VALUES (?, ?, ?, CURDATE(), ?)`, 
+                    [idProducto, Id_Proveedor, Precio, Stock], (err3) => {
+                    if (err3) return res.status(500).json({ error: err3.message });
+                    res.json({ message: "Producto agregado", Id_Producto: idProducto });
+                });
+            });
+        });
+    });
+});
+
+app.delete('/api/productos/:id', (req, res) => {
+    const { id } = req.params;
+    db.query(`DELETE FROM producto WHERE Id_Producto = ?`, [id], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Producto eliminado" });
+    });
+});
+
+// ================= CATEGORIAS =================
+app.get('/api/categorias', (req, res) => {
+    db.query(`SELECT Id_Categoria, Nombre FROM categoria ORDER BY Nombre`, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// ================= PROVEEDORES =================
+app.get('/api/proveedores', (req, res) => {
+    db.query(`SELECT Id_Proveedor, Nombre, Empresa FROM proveedores ORDER BY Nombre`, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });
 });
@@ -382,36 +663,148 @@ app.put('/api/trabajadores/:id', (req, res) => {
     });
 });
 
-// ================= PUNTOS DEL VENDEDOR =================
-app.get('/api/puntos-vendedor/:id', (req, res) => {
-    const { id } = req.params;
-    
-    const sql = `
+// ================= ESTADISTICAS =================
+app.get('/api/estadisticas-ventas', (req, res) => {
+    db.query(`
         SELECT 
-            t.Id_Trabajador as id_trabajador,
-            t.NombreCompleto as nombre_completo,
-            COUNT(c.Num_Factura) as total_ventas,
-            COUNT(DISTINCT DATE(c.Fecha)) as dias_activos,
-            ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) as promedio_diario,
-            ROUND(
-                (COUNT(c.Num_Factura) * 0.4) + 
-                (COUNT(DISTINCT DATE(c.Fecha)) * 0.3) + 
-                (ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) * 0.3), 
-                2
-            ) as puntaje_total,
-            COALESCE(SUM(c.Monto), 0) as total_ventas_cordobas
-        FROM compra c
-        INNER JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
-        WHERE t.Id_Trabajador = ?
-        GROUP BY t.Id_Trabajador, t.NombreCompleto
-    `;
-    
-    db.query(sql, [id], (err, results) => {
+            COALESCE(SUM(CASE WHEN DATE(Fecha) = CURDATE() THEN Monto ELSE 0 END), 0) as total_hoy,
+            COALESCE(SUM(CASE WHEN YEAR(Fecha) = YEAR(CURDATE()) AND MONTH(Fecha) = MONTH(CURDATE()) THEN Monto ELSE 0 END), 0) as total_mes
+        FROM compra
+    `, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        if (results.length === 0) {
-            return res.json({ success: true, total_ventas: 0, dias_activos: 0, promedio_diario: 0, puntaje_total: 0, total_ventas_cordobas: 0 });
+        res.json(results[0]);
+    });
+});
+
+app.get('/api/top-productos', (req, res) => {
+    const { limite = 5 } = req.query;
+    db.query(`
+        SELECT p.Nombre, SUM(o.CantidadVendida) as cantidad
+        FROM orden o
+        JOIN producto p ON o.Id_Producto = p.Id_Producto
+        GROUP BY p.Id_Producto
+        ORDER BY cantidad DESC
+        LIMIT ?
+    `, [parseInt(limite)], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.get('/api/puntos-vendedores', (req, res) => {
+    db.query(`
+        SELECT t.NombreCompleto as nombre_completo, COUNT(c.Num_Factura) as total_ventas,
+               ROUND(COUNT(c.Num_Factura) * 10, 2) as puntaje_total
+        FROM compra c
+        JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
+        GROUP BY t.Id_Trabajador
+        ORDER BY puntaje_total DESC
+    `, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.get('/api/ventas-recientes', (req, res) => {
+    db.query(`
+        SELECT c.Fecha, c.Monto as Subtotal,
+               CONCAT(COALESCE(cl.Nombre, 'Cliente'), ' ', COALESCE(cl.Apellido, '')) as cliente,
+               p.Nombre as producto, o.CantidadVendida as cantidad
+        FROM compra c
+        LEFT JOIN clientes cl ON c.Id_cliente = cl.Id_cliente
+        LEFT JOIN orden o ON c.Num_Factura = o.NumFactura
+        LEFT JOIN producto p ON o.Id_Producto = p.Id_Producto
+        ORDER BY c.Fecha DESC
+        LIMIT 10
+    `, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// ================= VENTAS/COMPRAS =================
+app.get('/api/canales', (req, res) => {
+    db.query(`SELECT * FROM canal`, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.get('/api/metodos-pago', (req, res) => {
+    db.query(`SELECT * FROM metododepago`, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.get('/api/clientes', (req, res) => {
+    db.query(`SELECT Id_cliente, Nombre, Apellido, Num_Celular FROM clientes`, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.post('/api/clientes', (req, res) => {
+    const { Nombre, Apellido, Num_Celular } = req.body;
+    
+    if (!Nombre || !Apellido) {
+        return res.status(400).json({ error: 'Nombre y apellido son requeridos' });
+    }
+    
+    db.query(`INSERT INTO clientes (Nombre, Apellido, Num_Celular) VALUES (?, ?, ?)`, 
+        [Nombre, Apellido, Num_Celular || null], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Cliente agregado", Id_cliente: result.insertId });
+    });
+});
+
+app.post('/api/compras', (req, res) => {
+    const { Num_Factura, Id_cliente, Id_Vendedor, Id_Canal, Id_Metodo, Fecha, Monto, Cajero } = req.body;
+    
+    if (!Num_Factura) return res.status(400).json({ error: 'Num_Factura es obligatoria' });
+    if (!Id_Vendedor || isNaN(Id_Vendedor)) return res.status(400).json({ error: 'Id_Vendedor es obligatorio' });
+    if (!Id_Metodo || isNaN(Id_Metodo)) return res.status(400).json({ error: 'Id_Metodo es obligatorio' });
+    if (!Fecha) return res.status(400).json({ error: 'Fecha es obligatoria' });
+    if (!Monto || isNaN(Monto) || parseFloat(Monto) <= 0) return res.status(400).json({ error: 'Monto debe ser mayor a 0' });
+    
+    const sql = `INSERT INTO compra (Num_Factura, Id_cliente, Id_Vendedor, Id_Canal, Id_Metodo, Fecha, Monto, Cajero) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    
+    db.query(sql, [Num_Factura, Id_cliente || null, Id_Vendedor, Id_Canal || null, Id_Metodo, Fecha, Monto, Cajero || null], (err, result) => {
+        if (err) {
+            if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: 'La factura #' + Num_Factura + ' ya existe' });
+            return res.status(500).json({ error: 'Error al guardar compra: ' + err.message });
         }
-        res.json({ success: true, ...results[0] });
+        res.json({ message: "Compra guardada exitosamente", Num_Factura: Num_Factura, compraId: result.insertId, monto: Monto });
+    });
+});
+
+app.post('/api/ordenes', (req, res) => {
+    const { Id_Producto, NumFactura, CantidadVendida, Subtotal, Fecha, PrecioUnitario } = req.body;
+    
+    if (!Id_Producto) return res.status(400).json({ error: 'Id_Producto es obligatorio' });
+    if (!NumFactura) return res.status(400).json({ error: 'NumFactura es obligatorio' });
+    if (!CantidadVendida || isNaN(CantidadVendida) || parseInt(CantidadVendida) <= 0) return res.status(400).json({ error: 'CantidadVendida debe ser mayor a 0' });
+    if (Subtotal === undefined || isNaN(Subtotal) || parseFloat(Subtotal) < 0) return res.status(400).json({ error: 'Subtotal es obligatorio' });
+    if (!Fecha) return res.status(400).json({ error: 'Fecha es obligatoria' });
+    if (!PrecioUnitario || isNaN(PrecioUnitario) || parseFloat(PrecioUnitario) <= 0) return res.status(400).json({ error: 'PrecioUnitario debe ser mayor a 0' });
+    
+    db.query(`SELECT Id_Producto FROM producto WHERE Id_Producto = ?`, [Id_Producto], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al verificar producto' });
+        if (!results || results.length === 0) return res.status(400).json({ error: 'El producto #' + Id_Producto + ' no existe' });
+        
+        const insertSql = `INSERT INTO orden (Id_Producto, NumFactura, CantidadVendida, Subtotal, Fecha, PrecioUnitario) 
+                          VALUES (?, ?, ?, ?, ?, ?)`;
+        
+        db.query(insertSql, [Id_Producto, NumFactura, CantidadVendida, Subtotal, Fecha, PrecioUnitario], (err, result) => {
+            if (err) return res.status(500).json({ error: 'Error al guardar orden: ' + err.message });
+            
+            const updateStockSql = `UPDATE stock SET Cantidad = Cantidad - ? WHERE Id_Producto = ?`;
+            db.query(updateStockSql, [CantidadVendida, Id_Producto], (err2) => {
+                if (err2) console.error('Advertencia: Error al actualizar stock:', err2);
+                res.json({ message: "Orden guardada exitosamente", orderId: result.insertId, producto: Id_Producto, factura: NumFactura, cantidad: CantidadVendida });
+            });
+        });
     });
 });
 
@@ -428,14 +821,23 @@ app.get('/vendedor_app.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'vendedor_app.html'));
 });
 
+app.get('/reset-password.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'reset-password.html'));
+});
+
+app.get('/nueva_compra.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'nueva_compra.html'));
+});
+
 // ================= INICIAR SERVIDOR =================
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`
     ╔══════════════════════════════════════════════════════════╗
-    ║     SERVIDOR CHEPITA - ASISTENCIA QR                    ║
+    ║     SERVIDOR CHEPITA CORRIENDO                           ║
     ╠══════════════════════════════════════════════════════════╣
     ║  Puerto: ${PORT}                                          ║
-    ║  Asistencia QR: ACTIVADA                                 ║
+    ║  QR Ventas: ACTIVADO                                     ║
+    ║  QR Asistencia: ACTIVADO                                 ║
     ║  Login Admin: admin / admin (MD5)                        ║
     ╚══════════════════════════════════════════════════════════╝
     `);
