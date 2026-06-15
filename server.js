@@ -14,21 +14,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-// ================= CONFIGURACIÓN DE GMAIL CORREGIDA =================
+// ================= CONFIGURACIÓN DE ETHEREAL EMAIL =================
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: 'smtp.ethereal.email',
     port: 587,
     secure: false,
     auth: {
-        user: 'isabelchepita678@gmail.com',
-        pass: 'hjyk gtno zgjs'
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    connectionTimeout: 30000,
-    greetingTimeout: 30000,
-    socketTimeout: 30000
+        user: 'jerrold.spinka@ethereal.email',
+        pass: '7yv47d4b6Nw9KxDPhg'
+    }
 });
 
 // Conexión a MySQL (Railway)
@@ -119,7 +113,7 @@ app.post('/api/admin/recuperar-email', (req, res) => {
         const resetLink = `${baseUrl}/reset-password.html?token=${token}&tipo=admin`;
         
         const mailOptions = {
-            from: 'Tienda Chepita <isabelchepita678@gmail.com>',
+            from: 'Chepita App <no-reply@chepita.com>',
             to: email,
             subject: 'Recuperación de Contraseña - Chepita',
             html: `
@@ -131,6 +125,7 @@ app.post('/api/admin/recuperar-email', (req, res) => {
                         <a href="${resetLink}" style="background:#A63C89; color:white; padding:12px 24px; text-decoration:none; border-radius:5px;">Restablecer Contraseña</a>
                     </div>
                     <p>Este enlace es válido por 1 hora.</p>
+                    <p>Si no solicitaste este cambio, ignora este correo.</p>
                 </div>
             `
         };
@@ -138,10 +133,11 @@ app.post('/api/admin/recuperar-email', (req, res) => {
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error('Error email:', error);
-                return res.status(500).json({ success: false, message: 'Error al enviar el correo. Verifica la configuración.' });
+                return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
             }
             console.log('✅ Email enviado a:', email);
-            res.json({ success: true, message: 'Correo enviado correctamente. Revisa tu bandeja de entrada o spam.' });
+            console.log('📧 Ver correo en:', nodemailer.getTestMessageUrl(info));
+            res.json({ success: true, message: 'Correo enviado. Revisa la consola para ver el enlace de vista previa.' });
         });
     });
 });
@@ -253,7 +249,7 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
             const resetLink = `${baseUrl}/reset-password.html?token=${token}&tipo=trabajador`;
             
             const mailOptions = {
-                from: 'Tienda Chepita <isabelchepita678@gmail.com>',
+                from: 'Chepita App <no-reply@chepita.com>',
                 to: trabajador.email,
                 subject: 'Recuperación de Contraseña - Chepita',
                 html: `
@@ -265,6 +261,7 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
                             <a href="${resetLink}" style="background:#A63C89; color:white; padding:12px 24px; text-decoration:none; border-radius:5px;">Restablecer Contraseña</a>
                         </div>
                         <p>Este enlace es válido por 1 hora.</p>
+                        <p>Si no solicitaste este cambio, ignora este correo.</p>
                     </div>
                 `
             };
@@ -275,7 +272,8 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
                     return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
                 }
                 console.log('✅ Email enviado a:', trabajador.email);
-                res.json({ success: true, message: 'Correo enviado correctamente. Revisa tu bandeja de entrada o spam.' });
+                console.log('📧 Ver correo en:', nodemailer.getTestMessageUrl(info));
+                res.json({ success: true, message: 'Correo enviado. Revisa la consola para ver el enlace de vista previa.' });
             });
         });
     });
