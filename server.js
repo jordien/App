@@ -5,7 +5,6 @@ const path = require('path');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,17 +12,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
-
-// ================= CONFIGURACIÓN DE ETHEREAL EMAIL =================
-const transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    secure: false,
-    auth: {
-        user: 'jerrold.spinka@ethereal.email',
-        pass: '7yv47d4b6Nw9KxDPhg'
-    }
-});
 
 // Conexión a MySQL (Railway)
 const db = mysql.createConnection({
@@ -40,23 +28,9 @@ db.connect(err => {
         return;
     }
     console.log('✅ Conectado a MySQL en Railway');
-    crearTablas();
 });
 
-function crearTablas() {
-    db.query(`
-        CREATE TABLE IF NOT EXISTS trabajador_recuperacion_tokens (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            id_trabajador INT NOT NULL,
-            token VARCHAR(255) NOT NULL,
-            expira_en DATETIME NOT NULL,
-            usado TINYINT DEFAULT 0
-        )
-    `);
-}
-
 const SECRET_KEY = 'chepita_secret_key_2025';
-const resetTokens = {};
 
 // ================= LOGIN ADMIN =================
 app.post('/api/admin/login', async (req, res) => {
@@ -88,10 +62,9 @@ app.post('/api/admin/login', async (req, res) => {
     });
 });
 
-// ================= RECUPERACIÓN ADMIN =================
+// ================= RECUPERACIÓN ADMIN (sin correo) =================
 app.post('/api/admin/recuperar-email', (req, res) => {
     const { email } = req.body;
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
     
     if (!email) {
         return res.status(400).json({ success: false, message: 'Ingresa tu correo electrónico' });
@@ -106,69 +79,21 @@ app.post('/api/admin/recuperar-email', (req, res) => {
             return res.json({ success: false, message: 'No existe una cuenta con ese correo electrónico' });
         }
         
-        const { usuario } = results[0];
-        const token = crypto.randomBytes(32).toString('hex');
-        const expiresAt = Date.now() + 3600000;
-        resetTokens[token] = { email, expiresAt };
-        const resetLink = `${baseUrl}/reset-password.html?token=${token}&tipo=admin`;
+        // Generar contraseña temporal de 8 caracteres
+        const nuevaPassword = crypto.randomBytes(4).toString('hex').toUpperCase();
+        const hashedPassword = bcrypt.hashSync(nuevaPassword, 10);
         
-        const mailOptions = {
-            from: 'Chepita App <no-reply@chepita.com>',
-            to: email,
-            subject: 'Recuperación de Contraseña - Chepita',
-            html: `
-                <div style="font-family: Arial; border: 2px solid #A63C89; padding: 20px; border-radius: 10px;">
-                    <h2 style="color: #A63C89;">Recuperación de Contraseña</h2>
-                    <p>Hola <strong>${usuario}</strong>,</p>
-                    <p>Haz clic en el botón para restablecer tu contraseña:</p>
-                    <div style="text-align: center; margin: 25px 0;">
-                        <a href="${resetLink}" style="background:#A63C89; color:white; padding:12px 24px; text-decoration:none; border-radius:5px;">Restablecer Contraseña</a>
-                    </div>
-                    <p>Este enlace es válido por 1 hora.</p>
-                    <p>Si no solicitaste este cambio, ignora este correo.</p>
-                </div>
-            `
-        };
-        
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Error email:', error);
-                return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
+        db.query(`UPDATE usuarios_admin SET password = ? WHERE email = ?`, [hashedPassword, email], (err) => {
+            if (err) {
+                return res.status(500).json({ success: false, message: 'Error actualizando contraseña' });
             }
-            console.log('✅ Email enviado a:', email);
-            console.log('📧 Ver correo en:', nodemailer.getTestMessageUrl(info));
-            res.json({ success: true, message: 'Correo enviado. Revisa la consola para ver el enlace de vista previa.' });
+            
+            res.json({ 
+                success: true, 
+                message: `Nueva contraseña temporal: ${nuevaPassword}\nGuárdala y luego cámbiala desde el panel.`,
+                nuevaPassword: nuevaPassword
+            });
         });
-    });
-});
-
-app.get('/api/admin/verificar-token-recuperacion/:token', (req, res) => {
-    const { token } = req.params;
-    const tokenData = resetTokens[token];
-    
-    if (!tokenData || Date.now() > tokenData.expiresAt) {
-        return res.status(400).json({ valido: false, message: 'El enlace ha expirado' });
-    }
-    res.json({ valido: true });
-});
-
-app.post('/api/admin/reset-password', (req, res) => {
-    const { token, nuevaPassword } = req.body;
-    
-    if (!nuevaPassword || nuevaPassword.length < 8) {
-        return res.status(400).json({ success: false, message: "La contraseña debe tener al menos 8 caracteres" });
-    }
-    
-    const tokenData = resetTokens[token];
-    if (!tokenData || Date.now() > tokenData.expiresAt) {
-        return res.status(400).json({ success: false, message: "El enlace ha expirado" });
-    }
-    
-    const hashedPassword = bcrypt.hashSync(nuevaPassword, 10);
-    db.query(`UPDATE usuarios_admin SET password = ? WHERE email = ?`, [hashedPassword, tokenData.email], (err) => {
-        if (err) return res.status(500).json({ success: false, message: "Error actualizando" });
-        delete resetTokens[token];
-        res.json({ success: true, message: "Contraseña actualizada correctamente" });
     });
 });
 
@@ -217,10 +142,9 @@ app.post('/api/trabajadores/login', async (req, res) => {
     });
 });
 
-// ================= RECUPERACIÓN TRABAJADOR =================
+// ================= RECUPERACIÓN TRABAJADOR (sin correo) =================
 app.post('/api/trabajadores/recuperar-password', (req, res) => {
     const { email } = req.body;
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
     
     if (!email) {
         return res.status(400).json({ success: false, message: 'Ingresa tu correo electrónico' });
@@ -235,94 +159,20 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
             return res.json({ success: false, message: 'No existe una cuenta activa con ese correo electrónico' });
         }
         
-        const trabajador = results[0];
-        const token = crypto.randomBytes(32).toString('hex');
-        const expiraEn = new Date();
-        expiraEn.setHours(expiraEn.getHours() + 1);
+        // Generar contraseña temporal de 6 caracteres
+        const nuevaPassword = Math.random().toString(36).slice(-6);
+        const md5pass = crypto.createHash('md5').update(nuevaPassword).digest('hex');
         
-        db.query(`INSERT INTO trabajador_recuperacion_tokens (id_trabajador, token, expira_en) VALUES (?, ?, ?)`, 
-            [trabajador.Id_Trabajador, token, expiraEn], (err) => {
+        db.query(`UPDATE trabajadores SET password_hash = ?, debe_cambiar_password = 1 WHERE Id_Trabajador = ?`, [md5pass, results[0].Id_Trabajador], (err) => {
             if (err) {
-                return res.status(500).json({ success: false, message: 'Error en el servidor' });
+                return res.status(500).json({ success: false, message: 'Error actualizando contraseña' });
             }
             
-            const resetLink = `${baseUrl}/reset-password.html?token=${token}&tipo=trabajador`;
-            
-            const mailOptions = {
-                from: 'Chepita App <no-reply@chepita.com>',
-                to: trabajador.email,
-                subject: 'Recuperación de Contraseña - Chepita',
-                html: `
-                    <div style="font-family: Arial; border: 2px solid #A63C89; padding: 20px; border-radius: 10px;">
-                        <h2 style="color: #A63C89;">Recuperación de Contraseña</h2>
-                        <p>Hola <strong>${trabajador.NombreCompleto}</strong>,</p>
-                        <p>Haz clic en el botón para restablecer tu contraseña:</p>
-                        <div style="text-align: center; margin: 25px 0;">
-                            <a href="${resetLink}" style="background:#A63C89; color:white; padding:12px 24px; text-decoration:none; border-radius:5px;">Restablecer Contraseña</a>
-                        </div>
-                        <p>Este enlace es válido por 1 hora.</p>
-                        <p>Si no solicitaste este cambio, ignora este correo.</p>
-                    </div>
-                `
-            };
-            
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.error('Error email:', error);
-                    return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
-                }
-                console.log('✅ Email enviado a:', trabajador.email);
-                console.log('📧 Ver correo en:', nodemailer.getTestMessageUrl(info));
-                res.json({ success: true, message: 'Correo enviado. Revisa la consola para ver el enlace de vista previa.' });
-            });
-        });
-    });
-});
-
-app.get('/api/trabajadores/verificar-token-recuperacion/:token', (req, res) => {
-    const { token } = req.params;
-    
-    db.query(`
-        SELECT tr.id_trabajador, t.NombreCompleto, t.email
-        FROM trabajador_recuperacion_tokens tr
-        JOIN trabajadores t ON tr.id_trabajador = t.Id_Trabajador
-        WHERE tr.token = ? AND tr.usado = 0 AND tr.expira_en > NOW()
-    `, [token], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        if (results.length === 0) {
-            return res.status(400).json({ valido: false, message: 'El enlace ha expirado' });
-        }
-        res.json({
-            valido: true,
-            id_trabajador: results[0].id_trabajador,
-            nombre: results[0].NombreCompleto,
-            email: results[0].email
-        });
-    });
-});
-
-app.post('/api/trabajadores/restablecer-password', async (req, res) => {
-    const { token, nueva_password } = req.body;
-    
-    if (!nueva_password || nueva_password.length < 4) {
-        return res.status(400).json({ success: false, message: 'La contraseña debe tener al menos 4 caracteres' });
-    }
-    
-    db.query(`SELECT id_trabajador FROM trabajador_recuperacion_tokens WHERE token = ? AND usado = 0 AND expira_en > NOW()`, [token], async (err, results) => {
-        if (err) return res.status(500).json({ success: false, message: 'Error en el servidor' });
-        if (results.length === 0) {
-            return res.status(400).json({ success: false, message: 'El enlace ha expirado' });
-        }
-        
-        const idTrabajador = results[0].id_trabajador;
-        const hashedPassword = await bcrypt.hash(nueva_password, 10);
-        
-        db.query(`UPDATE trabajadores SET password_hash = ?, debe_cambiar_password = 0 WHERE Id_Trabajador = ?`, [hashedPassword, idTrabajador], (err) => {
-            if (err) return res.status(500).json({ success: false, message: 'Error actualizando' });
-            
-            db.query(`UPDATE trabajador_recuperacion_tokens SET usado = 1 WHERE token = ?`, [token], (err) => {
-                if (err) return res.status(500).json({ success: false, message: 'Error actualizando token' });
-                res.json({ success: true, message: 'Contraseña restablecida correctamente' });
+            res.json({ 
+                success: true, 
+                message: `Nueva contraseña temporal: ${nuevaPassword}\nUsa esta contraseña para iniciar sesión y luego cámbiala.`,
+                nuevaPassword: nuevaPassword,
+                nombre: results[0].NombreCompleto
             });
         });
     });
@@ -480,10 +330,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/reset-password.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'reset-password.html'));
-});
-
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor Chepita corriendo en puerto ${PORT}`);
+    console.log(`📌 Recuperación de contraseña: Te mostraremos la nueva contraseña en pantalla`);
 });
