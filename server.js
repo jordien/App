@@ -482,7 +482,53 @@ app.get('/api/ventas-recientes', (req, res) => {
         res.json(results);
     });
 });
-
+// ================= PUNTOS POR VENDEDOR INDIVIDUAL =================
+app.get('/api/puntos-vendedor/:id', (req, res) => {
+    const { id } = req.params;
+    
+    const sql = `
+        SELECT 
+            t.Id_Trabajador as id_trabajador,
+            t.NombreCompleto as nombre_completo,
+            COUNT(c.Num_Factura) as total_ventas,
+            COUNT(DISTINCT DATE(c.Fecha)) as dias_activos,
+            ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) as promedio_diario,
+            ROUND(
+                (COUNT(c.Num_Factura) * 0.4) + 
+                (COUNT(DISTINCT DATE(c.Fecha)) * 0.3) + 
+                (ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) * 0.3), 
+                2
+            ) as puntaje_total,
+            COALESCE(SUM(c.Monto), 0) as total_ventas_cordobas
+        FROM compra c
+        INNER JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
+        WHERE t.Id_Trabajador = ?
+        GROUP BY t.Id_Trabajador, t.NombreCompleto
+    `;
+    
+    db.query(sql, [id], (err, results) => {
+        if (err) {
+            console.error('Error en /api/puntos-vendedor:', err);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        if (results.length === 0) {
+            return res.json({ 
+                success: true, 
+                total_ventas: 0, 
+                dias_activos: 0, 
+                promedio_diario: 0, 
+                puntaje_total: 0,
+                total_ventas_cordobas: 0
+            });
+        }
+        
+        res.json({
+            success: true,
+            ...results[0]
+        });
+    });
+});
 // ================= RUTAS PRINCIPALES =================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));

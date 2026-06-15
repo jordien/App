@@ -31,6 +31,43 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            background: #f0f0f0;
+            border-radius: 30px;
+            padding: 5px;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            box-shadow: 0 2px 8px rgba(166,60,137,0.3);
+        }
+        .panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .panel.active-panel {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .input-group {
             margin-bottom: 20px;
         }
@@ -206,6 +243,60 @@
             color: #4a1d6d;
             margin-bottom: 20px;
         }
+        /* Estilos para la tarjeta de puntos */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff, white);
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(166,60,137,0.2);
+        }
+        .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #A63C89;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .puntaje-card {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            border-radius: 28px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .puntaje-valor {
+            font-size: 48px;
+            font-weight: 800;
+        }
+        .premio-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        .premio-oro { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .premio-plata { background: linear-gradient(135deg, #f0fdf4, #dcfce7); color: #166534; }
+        .premio-bronce { background: linear-gradient(135deg, #fefce8, #fef08a); color: #854d0e; }
+        .premio-cobre { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #9a3412; }
+        .premio-vale { background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0369a1; }
+        .premio-nada { background: #f1f5f9; color: #64748b; }
+        .loading-puntos {
+            text-align: center;
+            padding: 40px;
+            color: #A63C89;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
@@ -216,6 +307,7 @@
             <p>Sistema de Ventas</p>
         </div>
 
+        <!-- Login Section -->
         <div id="loginSection">
             <div class="input-group">
                 <label>Busca tu nombre</label>
@@ -236,30 +328,58 @@
             </div>
         </div>
 
+        <!-- App Section with Tabs -->
         <div id="appSection" class="hidden">
+            <!-- Vendedor Info -->
             <div class="vendedor-card">
                 <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
                 <div style="font-size:13px; opacity:0.9;" id="vendedorId"></div>
             </div>
-            <div class="qr-card" id="qrContainer" style="display: none;">
-                <div class="qr-wrapper"><div id="qrcode"></div></div>
-                <div class="codigo-texto" id="codigoTexto" style="font-family:monospace; font-size:12px; background:#f5f5f5; padding:10px; border-radius:20px; margin-top:16px;"></div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" data-tab="qr" onclick="cambiarTab('qr')">Generar QR</button>
+                <button class="tab" data-tab="puntos" onclick="cambiarTab('puntos')">Mis Puntos</button>
             </div>
-            <div class="timer-card" id="tiempoInfo" style="display: none;">
-                <div class="timer-text">Valido por</div>
-                <div class="timer-time" id="timerTime">00:00</div>
+
+            <!-- Panel QR -->
+            <div id="panelQR" class="panel active-panel">
+                <div class="qr-card" id="qrContainer" style="display: none;">
+                    <div class="qr-wrapper"><div id="qrcode"></div></div>
+                    <div class="codigo-texto" id="codigoTexto" style="font-family:monospace; font-size:12px; background:#f5f5f5; padding:10px; border-radius:20px; margin-top:16px;"></div>
+                </div>
+                <div class="timer-card" id="tiempoInfo" style="display: none;">
+                    <div class="timer-text">Valido por</div>
+                    <div class="timer-time" id="timerTime">00:00</div>
+                </div>
+                <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerar">Generar nuevo QR</button>
+                <div class="footer-buttons">
+                    <button class="btn btn-secondary" onclick="enviarQREmail()">Enviar por Email</button>
+                </div>
+                <div class="instrucciones">
+                    <h4>Como usar este QR</h4>
+                    <p><span class="step-number">1</span> Muestra este QR en tu celular</p>
+                    <p><span class="step-number">2</span> El cliente lo acerca a la camara de la caja</p>
+                    <p><span class="step-number">3</span> La venta se asigna automaticamente a ti</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">El QR se renueva cada 60 minutos por seguridad</p>
+                </div>
             </div>
-            <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerar">Generar nuevo QR</button>
-            <div class="footer-buttons">
-                <button class="btn btn-secondary" onclick="enviarQREmail()">Enviar por Email</button>
+
+            <!-- Panel Mis Puntos -->
+            <div id="panelPuntos" class="panel">
+                <div id="puntosContent">
+                    <div class="loading-puntos">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando tus estadisticas...
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="cargarMisPuntos()" style="margin-top: 15px;">
+                    Actualizar datos
+                </button>
+            </div>
+
+            <!-- Boton cerrar sesion -->
+            <div class="footer-buttons" style="margin-top: 20px;">
                 <button class="btn btn-secondary" onclick="cerrarSesion()">Cerrar sesion</button>
-            </div>
-            <div class="instrucciones">
-                <h4>Como usar este QR</h4>
-                <p><span class="step-number">1</span> Muestra este QR en tu celular</p>
-                <p><span class="step-number">2</span> El cliente lo acerca a la camara de la caja</p>
-                <p><span class="step-number">3</span> La venta se asigna automaticamente a ti</p>
-                <p style="margin-top:12px; font-size:12px; color:#A63C89;">El QR se renueva cada 60 minutos por seguridad</p>
             </div>
         </div>
     </div>
@@ -271,6 +391,75 @@
         let intervalo = null;
         let trabajadores = [];
         let vendedorSeleccionado = null;
+
+        function obtenerPremio(puntaje) {
+            if (puntaje >= 50) return { texto: "C$ 1,000 + Diploma", clase: "premio-oro" };
+            if (puntaje >= 40) return { texto: "C$ 750", clase: "premio-plata" };
+            if (puntaje >= 30) return { texto: "C$ 500", clase: "premio-bronce" };
+            if (puntaje >= 20) return { texto: "C$ 250", clase: "premio-cobre" };
+            if (puntaje >= 10) return { texto: "Vale C$ 100", clase: "premio-vale" };
+            return { texto: "Sin premio", clase: "premio-nada" };
+        }
+
+        function cambiarTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+            
+            if (tab === 'qr') {
+                document.getElementById('panelQR').classList.add('active-panel');
+                document.getElementById('panelPuntos').classList.remove('active-panel');
+            } else {
+                document.getElementById('panelQR').classList.remove('active-panel');
+                document.getElementById('panelPuntos').classList.add('active-panel');
+                cargarMisPuntos();
+            }
+        }
+
+        async function cargarMisPuntos() {
+            const puntosContent = document.getElementById('puntosContent');
+            puntosContent.innerHTML = '<div class="loading-puntos"><i class="fas fa-spinner fa-spin"></i> Cargando tus estadisticas...</div>';
+            
+            try {
+                const response = await fetch(`/api/puntos-vendedor/${vendedor.id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const premio = obtenerPremio(data.puntaje_total);
+                    
+                    let html = `
+                        <div class="puntaje-card">
+                            <div class="puntaje-valor">${data.puntaje_total} pts</div>
+                            <div>Puntaje Total</div>
+                            <div class="premio-badge ${premio.clase}">🎁 ${premio.texto}</div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">${data.total_ventas}</div>
+                                <div class="stat-label">Ventas Realizadas</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.dias_activos}</div>
+                                <div class="stat-label">Dias Activos</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.promedio_diario}</div>
+                                <div class="stat-label">Promedio Diario</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">C$${data.total_ventas_cordobas || 0}</div>
+                                <div class="stat-label">Total Ventas (C$)</div>
+                            </div>
+                        </div>
+                    `;
+                    puntosContent.innerHTML = html;
+                } else {
+                    puntosContent.innerHTML = `<div class="loading-puntos" style="color:#c62828;">Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                console.error('Error cargando puntos:', error);
+                puntosContent.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
+            }
+        }
 
         function mostrarMensaje(texto, esError) {
             const modal = document.createElement('div');
@@ -324,7 +513,7 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    mostrarMensaje('Si el correo esta registrado, recibiras un enlace para restablecer tu contrasena.', false);
+                    mostrarMensaje(`Nueva contraseña temporal: ${data.nuevaPassword}`, false);
                     cerrarModalRecuperacion();
                 } else {
                     mostrarMensaje('Error: ' + data.message, true);
