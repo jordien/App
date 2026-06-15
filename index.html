@@ -5,56 +5,670 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="manifest" href="/manifest.json">
-    <title>Chepita</title>
+    <title>Chepita - Portal de Acceso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(145deg, #4a1d6d 0%, #7b2c8d 50%, #A63C89 100%);
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #4a1d6d 0%, #7b2c8d 50%, #A63C89 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Elementos decorativos de fondo */
+        .bg-circle {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .c1 {
+            width: 400px;
+            height: 400px;
+            top: -150px;
+            right: -100px;
+        }
+
+        .c2 {
+            width: 500px;
+            height: 500px;
+            bottom: -200px;
+            left: -150px;
+        }
+
+        .c3 {
+            width: 250px;
+            height: 250px;
+            top: 50%;
+            left: 20%;
+        }
+
+        .c4 {
+            width: 300px;
+            height: 300px;
+            bottom: 10%;
+            right: 10%;
+        }
+
+        .sparkle {
+            position: fixed;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 20px;
+            pointer-events: none;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .sparkle1 {
+            top: 15%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .sparkle2 {
+            top: 70%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .sparkle3 {
+            top: 30%;
+            right: 25%;
+            animation-delay: 4s;
+        }
+
+        .sparkle4 {
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+
+        .p1 {
+            top: 20%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .p2 {
+            top: 60%;
+            right: 20%;
+            animation-delay: 1s;
+        }
+
+        .p3 {
+            top: 40%;
+            left: 30%;
+            animation-delay: 2s;
+        }
+
+        .p4 {
+            bottom: 30%;
+            right: 30%;
+            animation-delay: 3s;
+        }
+
+        .p5 {
+            top: 80%;
+            left: 10%;
+            animation-delay: 4s;
+        }
+
+        .p6 {
+            top: 10%;
+            right: 40%;
+            animation-delay: 5s;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% {
+                transform: translateY(0px);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(-30px);
+                opacity: 1;
+            }
+        }
+
+        /* Layout principal */
+        .main-layout {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
+
         .portal-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
             border-radius: 48px;
-            padding: 40px 32px;
-            max-width: 400px;
+            padding: 48px 40px;
+            max-width: 500px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        h1 { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #A63C89, #4a1d6d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 32px; }
-        .btn-portal {
-            display: block;
-            width: 100%;
-            padding: 18px;
-            margin: 16px 0;
+
+        .portal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Encabezado */
+        .login-header {
+            margin-bottom: 40px;
+        }
+
+        .login-header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #A63C89 0%, #4a1d6d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .login-header h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2d1b3d;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: #7a6b8a;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .fecha-login {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f8f4ff 0%, #f0eafa 100%);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            color: #A63C89;
+            font-weight: 500;
+        }
+
+        .fecha-login i {
+            color: #A63C89;
+        }
+
+        /* Botones de rol */
+        .rol-buttons {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .btn-rol {
+            flex: 1;
+            padding: 18px 24px;
             border: none;
             border-radius: 40px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             text-decoration: none;
             text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(166, 60, 137, 0.4);
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(166, 60, 137, 0.5);
+        }
+
+        .btn-vendedor {
+            background: white;
+            color: #4a1d6d;
+            border: 2px solid #A63C89;
+        }
+
+        .btn-vendedor:hover {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .btn-rol:active {
+            transform: scale(0.98);
+        }
+
+        /* Separador */
+        .separador {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+            color: #ccc;
+            font-size: 12px;
+        }
+
+        .separador::before,
+        .separador::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #ccc, transparent);
+        }
+
+        /* Formulario oculto (para acceso rápido) */
+        .acceso-rapido {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .toggle-acceso {
+            background: none;
+            border: none;
+            color: #A63C89;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             transition: all 0.3s ease;
         }
-        .btn-admin { background: linear-gradient(135deg, #A63C89, #4a1d6d); color: white; box-shadow: 0 4px 15px rgba(166, 60, 137, 0.3); }
-        .btn-vendedor { background: #f0f0f0; color: #4a1d6d; border: 2px solid #A63C89; }
-        .btn-portal:active { transform: scale(0.98); }
-        .footer { margin-top: 24px; font-size: 12px; color: #999; }
+
+        .toggle-acceso:hover {
+            color: #4a1d6d;
+            transform: translateX(3px);
+        }
+
+        .form-rapido {
+            display: none;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .form-rapido.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #A63C89;
+            margin-bottom: 8px;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #A63C89;
+            font-size: 14px;
+        }
+
+        .input-icon input {
+            width: 100%;
+            padding: 14px 16px 14px 42px;
+            border: 1px solid #e0d6e8;
+            border-radius: 30px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-icon input:focus {
+            outline: none;
+            border-color: #A63C89;
+            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(166, 60, 137, 0.4);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .footer {
+            margin-top: 32px;
+            font-size: 12px;
+            color: #bbb;
+        }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .portal-card {
+                padding: 32px 24px;
+            }
+
+            .login-header h1 {
+                font-size: 36px;
+            }
+
+            .login-header h2 {
+                font-size: 24px;
+            }
+
+            .btn-rol {
+                padding: 14px 20px;
+                font-size: 14px;
+            }
+
+            .rol-buttons {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="portal-card">
-        <h1>🏪 Chepita</h1>
-        <p style="margin-bottom: 24px; color: #666;">Sistema de Gestión Comercial</p>
-        
-        <a href="/admin_app.html" class="btn-portal btn-admin">👑 Administrador</a>
-        <a href="/vendedor_app.html" class="btn-portal btn-vendedor">👤 Vendedor</a>
-        
-        <div class="footer">Selecciona tu rol</div>
+    <!-- Elementos decorativos -->
+    <div class="bg-circle c1"></div>
+    <div class="bg-circle c2"></div>
+    <div class="bg-circle c3"></div>
+    <div class="bg-circle c4"></div>
+    <div class="sparkle sparkle1">✦</div>
+    <div class="sparkle sparkle2">✦</div>
+    <div class="sparkle sparkle3">✦</div>
+    <div class="sparkle sparkle4">✦</div>
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+    <div class="particle p4"></div>
+    <div class="particle p5"></div>
+    <div class="particle p6"></div>
+
+    <div class="main-layout">
+        <div class="portal-card">
+            <div class="login-header">
+                <h1>🏪 Chepita</h1>
+                <h2>Bienvenido</h2>
+                <p>Sistema de Gestión de Variedades Chepita</p>
+                <div class="fecha-login">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span id="fecha"></span>
+                    <span>·</span>
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="hora"></span>
+                </div>
+            </div>
+
+            <div class="rol-buttons">
+                <a href="/admin_app.html" class="btn-rol btn-admin">
+                    <i class="fa-solid fa-crown"></i>
+                    Administrador
+                </a>
+                <a href="/vendedor_app.html" class="btn-rol btn-vendedor">
+                    <i class="fa-solid fa-user"></i>
+                    Vendedor
+                </a>
+            </div>
+
+            <div class="separador">
+                <span>○</span>
+                <span>Acceso rápido con credenciales</span>
+                <span>○</span>
+            </div>
+
+            <div class="acceso-rapido">
+                <button class="toggle-acceso" onclick="toggleAccesoRapido()">
+                    <i class="fa-solid fa-key"></i>
+                    ¿Tienes credenciales? Inicia sesión aquí
+                    <i class="fa-solid fa-chevron-down" id="toggleIcon"></i>
+                </button>
+
+                <div id="formRapido" class="form-rapido">
+                    <form id="loginForm" onsubmit="return handleLogin(event);">
+                        <div class="input-group">
+                            <label>USUARIO</label>
+                            <div class="input-icon">
+                                <i class="fa-solid fa-user"></i>
+                                <input type="text" id="username" placeholder="Ingrese su usuario" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>CONTRASEÑA</label>
+                            <div class="input-icon">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="password" placeholder="Ingrese su contraseña">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnLogin">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
+                        </button>
+
+                        <div id="errorMessage" class="error-message"></div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="footer">
+                <i class="fa-regular fa-copyright"></i> 2024 Chepita - Sistema de Gestión Comercial
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Función para mostrar fecha y hora actual
+        function actualizarFechaHora() {
+            const ahora = new Date();
+            const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
+            const fechaStr = ahora.toLocaleDateString('es-ES', opcionesFecha);
+            const horaStr = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            
+            document.getElementById('fecha').textContent = fechaStr;
+            document.getElementById('hora').textContent = horaStr;
+        }
+
+        actualizarFechaHora();
+        setInterval(actualizarFechaHora, 60000);
+
+        // Toggle para mostrar/ocultar formulario de acceso rápido
+        function toggleAccesoRapido() {
+            const formRapido = document.getElementById('formRapido');
+            const icon = document.getElementById('toggleIcon');
+            
+            formRapido.classList.toggle('active');
+            
+            if (formRapido.classList.contains('active')) {
+                icon.style.transform = 'rotate(180deg)';
+                icon.style.transition = 'transform 0.3s ease';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Función para manejar el login (simulación con redirección según rol)
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const btn = document.getElementById('btnLogin');
+            
+            errorDiv.style.display = 'none';
+            
+            if (!username || !password) {
+                errorDiv.textContent = 'Por favor, complete todos los campos';
+                errorDiv.style.display = 'block';
+                return false;
+            }
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Verificando...';
+            btn.disabled = true;
+            
+            // Simular verificación - En producción conectar con API real
+            setTimeout(() => {
+                // Aquí iría la lógica real de autenticación con el backend
+                // Por ahora, redirigimos según el usuario ingresado
+                
+                if (username.toLowerCase() === 'admin' && password === 'admin123') {
+                    // Simular login admin
+                    localStorage.setItem('token', 'demo-token-admin');
+                    localStorage.setItem('tipoUsuario', 'admin');
+                    localStorage.setItem('sesionIniciada', 'true');
+                    window.location.replace('/admin_app.html');
+                } 
+                else if (username.toLowerCase() === 'vendedor' && password === 'vendedor123') {
+                    // Simular login vendedor
+                    localStorage.setItem('token', 'demo-token-vendedor');
+                    localStorage.setItem('tipoUsuario', 'caja');
+                    localStorage.setItem('sesionIniciada', 'true');
+                    localStorage.setItem('trabajador', JSON.stringify({
+                        Id_Trabajador: 1,
+                        NombreCompleto: 'Vendedor Demo',
+                        tipo: 'vendedor'
+                    }));
+                    window.location.replace('/vendedor_app.html');
+                }
+                else {
+                    errorDiv.textContent = 'Usuario o contraseña incorrectos. Usuario de prueba: admin/admin123 o vendedor/vendedor123';
+                    errorDiv.style.display = 'block';
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    
+                    // Limpiar campos
+                    document.getElementById('password').value = '';
+                }
+            }, 800);
+            
+            return false;
+        }
+
+        // Efecto hover en tarjeta
+        const portalCard = document.querySelector('.portal-card');
+        if (portalCard) {
+            portalCard.addEventListener('mouseenter', () => {
+                portalCard.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+            });
+        }
+
+        // Prevenir que los enlaces de roles tengan problemas si las páginas no existen
+        document.querySelectorAll('.btn-rol').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Si es solo demo y la página no existe, mostrar mensaje
+                if (this.getAttribute('href') === '/admin_app.html' || this.getAttribute('href') === '/vendedor_app.html') {
+                    // Los enlaces son válidos, permitir navegación normal
+                    // En un entorno real, estas páginas existirían
+                    console.log('Redirigiendo a:', this.getAttribute('href'));
+                }
+            });
+        });
+    </script>
 </body>
 </html>
