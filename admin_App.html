@@ -17,7 +17,6 @@
             min-height: 100vh;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(135deg, #4a1d6d, #A63C89);
             color: white;
@@ -40,7 +39,6 @@
             margin-top: 5px;
         }
 
-        /* Tabs */
         .tabs {
             display: flex;
             background: white;
@@ -73,7 +71,6 @@
             box-shadow: 0 2px 8px rgba(166,60,137,0.3);
         }
 
-        /* Contenido */
         .content {
             padding: 0 15px 20px;
         }
@@ -92,7 +89,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Tarjetas */
         .card {
             background: white;
             border-radius: 24px;
@@ -110,7 +106,6 @@
             gap: 8px;
         }
 
-        /* Estadísticas */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -137,7 +132,6 @@
             margin-top: 5px;
         }
 
-        /* Tablas */
         .table-container {
             overflow-x: auto;
         }
@@ -159,7 +153,6 @@
             font-weight: 600;
         }
 
-        /* Formularios */
         .form-group {
             margin-bottom: 15px;
         }
@@ -185,7 +178,6 @@
             border-color: #A63C89;
         }
 
-        /* Botones */
         .btn {
             padding: 12px 20px;
             border: none;
@@ -212,17 +204,11 @@
             color: #dc2626;
         }
 
-        .btn-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -260,36 +246,6 @@
             margin-top: 20px;
         }
 
-        /* Escáner QR */
-        .scanner-container {
-            text-align: center;
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 20px;
-            margin-bottom: 20px;
-        }
-
-        .scanner-input {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .scanner-input input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e8e8f0;
-            border-radius: 20px;
-            font-size: 14px;
-            font-family: monospace;
-        }
-
-        .scanner-input button {
-            width: auto;
-            padding: 12px 20px;
-        }
-
-        /* Badges */
         .badge {
             display: inline-block;
             padding: 4px 10px;
@@ -313,12 +269,6 @@
             color: #e65100;
         }
 
-        .badge-info {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        /* Login */
         .login-container {
             max-width: 400px;
             margin: 100px auto;
@@ -334,7 +284,6 @@
             margin-bottom: 20px;
         }
 
-        /* Footer */
         .footer {
             text-align: center;
             padding: 20px;
@@ -342,14 +291,6 @@
             font-size: 12px;
         }
 
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #A63C89;
-        }
-
-        /* Responsive */
         @media (max-width: 480px) {
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
@@ -377,7 +318,12 @@
         </div>
         <div class="form-group">
             <label>Contraseña</label>
-            <input type="password" id="adminPassword" placeholder="Ingresa tu contraseña">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="password" id="adminPassword" placeholder="Ingresa tu contraseña" style="flex: 1;">
+                <button type="button" onclick="togglePassword()" style="background: none; border: none; cursor: pointer; font-size: 20px; padding: 12px;">
+                    👁️
+                </button>
+            </div>
         </div>
         <button class="btn btn-primary" onclick="loginAdmin()">Iniciar Sesión</button>
         <div style="margin-top: 15px;">
@@ -401,7 +347,6 @@
         </div>
 
         <div class="content">
-            <!-- Panel Dashboard -->
             <div id="dashboard" class="panel active-panel">
                 <div class="stats-grid" id="statsContainer">
                     <div class="stat-card"><div class="stat-number" id="totalProductos">---</div><div class="stat-label">Productos</div></div>
@@ -414,7 +359,7 @@
                     <div class="table-container">
                         <table id="topProductos">
                             <thead><tr><th>Producto</th><th>Cantidad</th></tr></thead>
-                            <tbody><tr><td colspan="2">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="2">Cargando...</td></tr>
                         </table>
                     </div>
                 </div>
@@ -423,13 +368,12 @@
                     <div class="table-container">
                         <table id="topVendedores">
                             <thead><tr><th>Vendedor</th><th>Ventas</th><th>Puntaje</th></tr></thead>
-                            <tbody><tr><td colspan="3">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="3">Cargando...</td></tr>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel Escáner QR -->
             <div id="scanner" class="panel">
                 <div class="card">
                     <h3>Escáner QR - Asistencia</h3>
@@ -447,7 +391,6 @@
                 </div>
             </div>
 
-            <!-- Panel Inventario -->
             <div id="inventario" class="panel">
                 <div class="card">
                     <h3>Agregar Producto</h3>
@@ -478,13 +421,12 @@
                     <div class="table-container">
                         <table id="listaProductos">
                             <thead><tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel Vendedores -->
             <div id="vendedores" class="panel">
                 <div class="card">
                     <h3>Registrar Vendedor</h3>
@@ -507,13 +449,12 @@
                     <div class="table-container">
                         <table id="listaVendedores">
                             <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Celular</th><th>Estado</th><th></th></tr></thead>
-                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="6">Cargando...</td></tr>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel Asistencia (Registro) -->
             <div id="asistencia" class="panel">
                 <div class="card">
                     <h3>Registro de Asistencia</h3>
@@ -524,13 +465,12 @@
                     <div class="table-container">
                         <table id="tablaAsistencia">
                             <thead><tr><th>Vendedor</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr></thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel Reportes -->
             <div id="reportes" class="panel">
                 <div class="card">
                     <h3>Filtrar Reportes</h3>
@@ -560,7 +500,7 @@
                     <div class="table-container">
                         <table id="tablaPuntos">
                             <thead><tr><th>Vendedor</th><th>Ventas</th><th>Días Activos</th><th>Promedio</th><th>Puntaje</th></tr></thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr>
                         </table>
                     </div>
                 </div>
@@ -572,7 +512,6 @@
         </div>
     </div>
 
-    <!-- Modal Recuperación -->
     <div id="recuperacionModal" class="modal">
         <div class="modal-content">
             <h3>Recuperar Contraseña</h3>
@@ -597,7 +536,15 @@
     <script>
         let token = null;
 
-        // ================= LOGIN =================
+        function togglePassword() {
+            const passwordInput = document.getElementById('adminPassword');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+            } else {
+                passwordInput.type = 'password';
+            }
+        }
+
         async function loginAdmin() {
             const usuario = document.getElementById('adminUser').value;
             const password = document.getElementById('adminPassword').value;
@@ -674,7 +621,6 @@
             }
         }
 
-        // ================= TABS =================
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const tabId = tab.getAttribute('data-tab');
@@ -682,13 +628,11 @@
                 tab.classList.add('active');
                 document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
                 document.getElementById(tabId).classList.add('active-panel');
-                
                 if (tabId === 'asistencia') cargarRegistroAsistencia();
                 if (tabId === 'reportes') cargarReportes();
             });
         });
 
-        // ================= DATOS INICIALES =================
         async function cargarDatosIniciales() {
             await Promise.all([
                 cargarDashboard(),
@@ -730,7 +674,6 @@
             }
         }
 
-        // ================= INVENTARIO =================
         async function cargarProductos() {
             try {
                 const response = await fetch('/api/productos');
@@ -816,7 +759,6 @@
             }
         }
 
-        // ================= VENDEDORES =================
         async function cargarVendedores() {
             try {
                 const response = await fetch('/api/trabajadores');
@@ -882,7 +824,6 @@
             }
         }
 
-        // ================= ESCÁNER QR =================
         async function escanearQR() {
             const codigo = document.getElementById('codigoQR').value.trim();
             if (!codigo) {
@@ -918,7 +859,6 @@
             }
         }
 
-        // ================= ASISTENCIA =================
         async function cargarRegistroAsistencia() {
             const fecha = document.getElementById('filtroFecha').value || new Date().toISOString().split('T')[0];
             document.getElementById('filtroFecha').value = fecha;
@@ -940,7 +880,6 @@
             }
         }
 
-        // ================= REPORTES =================
         async function cargarAniosReporte() {
             try {
                 const response = await fetch('/api/anios-disponibles');
@@ -981,7 +920,6 @@
             }
         }
 
-        // Verificar sesión guardada
         const tokenGuardado = localStorage.getItem('token_admin');
         if (tokenGuardado) {
             token = tokenGuardado;
