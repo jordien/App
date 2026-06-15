@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Chepita Admin">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23A63C89'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E👑%3C/text%3E%3C/svg%3E">
+    <title>Chepita - Panel Administrador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #4a1d6d, #A63C89);
+            color: white;
+            padding: 20px;
+            padding-top: 50px;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Menú de pestañas */
+        .tabs {
+            display: flex;
+            background: white;
+            margin: 0 15px;
+            border-radius: 30px;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            background: none;
+            border: none;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            box-shadow: 0 2px 8px rgba(166,60,137,0.3);
+        }
+
+        /* Contenedor de contenido */
+        .content {
+            padding: 0 15px 20px;
+        }
+
+        .panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .panel.active-panel {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tarjetas */
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            color: #4a1d6d;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Estadísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff, white);
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(166,60,137,0.2);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #A63C89;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Tablas */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        th {
+            color: #A63C89;
+            font-weight: 600;
+        }
+
+        /* Botones */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #4a1d6d;
+        }
+
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #A63C89;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            th, td {
+                font-size: 11px;
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👑 Chepita Admin</h1>
+        <p>Sistema de Gestión Comercial</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
+        <button class="tab" data-tab="inventario">📦 Inventario</button>
+        <button class="tab" data-tab="trabajadores">👥 Trabajadores</button>
+        <button class="tab" data-tab="ventas">💰 Ventas</button>
+    </div>
+
+    <div class="content">
+        <!-- PANEL DASHBOARD -->
+        <div id="dashboard" class="panel active-panel">
+            <div class="stats-grid" id="statsContainer">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalProductos">---</div>
+                    <div class="stat-label">Productos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalVentasHoy">---</div>
+                    <div class="stat-label">Ventas Hoy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTrabajadores">---</div>
+                    <div class="stat-label">Trabajadores</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stockBajo">---</div>
+                    <div class="stat-label">Stock Bajo</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📈 Productos más vendidos</h3>
+                <div class="table-container">
+                    <table id="topProductos">
+                        <thead>
+                            <tr><th>Producto</th><th>Cantidad</th></tr>
+                        </thead>
+                        <tbody><tr><td colspan="2">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🏆 Mejores vendedores</h3>
+                <div class="table-container">
+                    <table id="topVendedores">
+                        <thead>
+                            <tr><th>Vendedor</th><th>Ventas</th><th>Puntaje</th></tr>
+                        </thead>
+                        <tbody><tr><td colspan="3">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL INVENTARIO -->
+        <div id="inventario" class="panel">
+            <div class="card">
+                <h3>➕ Agregar Producto</h3>
+                <input type="text" id="prodNombre" placeholder="Nombre del producto" style="width:100%; padding:12px; margin-bottom:10px; border-radius:20px; border:1px solid #ddd;">
+                <input type="number" id="prodPrecio" placeholder="Precio" style="width:100%; padding:12px; margin-bottom:10px; border-radius:20px; border:1px solid #ddd;">
+                <input type="number" id="prodStock" placeholder="Stock inicial" style="width:100%; padding:12px; margin-bottom:10px; border-radius:20px; border:1px solid #ddd;">
+                <select id="prodCategoria" style="width:100%; padding:12px; margin-bottom:10px; border-radius:20px; border:1px solid #ddd;">
+                    <option value="">Seleccionar categoría</option>
+                </select>
+                <button class="btn btn-primary" onclick="agregarProducto()">Agregar Producto</button>
+            </div>
+
+            <div class="card">
+                <h3>📋 Lista de Productos</h3>
+                <div class="table-container">
+                    <table id="listaProductos">
+                        <thead>
+                            <tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr>
+                        </thead>
+                        <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL TRABAJADORES -->
+        <div id="trabajadores" class="panel">
+            <div class="card">
+                <h3>➕ Registrar Trabajador</h3>
+                <input type="text" id="traNombre" placeholder="Nombre completo" style="width:100%; padding:12px; margin-bottom:10px; border-radius:20px; border:1px solid #ddd;">
+                <input type="text" id="traCelular" placeholder="Celular" style="width:100%; padding:12px; margin-bottom:10px; border-radius:20px; border:1px solid #ddd;">
+                <input type="email" id="traEmail" placeholder="Correo electrónico" style="width:100%; padding:12px; margin-bottom:10px; border-radius:20px; border:1px solid #ddd;">
+                <button class="btn btn-primary" onclick="registrarTrabajador()">Registrar Trabajador</button>
+            </div>
+
+            <div class="card">
+                <h3>👥 Lista de Trabajadores</h3>
+                <div class="table-container">
+                    <table id="listaTrabajadores">
+                        <thead>
+                            <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Celular</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL VENTAS -->
+        <div id="ventas" class="panel">
+            <div class="card">
+                <h3>📊 Resumen de Ventas</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="ventasHoy">---</div>
+                        <div class="stat-label">Hoy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="ventasMes">---</div>
+                        <div class="stat-label">Este Mes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🕐 Últimas Ventas</h3>
+                <div class="table-container">
+                    <table id="ultimasVentas">
+                        <thead>
+                            <tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total</th></tr>
+                        </thead>
+                        <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Chepita Sistema de Gestión
+    </div>
+
+    <script>
+        let token = null;
+        let admin = null;
+
+        // Verificar sesión
+        const tokenGuardado = localStorage.getItem('token_admin');
+        if (tokenGuardado) {
+            token = tokenGuardado;
+            verificarSesion();
+        } else {
+            mostrarLogin();
+        }
+
+        function mostrarLogin() {
+            const html = `
+                <div class="modal active" id="loginModal">
+                    <div class="modal-content">
+                        <h3>🔐 Login Administrador</h3>
+                        <input type="text" id="adminUsuario" placeholder="Usuario">
+                        <input type="password" id="adminPassword" placeholder="Contraseña">
+                        <button class="btn btn-primary" onclick="loginAdmin()">Iniciar Sesión</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('afterbegin', html);
+        }
+
+        async function loginAdmin() {
+            const usuario = document.getElementById('adminUsuario').value;
+            const password = document.getElementById('adminPassword').value;
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, password })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    token = data.token;
+                    localStorage.setItem('token_admin', token);
+                    document.getElementById('loginModal').remove();
+                    cargarDatosIniciales();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error de conexión: ' + error.message);
+            }
+        }
+
+        async function verificarSesion() {
+            try {
+                const response = await fetch('/api/verificar-sesion', {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+                if (data.autenticado) {
+                    cargarDatosIniciales();
+                } else {
+                    localStorage.removeItem('token_admin');
+                    mostrarLogin();
+                }
+            } catch (error) {
+                localStorage.removeItem('token_admin');
+                mostrarLogin();
+            }
+        }
+
+        async function cargarDatosIniciales() {
+            await Promise.all([
+                cargarDashboard(),
+                cargarProductos(),
+                cargarTrabajadores(),
+                cargarCategorias(),
+                cargarVentas()
+            ]);
+        }
+
+        async function cargarDashboard() {
+            try {
+                // Productos total
+                const prodRes = await fetch('/api/productos');
+                const productos = await prodRes.json();
+                document.getElementById('totalProductos').innerText = productos.length;
+
+                // Ventas hoy
+                const ventasRes = await fetch('/api/estadisticas-ventas');
+                const estadisticas = await ventasRes.json();
+                document.getElementById('totalVentasHoy').innerText = 'C$' + (estadisticas.total_hoy || 0);
+
+                // Trabajadores
+                const trabRes = await fetch('/api/trabajadores/activos');
+                const trabajadores = await trabRes.json();
+                document.getElementById('totalTrabajadores').innerText = trabajadores.length;
+
+                // Stock bajo
+                const stockRes = await fetch('/api/productos/bajo-stock');
+                const bajoStock = await stockRes.json();
+                document.getElementById('stockBajo').innerText = bajoStock.length;
+
+                // Top productos
+                const topRes = await fetch('/api/top-productos?periodo=mes&limite=5');
+                const topProductos = await topRes.json();
+                const topHtml = topProductos.map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`).join('');
+                document.querySelector('#topProductos tbody').innerHTML = topHtml || '<tr><td colspan="2">Sin datos</td></tr>';
+
+                // Top vendedores
+                const puntosRes = await fetch('/api/puntos-vendedores');
+                const puntos = await puntosRes.json();
+                const vendedoresHtml = puntos.slice(0,5).map(v => `<tr><td>${v.nombre_completo}</td><td>${v.total_ventas}</td><td>${v.puntaje_total}</td></tr>`).join('');
+                document.querySelector('#topVendedores tbody').innerHTML = vendedoresHtml || '<tr><td colspan="3">Sin datos</td></tr>';
+
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+            }
+        }
+
+        async function cargarProductos() {
+            try {
+                const response = await fetch('/api/productos');
+                const productos = await response.json();
+                const html = productos.map(p => `
+                    <tr>
+                        <td>${p.Id_Producto}</td>
+                        <td>${p.Nombre}</td>
+                        <td>C$${p.Precio}</td>
+                        <td>${p.Stock}</td>
+                        <td><span class="badge ${p.Stock <= 10 ? 'badge-warning' : 'badge-success'}">${p.Stock <= 10 ? '⚠️ Bajo stock' : 'OK'}</span></td>
+                    </tr>
+                `).join('');
+                document.querySelector('#listaProductos tbody').innerHTML = html || '<tr><td colspan="5">No hay productos</td></tr>';
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+            }
+        }
+
+        async function cargarTrabajadores() {
+            try {
+                const response = await fetch('/api/trabajadores');
+                const trabajadores = await response.json();
+                const html = trabajadores.map(t => `
+                    <tr>
+                        <td>${t.Id_Trabajador}</td>
+                        <td>${t.NombreCompleto}</td>
+                        <td>${t.email || '-'}</td>
+                        <td>${t.Celular || '-'}</td>
+                        <td><span class="badge ${t.Activo ? 'badge-success' : 'badge-danger'}">${t.Activo ? 'Activo' : 'Inactivo'}</span></td>
+                    </tr>
+                `).join('');
+                document.querySelector('#listaTrabajadores tbody').innerHTML = html || '<tr><td colspan="5">No hay trabajadores</td></tr>';
+            } catch (error) {
+                console.error('Error cargando trabajadores:', error);
+            }
+        }
+
+        async function cargarCategorias() {
+            try {
+                const response = await fetch('/api/categorias');
+                const categorias = await response.json();
+                const select = document.getElementById('prodCategoria');
+                select.innerHTML = '<option value="">Seleccionar categoría</option>' + 
+                    categorias.map(c => `<option value="${c.Id_Categoria}">${c.Nombre}</option>`).join('');
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+            }
+        }
+
+        async function cargarVentas() {
+            try {
+                const statsRes = await fetch('/api/estadisticas-ventas');
+                const stats = await statsRes.json();
+                document.getElementById('ventasHoy').innerText = 'C$' + (stats.total_hoy || 0);
+                document.getElementById('ventasMes').innerText = 'C$' + (stats.total_mes || 0);
+
+                const ventasRes = await fetch('/api/ventas-recientes');
+                const ventas = await ventasRes.json();
+                const html = ventas.slice(0,10).map(v => `
+                    <tr>
+                        <td>${new Date(v.Fecha).toLocaleDateString()}</td>
+                        <td>${v.cliente || 'Cliente'}</td>
+                        <td>${v.producto || '-'}</td>
+                        <td>${v.cantidad || 0}</td>
+                        <td>C$${v.Subtotal || 0}</td>
+                    </tr>
+                `).join('');
+                document.querySelector('#ultimasVentas tbody').innerHTML = html || '<tr><td colspan="5">Sin ventas recientes</td></tr>';
+            } catch (error) {
+                console.error('Error cargando ventas:', error);
+            }
+        }
+
+        async function agregarProducto() {
+            const nombre = document.getElementById('prodNombre').value;
+            const precio = parseFloat(document.getElementById('prodPrecio').value);
+            const stock = parseInt(document.getElementById('prodStock').value);
+            const idCategoria = document.getElementById('prodCategoria').value;
+
+            if (!nombre || !precio || !stock) {
+                alert('Completa todos los campos');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/productos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        Nombre: nombre,
+                        Precio: precio,
+                        Stock: stock,
+                        Id_Categoria: idCategoria || null,
+                        Marca: null,
+                        Id_Proveedor: 1
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Producto agregado correctamente');
+                    document.getElementById('prodNombre').value = '';
+                    document.getElementById('prodPrecio').value = '';
+                    document.getElementById('prodStock').value = '';
+                    cargarProductos();
+                    cargarDashboard();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function registrarTrabajador() {
+            const nombre = document.getElementById('traNombre').value;
+            const celular = document.getElementById('traCelular').value;
+            const email = document.getElementById('traEmail').value;
+
+            if (!nombre || !celular || !email) {
+                alert('Completa todos los campos');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/trabajadores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        NombreCompleto: nombre,
+                        Celular: celular,
+                        email: email,
+                        Activo: 1,
+                        Salario: null
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Trabajador registrado. Se envió email con instrucciones.');
+                    document.getElementById('traNombre').value = '';
+                    document.getElementById('traCelular').value = '';
+                    document.getElementById('traEmail').value = '';
+                    cargarTrabajadores();
+                    cargarDashboard();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
+                document.getElementById(tabId).classList.add('active-panel');
+            });
+        });
+    </script>
+</body>
+</html>
