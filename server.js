@@ -30,7 +30,7 @@ db.connect(err => {
     }
     console.log('✅ Conectado a MySQL');
     crearTablas();
-    crearTablasAsistencia(); // ← IMPORTANTE: llamar a esta función
+    crearTablaAsistencia();
 });
 
 const SECRET_KEY = 'chepita_secret_key_2025';
@@ -65,21 +65,8 @@ function crearTablas() {
     });
 }
 
-// ================= TABLAS DE ASISTENCIA =================
-function crearTablasAsistencia() {
-    db.query(`
-        CREATE TABLE IF NOT EXISTS asistencia_qr_vendedores (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            id_vendedor INT NOT NULL UNIQUE,
-            codigo VARCHAR(100) NOT NULL UNIQUE,
-            generado_en DATETIME DEFAULT NOW(),
-            FOREIGN KEY (id_vendedor) REFERENCES trabajadores(Id_Trabajador)
-        )
-    `, (err) => {
-        if (err) console.error('Error creando asistencia_qr_vendedores:', err);
-        else console.log('✅ Tabla asistencia_qr_vendedores lista');
-    });
-    
+// ================= TABLA DE ASISTENCIA MANUAL =================
+function crearTablaAsistencia() {
     db.query(`
         CREATE TABLE IF NOT EXISTS asistencia_registros (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -382,10 +369,13 @@ app.post('/api/vendedor/enviar-qr-email', (req, res) => {
     });
 });
 
-// ================= SISTEMA DE ASISTENCIA QR =================
+// ================= SISTEMA DE ASISTENCIA MANUAL =================
 
-app.post('/api/asistencia/generar-qr', verificarTokenTrabajador, (req, res) => {
+// Vendedor marca entrada
+app.post('/api/asistencia/marcar-entrada', verificarTokenTrabajador, (req, res) => {
     const { id_vendedor } = req.body;
+    const hoy = new Date().toISOString().split('T')[0];
+    const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
     if (!id_vendedor) {
         return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
@@ -395,123 +385,160 @@ app.post('/api/asistencia/generar-qr', verificarTokenTrabajador, (req, res) => {
         return res.status(403).json({ success: false, message: 'No autorizado' });
     }
     
-    const codigo = `ASIS${id_vendedor}${Date.now()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    
-    db.query(`INSERT INTO asistencia_qr_vendedores (id_vendedor, codigo) VALUES (?, ?) 
-              ON DUPLICATE KEY UPDATE codigo = ?, generado_en = NOW()`, 
-              [id_vendedor, codigo, codigo], (err) => {
-        if (err) {
-            console.error('Error:', err);
-            return res.status(500).json({ success: false, message: 'Error generando QR de asistencia' });
-        }
-        res.json({ success: true, codigo: codigo });
-    });
-});
-
-app.get('/api/asistencia/vendedor/:id', (req, res) => {
-    const { id } = req.params;
-    const hoy = new Date().toISOString().split('T')[0];
-    
-    db.query(`SELECT codigo FROM asistencia_qr_vendedores WHERE id_vendedor = ?`, [id], (err, qrResults) => {
-        const codigoQR = qrResults.length > 0 ? qrResults[0].codigo : null;
+    db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id_vendedor, hoy], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
         
-        db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id, hoy], (err, results) => {
-            let estado = 'ausente';
-            let estadoTexto = 'Sin registro hoy';
-            let ultimoRegistro = null;
-            let registrosHoy = [];
-            
-            if (results.length > 0) {
-                const reg = results[0];
-                if (reg.hora_entrada && reg.hora_salida) {
-                    estado = 'completo';
-                    estadoTexto = 'Jornada completada';
-                    ultimoRegistro = reg.hora_salida;
-                } else if (reg.hora_entrada) {
-                    estado = 'presente';
-                    estadoTexto = `Entrada: ${reg.hora_entrada}`;
-                    ultimoRegistro = reg.hora_entrada;
-                }
-                
-                if (reg.hora_entrada) registrosHoy.push({ tipo: 'Entrada', hora: reg.hora_entrada });
-                if (reg.hora_salida) registrosHoy.push({ tipo: 'Salida', hora: reg.hora_salida });
+        if (results.length > 0) {
+            const registro = results[0];
+            if (registro.hora_entrada && !registro.hora_salida) {
+                return res.json({ success: false, message: 'Ya marcaste entrada hoy. Debes marcar salida primero.' });
             }
-            
-            res.json({
-                success: true,
-                codigo_qr: codigoQR,
-                estado: estado,
-                estado_texto: estadoTexto,
-                ultimo_registro: ultimoRegistro,
-                registros_hoy: registrosHoy
-            });
-        });
-    });
-});
-
-app.post('/api/asistencia/escanear', (req, res) => {
-    const { codigo } = req.body;
-    const hoy = new Date().toISOString().split('T')[0];
-    const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
-    if (!codigo) {
-        return res.status(400).json({ success: false, message: 'Código QR requerido' });
-    }
-    
-    db.query(`SELECT id_vendedor FROM asistencia_qr_vendedores WHERE codigo = ?`, [codigo], (err, results) => {
-        if (err) {
-            console.error('Error:', err);
-            return res.status(500).json({ success: false, message: 'Error en servidor' });
+            if (registro.hora_entrada && registro.hora_salida) {
+                return res.json({ success: false, message: 'Ya completaste tu jornada hoy' });
+            }
         }
         
         if (results.length === 0) {
-            return res.json({ success: false, message: 'QR inválido' });
+            db.query(`INSERT INTO asistencia_registros (id_vendedor, fecha, hora_entrada, estado) VALUES (?, ?, ?, 'presente')`, 
+                [id_vendedor, hoy, horaActual], (err) => {
+                if (err) return res.status(500).json({ success: false, message: 'Error registrando entrada' });
+                res.json({ success: true, message: `Entrada registrada a las ${horaActual}`, tipo: 'entrada', hora: horaActual });
+            });
+        } else {
+            db.query(`UPDATE asistencia_registros SET hora_entrada = ?, estado = 'presente' WHERE id_vendedor = ? AND fecha = ?`, 
+                [horaActual, id_vendedor, hoy], (err) => {
+                if (err) return res.status(500).json({ success: false, message: 'Error registrando entrada' });
+                res.json({ success: true, message: `Entrada registrada a las ${horaActual}`, tipo: 'entrada', hora: horaActual });
+            });
+        }
+    });
+});
+
+// Vendedor marca salida
+app.post('/api/asistencia/marcar-salida', verificarTokenTrabajador, (req, res) => {
+    const { id_vendedor } = req.body;
+    const hoy = new Date().toISOString().split('T')[0];
+    const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    if (!id_vendedor) {
+        return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
+    }
+    
+    if (req.usuario.id !== id_vendedor) {
+        return res.status(403).json({ success: false, message: 'No autorizado' });
+    }
+    
+    db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id_vendedor, hoy], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        
+        if (results.length === 0) {
+            return res.json({ success: false, message: 'Primero debes marcar tu entrada' });
         }
         
-        const idVendedor = results[0].id_vendedor;
+        const registro = results[0];
+        if (registro.hora_salida) {
+            return res.json({ success: false, message: 'Ya marcaste salida hoy' });
+        }
         
-        db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [idVendedor, hoy], (err, existing) => {
-            if (err) {
-                return res.status(500).json({ success: false, message: 'Error en servidor' });
-            }
-            
-            if (existing.length === 0) {
-                db.query(`INSERT INTO asistencia_registros (id_vendedor, fecha, hora_entrada, estado) 
-                          VALUES (?, ?, ?, 'presente')`, 
-                          [idVendedor, hoy, horaActual], (err) => {
-                    if (err) {
-                        console.error('Error:', err);
-                        return res.status(500).json({ success: false, message: 'Error registrando entrada' });
-                    }
-                    
-                    db.query(`SELECT NombreCompleto FROM trabajadores WHERE Id_Trabajador = ?`, [idVendedor], (err, nombreResults) => {
-                        const nombreVendedor = nombreResults.length > 0 ? nombreResults[0].NombreCompleto : 'Vendedor';
-                        res.json({ success: true, message: `Entrada registrada: ${nombreVendedor}`, tipo: 'entrada', hora: horaActual, vendedor: nombreVendedor });
-                    });
-                });
-            } else {
-                const registro = existing[0];
-                if (!registro.hora_salida) {
-                    db.query(`UPDATE asistencia_registros SET hora_salida = ?, estado = 'completo' 
-                              WHERE id_vendedor = ? AND fecha = ?`, 
-                              [horaActual, idVendedor, hoy], (err) => {
-                        if (err) {
-                            return res.status(500).json({ success: false, message: 'Error registrando salida' });
-                        }
-                        
-                        db.query(`SELECT NombreCompleto FROM trabajadores WHERE Id_Trabajador = ?`, [idVendedor], (err, nombreResults) => {
-                            const nombreVendedor = nombreResults.length > 0 ? nombreResults[0].NombreCompleto : 'Vendedor';
-                            res.json({ success: true, message: `Salida registrada: ${nombreVendedor}`, tipo: 'salida', hora: horaActual, vendedor: nombreVendedor });
-                        });
-                    });
-                } else {
-                    res.json({ success: false, message: 'Ya registró entrada y salida hoy' });
-                }
-            }
+        if (!registro.hora_entrada) {
+            return res.json({ success: false, message: 'Primero debes marcar tu entrada' });
+        }
+        
+        db.query(`UPDATE asistencia_registros SET hora_salida = ?, estado = 'completo' WHERE id_vendedor = ? AND fecha = ?`, 
+            [horaActual, id_vendedor, hoy], (err) => {
+            if (err) return res.status(500).json({ success: false, message: 'Error registrando salida' });
+            res.json({ success: true, message: `Salida registrada a las ${horaActual}`, tipo: 'salida', hora: horaActual });
         });
     });
 });
 
+// Obtener estado de asistencia del vendedor
+app.get('/api/asistencia/estado/:id', (req, res) => {
+    const { id } = req.params;
+    const hoy = new Date().toISOString().split('T')[0];
+    
+    db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id, hoy], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        
+        if (results.length === 0) {
+            return res.json({
+                success: true,
+                tiene_registro: false,
+                entrada: null,
+                salida: null,
+                estado: 'pendiente',
+                mensaje: 'No has marcado asistencia hoy'
+            });
+        }
+        
+        const registro = results[0];
+        let estado = 'pendiente';
+        let mensaje = '';
+        
+        if (registro.hora_entrada && !registro.hora_salida) {
+            estado = 'en_jornada';
+            mensaje = `Entrada: ${registro.hora_entrada} - Aún no marcas salida`;
+        } else if (registro.hora_entrada && registro.hora_salida) {
+            estado = 'completo';
+            mensaje = `Entrada: ${registro.hora_entrada} | Salida: ${registro.hora_salida}`;
+        }
+        
+        res.json({
+            success: true,
+            tiene_registro: true,
+            entrada: registro.hora_entrada,
+            salida: registro.hora_salida,
+            estado: estado,
+            mensaje: mensaje
+        });
+    });
+});
+
+// Admin marca asistencia manualmente
+app.post('/api/asistencia/admin-marcar', async (req, res) => {
+    const { id_vendedor, tipo, hora } = req.body;
+    const hoy = new Date().toISOString().split('T')[0];
+    const horaMarcar = hora || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    if (!id_vendedor || !tipo) {
+        return res.status(400).json({ success: false, message: 'Datos incompletos' });
+    }
+    
+    db.query(`SELECT * FROM asistencia_registros WHERE id_vendedor = ? AND fecha = ?`, [id_vendedor, hoy], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        
+        if (results.length === 0) {
+            if (tipo === 'entrada') {
+                db.query(`INSERT INTO asistencia_registros (id_vendedor, fecha, hora_entrada, estado) VALUES (?, ?, ?, 'presente')`, 
+                    [id_vendedor, hoy, horaMarcar], (err) => {
+                    if (err) return res.status(500).json({ success: false, message: 'Error registrando' });
+                    res.json({ success: true, message: `Entrada marcada manualmente a las ${horaMarcar}` });
+                });
+            } else {
+                res.json({ success: false, message: 'Primero debe marcar la entrada' });
+            }
+        } else {
+            const registro = results[0];
+            if (tipo === 'entrada' && !registro.hora_entrada) {
+                db.query(`UPDATE asistencia_registros SET hora_entrada = ?, estado = 'presente' WHERE id_vendedor = ? AND fecha = ?`, 
+                    [horaMarcar, id_vendedor, hoy], (err) => {
+                    if (err) return res.status(500).json({ success: false, message: 'Error registrando' });
+                    res.json({ success: true, message: `Entrada marcada manualmente a las ${horaMarcar}` });
+                });
+            } else if (tipo === 'salida' && !registro.hora_salida && registro.hora_entrada) {
+                db.query(`UPDATE asistencia_registros SET hora_salida = ?, estado = 'completo' WHERE id_vendedor = ? AND fecha = ?`, 
+                    [horaMarcar, id_vendedor, hoy], (err) => {
+                    if (err) return res.status(500).json({ success: false, message: 'Error registrando' });
+                    res.json({ success: true, message: `Salida marcada manualmente a las ${horaMarcar}` });
+                });
+            } else {
+                res.json({ success: false, message: `Ya tiene registrada ${tipo === 'entrada' ? 'entrada' : 'salida'} hoy` });
+            }
+        }
+    });
+});
+
+// Obtener registro de asistencia para ADMIN
 app.get('/api/asistencia/registro', (req, res) => {
     const { fecha } = req.query;
     const fechaBuscar = fecha || new Date().toISOString().split('T')[0];
@@ -672,7 +699,6 @@ app.get('/api/estadisticas-ventas', (req, res) => {
     });
 });
 
-// ================= TOP PRODUCTOS CORREGIDO (FIX UNDEFINED) =================
 app.get('/api/top-productos', (req, res) => {
     const { limite = 5 } = req.query;
     db.query(`
@@ -836,7 +862,7 @@ app.listen(PORT, '0.0.0.0', () => {
     ╠══════════════════════════════════════════════════════════╣
     ║  Puerto: ${PORT}                                          ║
     ║  QR Ventas: ACTIVADO                                     ║
-    ║  QR Asistencia: ACTIVADO                                 ║
+    ║  Asistencia Manual: ACTIVADO                             ║
     ║  Login Admin: admin / admin (MD5)                        ║
     ╚══════════════════════════════════════════════════════════╝
     `);

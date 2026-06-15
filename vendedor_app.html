@@ -153,6 +153,16 @@
             color: #4a1d6d;
         }
 
+        .btn-success {
+            background: #2e7d32;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #c62828;
+            color: white;
+        }
+
         .btn-link {
             background: none;
             color: #A63C89;
@@ -241,7 +251,6 @@
             word-break: break-all;
         }
 
-        /* Botones de acciones */
         .footer-buttons {
             display: flex;
             gap: 12px;
@@ -253,7 +262,6 @@
             margin: 0;
         }
 
-        /* Instrucciones */
         .instrucciones {
             background: linear-gradient(135deg, #f5f0ff, #faf5ff);
             border-radius: 28px;
@@ -290,7 +298,6 @@
             font-weight: bold;
         }
 
-        /* Estados */
         .hidden {
             display: none;
         }
@@ -419,35 +426,12 @@
             margin-top: 10px;
         }
 
-        .premio-oro {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            color: #92400e;
-        }
-
-        .premio-plata {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            color: #166534;
-        }
-
-        .premio-bronce {
-            background: linear-gradient(135deg, #fefce8, #fef08a);
-            color: #854d0e;
-        }
-
-        .premio-cobre {
-            background: linear-gradient(135deg, #fff7ed, #fed7aa);
-            color: #9a3412;
-        }
-
-        .premio-vale {
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-            color: #0369a1;
-        }
-
-        .premio-nada {
-            background: #f1f5f9;
-            color: #64748b;
-        }
+        .premio-oro { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .premio-plata { background: linear-gradient(135deg, #f0fdf4, #dcfce7); color: #166534; }
+        .premio-bronce { background: linear-gradient(135deg, #fefce8, #fef08a); color: #854d0e; }
+        .premio-cobre { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #9a3412; }
+        .premio-vale { background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0369a1; }
+        .premio-nada { background: #f1f5f9; color: #64748b; }
 
         .loading-puntos {
             text-align: center;
@@ -455,7 +439,7 @@
             color: #A63C89;
         }
 
-        /* Asistencia */
+        /* Asistencia manual */
         .asistencia-card {
             background: white;
             border-radius: 28px;
@@ -463,14 +447,6 @@
             text-align: center;
             margin-bottom: 20px;
             border: 2px solid #e8e8f0;
-        }
-
-        .asistencia-hora {
-            font-size: 48px;
-            font-weight: 800;
-            font-family: monospace;
-            color: #4a1d6d;
-            margin: 15px 0;
         }
 
         .asistencia-fecha {
@@ -486,29 +462,11 @@
             font-weight: 600;
         }
 
-        .estado-presente {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .estado-ausente {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .estado-completo {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .asistencia-qr {
-            background: white;
-            border-radius: 28px;
-            padding: 24px;
-            text-align: center;
-            margin: 20px 0;
-            border: 2px dashed #A63C89;
-        }
+        .estado-pendiente { background: #fff3e0; color: #e65100; }
+        .estado-presente { background: #e8f5e9; color: #2e7d32; }
+        .estado-en_jornada { background: #e3f2fd; color: #1565c0; }
+        .estado-completo { background: #e8f5e9; color: #2e7d32; }
+        .estado-ausente { background: #ffebee; color: #c62828; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
@@ -555,7 +513,7 @@
                 <button class="tab" data-tab="puntos" onclick="cambiarTab('puntos')">Mis Puntos</button>
             </div>
 
-            <!-- Panel QR -->
+            <!-- Panel QR Ventas -->
             <div id="panelQR" class="panel active-panel">
                 <div class="qr-card" id="qrContainer" style="display: none;">
                     <div class="qr-wrapper"><div id="qrcode"></div></div>
@@ -576,25 +534,21 @@
                 </div>
             </div>
 
-            <!-- Panel Asistencia -->
+            <!-- Panel Asistencia Manual -->
             <div id="panelAsistencia" class="panel">
                 <div id="asistenciaContent">
-                    <div class="loading-puntos">Cargando informacion de asistencia...</div>
+                    <div class="loading-puntos">Cargando tu estado...</div>
                 </div>
-                <div class="asistencia-qr" id="asistenciaQrContainer" style="display: none;">
-                    <div class="qr-wrapper"><div id="asistenciaQrcode"></div></div>
-                    <div class="codigo-texto" id="asistenciaCodigo"></div>
+                <div class="footer-buttons" style="margin-top: 15px; gap: 10px;">
+                    <button class="btn btn-success" onclick="marcarEntrada()" id="btnEntrada" style="background: #2e7d32;">Marcar Entrada</button>
+                    <button class="btn btn-danger" onclick="marcarSalida()" id="btnSalida" style="background: #c62828;">Marcar Salida</button>
                 </div>
-                <button class="btn btn-primary" onclick="generarQRAistencia()" id="btnGenerarAsistencia">
-                    Generar QR para marcar asistencia
-                </button>
                 <div class="instrucciones">
-                    <h4>Como usar el QR de asistencia</h4>
-                    <p><span class="step-number">1</span> Genera tu QR unico de asistencia</p>
-                    <p><span class="step-number">2</span> El administrador lo escanea al llegar</p>
-                    <p><span class="step-number">3</span> Se registra tu hora de entrada</p>
-                    <p><span class="step-number">4</span> Al escanear nuevamente, se registra tu salida</p>
-                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">El QR es permanente, no expira</p>
+                    <h4>Sistema de Asistencia</h4>
+                    <p><span class="step-number">1</span> Al llegar, presiona "Marcar Entrada"</p>
+                    <p><span class="step-number">2</span> Al retirarte, presiona "Marcar Salida"</p>
+                    <p><span class="step-number">3</span> Tu registro quedara guardado automaticamente</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">El horario se registra automaticamente</p>
                 </div>
             </div>
 
@@ -620,7 +574,6 @@
         let vendedor = null;
         let qrActual = null;
         let qrActivo = false;
-        let qrAsistenciaActual = null;
         let trabajadores = [];
         let vendedorSeleccionado = null;
 
@@ -654,56 +607,41 @@
 
         async function cargarAsistencia() {
             const content = document.getElementById('asistenciaContent');
-            content.innerHTML = '<div class="loading-puntos">Cargando registro de asistencia...</div>';
+            content.innerHTML = '<div class="loading-puntos">Cargando tu estado...</div>';
             
             try {
-                const response = await fetch(`/api/asistencia/vendedor/${vendedor.id}`);
+                const response = await fetch(`/api/asistencia/estado/${vendedor.id}`);
                 const data = await response.json();
                 
                 if (data.success) {
+                    let estadoTexto = '';
+                    let estadoClase = '';
+                    
+                    if (data.estado === 'pendiente') {
+                        estadoTexto = 'No has marcado asistencia hoy';
+                        estadoClase = 'estado-pendiente';
+                    } else if (data.estado === 'en_jornada') {
+                        estadoTexto = `En jornada - Entrada: ${data.entrada}`;
+                        estadoClase = 'estado-en_jornada';
+                    } else if (data.estado === 'completo') {
+                        estadoTexto = `Jornada completada - Entrada: ${data.entrada} | Salida: ${data.salida}`;
+                        estadoClase = 'estado-completo';
+                    } else {
+                        estadoTexto = data.mensaje || 'Estado desconocido';
+                        estadoClase = 'estado-ausente';
+                    }
+                    
                     let html = `
                         <div class="asistencia-card">
-                            <div class="asistencia-fecha">Ultimo registro</div>
-                            <div class="asistencia-hora">${data.ultimo_registro || 'Sin registro'}</div>
-                            <div class="asistencia-estado estado-${data.estado || 'ausente'}">
-                                Estado: ${data.estado_texto || 'Sin registro hoy'}
+                            <div class="asistencia-fecha">${new Date().toLocaleDateString()}</div>
+                            <div class="asistencia-estado ${estadoClase}">
+                                ${estadoTexto}
                             </div>
                         </div>
                     `;
-                    
-                    if (data.registros_hoy && data.registros_hoy.length > 0) {
-                        html += `<div class="stats-grid">`;
-                        data.registros_hoy.forEach(reg => {
-                            html += `
-                                <div class="stat-card">
-                                    <div class="stat-number">${reg.hora}</div>
-                                    <div class="stat-label">${reg.tipo}</div>
-                                </div>
-                            `;
-                        });
-                        html += `</div>`;
-                    }
-                    
                     content.innerHTML = html;
-                    
-                    if (data.codigo_qr) {
-                        qrAsistenciaActual = data.codigo_qr;
-                        document.getElementById('asistenciaQrContainer').style.display = 'block';
-                        document.getElementById('asistenciaCodigo').textContent = data.codigo_qr;
-                        const qrDiv = document.getElementById('asistenciaQrcode');
-                        qrDiv.innerHTML = '';
-                        new QRCode(qrDiv, {
-                            text: data.codigo_qr,
-                            width: 200,
-                            height: 200,
-                            colorDark: "#A63C89",
-                            colorLight: "#ffffff"
-                        });
-                    } else {
-                        document.getElementById('asistenciaQrContainer').style.display = 'none';
-                    }
                 } else {
-                    content.innerHTML = `<div class="loading-puntos" style="color:#c62828;">Error: ${data.message}</div>`;
+                    content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
                 }
             } catch (error) {
                 console.error('Error cargando asistencia:', error);
@@ -711,14 +649,14 @@
             }
         }
 
-        async function generarQRAistencia() {
-            const btn = document.getElementById('btnGenerarAsistencia');
+        async function marcarEntrada() {
+            const btn = document.getElementById('btnEntrada');
             const originalText = btn.innerHTML;
-            btn.innerHTML = 'Generando...';
+            btn.innerHTML = 'Procesando...';
             btn.disabled = true;
             
             try {
-                const response = await fetch('/api/asistencia/generar-qr', {
+                const response = await fetch('/api/asistencia/marcar-entrada', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -729,24 +667,44 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    qrAsistenciaActual = data.codigo;
-                    document.getElementById('asistenciaQrContainer').style.display = 'block';
-                    document.getElementById('asistenciaCodigo').textContent = data.codigo;
-                    const qrDiv = document.getElementById('asistenciaQrcode');
-                    qrDiv.innerHTML = '';
-                    new QRCode(qrDiv, {
-                        text: data.codigo,
-                        width: 200,
-                        height: 200,
-                        colorDark: "#A63C89",
-                        colorLight: "#ffffff"
-                    });
-                    mostrarMensaje('QR de asistencia generado correctamente', false);
+                    mostrarMensaje(data.message, false);
+                    cargarAsistencia();
                 } else {
-                    mostrarMensaje('Error: ' + data.message, true);
+                    mostrarMensaje(data.message, true);
                 }
             } catch (error) {
-                mostrarMensaje('Error generando QR: ' + error.message, true);
+                mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function marcarSalida() {
+            const btn = document.getElementById('btnSalida');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Procesando...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/asistencia/marcar-salida', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ id_vendedor: vendedor.id })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarMensaje(data.message, false);
+                    cargarAsistencia();
+                } else {
+                    mostrarMensaje(data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message, true);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;

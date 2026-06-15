@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Chepita Admin</title>
+    <title>Chepita Vendedor</title>
     <style>
         * {
             margin: 0;
@@ -13,71 +13,71 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(145deg, #4a1d6d 0%, #7b2c8d 50%, #A63C89 100%);
             min-height: 100vh;
+            padding: 20px;
         }
 
-        /* Header */
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 48px;
+            padding: 28px 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+
         .header {
-            background: linear-gradient(135deg, #4a1d6d, #A63C89);
-            color: white;
-            padding: 20px;
-            padding-top: 50px;
-            border-radius: 0 0 30px 30px;
-            margin-bottom: 20px;
+            text-align: center;
+            margin-bottom: 28px;
         }
 
         .header h1 {
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-top: 5px;
+            color: #666;
+            font-size: 14px;
+            margin-top: 4px;
         }
 
         /* Tabs */
         .tabs {
             display: flex;
-            background: white;
-            margin: 0 15px;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: #f0f0f0;
             border-radius: 30px;
             padding: 5px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            overflow-x: auto;
-            margin-bottom: 20px;
-            gap: 5px;
         }
 
         .tab {
-            padding: 12px 16px;
+            flex: 1;
+            padding: 12px;
             text-align: center;
-            background: none;
             border: none;
+            background: transparent;
             border-radius: 25px;
             font-size: 13px;
             font-weight: 600;
-            color: #666;
             cursor: pointer;
             transition: all 0.3s ease;
-            white-space: nowrap;
+            color: #666;
         }
 
         .tab.active {
             background: linear-gradient(135deg, #A63C89, #4a1d6d);
             color: white;
-            box-shadow: 0 2px 8px rgba(166,60,137,0.3);
+            box-shadow: 0 2px 8px rgba(166, 60, 137, 0.3);
         }
 
-        /* Contenido */
-        .content {
-            padding: 0 15px 20px;
-        }
-
+        /* Paneles */
         .panel {
             display: none;
             animation: fadeIn 0.3s ease;
@@ -88,35 +88,300 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        /* Tarjetas */
-        .card {
-            background: white;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        /* Inputs */
+        .input-group {
+            margin-bottom: 20px;
         }
 
-        .card h3 {
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
             color: #4a1d6d;
-            margin-bottom: 15px;
-            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid #e8e8f0;
+            border-radius: 24px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #A63C89;
+            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
+        }
+
+        /* Botones */
+        .btn {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #4a1d6d;
+        }
+
+        .btn-success {
+            background: #2e7d32;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #c62828;
+            color: white;
+        }
+
+        .btn-link {
+            background: none;
+            color: #A63C89;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* Sugerencias */
+        .suggestions {
+            background: white;
+            border: 2px solid #e8e8f0;
+            border-radius: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 5px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .suggestion-item {
+            padding: 12px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #f5f0ff;
+        }
+
+        .suggestion-item .nombre {
+            font-weight: 600;
+            color: #4a1d6d;
+        }
+
+        .suggestion-item .email {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Tarjeta del vendedor */
+        .vendedor-card {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            border-radius: 28px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .vendedor-nombre {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .vendedor-id {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* QR Card */
+        .qr-card {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid rgba(166, 60, 137, 0.2);
+        }
+
+        .qr-wrapper {
+            background: white;
+            padding: 20px;
+            border-radius: 28px;
+            display: inline-block;
+        }
+
+        .codigo-texto {
+            font-family: monospace;
+            font-size: 12px;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 20px;
+            margin-top: 16px;
+            word-break: break-all;
+        }
+
+        .footer-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .footer-buttons .btn {
+            flex: 1;
+            margin: 0;
+        }
+
+        .instrucciones {
+            background: linear-gradient(135deg, #f5f0ff, #faf5ff);
+            border-radius: 28px;
+            padding: 20px;
+            margin-top: 24px;
+            border-left: 4px solid #A63C89;
+        }
+
+        .instrucciones h4 {
+            color: #4a1d6d;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .instrucciones p {
+            font-size: 13px;
+            color: #555;
+            margin: 8px 0;
             display: flex;
             align-items: center;
-            gap: 8px;
-            border-left: 4px solid #A63C89;
-            padding-left: 12px;
+            gap: 10px;
         }
 
-        /* Estadísticas */
+        .step-number {
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            background: #A63C89;
+            color: white;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .badge-usado {
+            background: #ffebee;
+            color: #c62828;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* Modales */
+        .modal-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-message-content {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .modal-message-content p {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-message-content button {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 350px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            color: #4a1d6d;
+            margin-bottom: 20px;
+        }
+
+        /* Estadisticas */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
@@ -124,12 +389,7 @@
             border-radius: 20px;
             padding: 16px;
             text-align: center;
-            border: 1px solid rgba(166,60,137,0.2);
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
+            border: 1px solid rgba(166, 60, 137, 0.2);
         }
 
         .stat-number {
@@ -144,915 +404,654 @@
             margin-top: 5px;
         }
 
-        /* Tablas */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 16px;
+        .puntaje-card {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            border-radius: 28px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .puntaje-valor {
+            font-size: 48px;
+            font-weight: 800;
         }
 
-        th, td {
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
+        .premio-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            margin-top: 10px;
         }
 
-        th {
+        .premio-oro { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .premio-plata { background: linear-gradient(135deg, #f0fdf4, #dcfce7); color: #166534; }
+        .premio-bronce { background: linear-gradient(135deg, #fefce8, #fef08a); color: #854d0e; }
+        .premio-cobre { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #9a3412; }
+        .premio-vale { background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0369a1; }
+        .premio-nada { background: #f1f5f9; color: #64748b; }
+
+        .loading-puntos {
+            text-align: center;
+            padding: 40px;
             color: #A63C89;
-            font-weight: 600;
-            background: #faf5ff;
         }
 
-        tr:hover {
-            background: #faf5ff;
+        /* Asistencia manual */
+        .asistencia-card {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid #e8e8f0;
         }
 
-        /* Formularios */
-        .form-group {
+        .asistencia-fecha {
+            font-size: 16px;
+            color: #666;
             margin-bottom: 15px;
         }
 
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #4a1d6d;
-            margin-bottom: 5px;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e8e8f0;
+        .asistencia-estado {
+            padding: 10px;
             border-radius: 20px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #A63C89;
-            box-shadow: 0 0 0 3px rgba(166,60,137,0.1);
-        }
-
-        /* Botones */
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #A63C89, #4a1d6d);
-            color: white;
-            width: 100%;
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #4a1d6d;
-        }
-
-        .btn-danger {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .btn-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-
-        /* Escáner QR */
-        .scanner-container {
-            text-align: center;
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 20px;
-            margin-bottom: 20px;
-        }
-
-        .scanner-video {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 20px;
-            margin: 0 auto;
-            display: block;
-            border: 2px solid #A63C89;
-        }
-
-        .scanner-input {
-            display: flex;
-            gap: 10px;
             margin-top: 15px;
-        }
-
-        .scanner-input input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e8e8f0;
-            border-radius: 20px;
-            font-size: 14px;
-            font-family: monospace;
-        }
-
-        .scanner-input button {
-            width: auto;
-            padding: 12px 20px;
-        }
-
-        /* Login */
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            background: white;
-            border-radius: 48px;
-            padding: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
-            text-align: center;
-        }
-
-        .login-container h2 {
-            color: #4a1d6d;
-            margin-bottom: 20px;
-        }
-
-        .password-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .password-wrapper input {
-            flex: 1;
-        }
-
-        .password-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            padding: 12px;
-            color: #666;
-            transition: color 0.2s;
-        }
-
-        .password-toggle:hover {
-            color: #A63C89;
-        }
-
-        /* Badges */
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
             font-weight: 600;
         }
 
-        .badge-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .badge-danger {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .badge-warning {
-            background: #fff3e0;
-            color: #e65100;
-        }
-
-        .badge-info {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .badge-success-light {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .badge-danger-light {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 32px;
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .modal-content h3 {
-            margin-bottom: 20px;
-            color: #4a1d6d;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        /* Layout de dos columnas */
-        .two-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        @media (max-width: 768px) {
-            .two-columns {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #999;
-            font-size: 12px;
-        }
+        .estado-pendiente { background: #fff3e0; color: #e65100; }
+        .estado-presente { background: #e8f5e9; color: #2e7d32; }
+        .estado-en_jornada { background: #e3f2fd; color: #1565c0; }
+        .estado-completo { background: #e8f5e9; color: #2e7d32; }
+        .estado-ausente { background: #ffebee; color: #c62828; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-    <div id="loginContainer" class="login-container">
-        <h2>Acceso Administrador</h2>
-        <div class="form-group">
-            <label>Usuario</label>
-            <input type="text" id="adminUser" placeholder="Ingresa tu usuario">
+    <div class="container">
+        <div class="header">
+            <h1>Chepita Vendedor</h1>
+            <p>Sistema de Ventas</p>
         </div>
-        <div class="form-group">
-            <label>Contraseña</label>
-            <div class="password-wrapper">
-                <input type="password" id="adminPassword" placeholder="Ingresa tu contraseña">
-                <button type="button" class="password-toggle" onclick="togglePassword()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
+
+        <!-- Pantalla de Login -->
+        <div id="loginSection">
+            <div class="input-group">
+                <label>Busca tu nombre</label>
+                <input type="text" id="searchInput" placeholder="Escribe tu nombre..." autocomplete="off">
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+            <div id="passwordSection" class="hidden">
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="passwordInput" placeholder="Ingresa tu contraseña">
+                </div>
+                <button class="btn btn-primary" onclick="iniciarSesion()">Iniciar Sesion</button>
+                <button class="btn btn-link" onclick="mostrarRecuperacion()">Olvidaste tu contraseña?</button>
+            </div>
+            <div id="selectedUserInfo" class="hidden" style="background:#f5f0ff; padding:12px; border-radius:20px; margin-top:10px; text-align:center;">
+                <span id="selectedUserName"></span>
+                <button onclick="clearSelection()" style="background:none; border:none; color:#A63C89; margin-left:10px;">X</button>
+            </div>
+        </div>
+
+        <!-- Pantalla Principal -->
+        <div id="appSection" class="hidden">
+            <!-- Info Vendedor -->
+            <div class="vendedor-card">
+                <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
+                <div class="vendedor-id" id="vendedorId"></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" data-tab="qr" onclick="cambiarTab('qr')">Venta QR</button>
+                <button class="tab" data-tab="asistencia" onclick="cambiarTab('asistencia')">Asistencia</button>
+                <button class="tab" data-tab="puntos" onclick="cambiarTab('puntos')">Mis Puntos</button>
+            </div>
+
+            <!-- Panel QR Ventas -->
+            <div id="panelQR" class="panel active-panel">
+                <div class="qr-card" id="qrContainer" style="display: none;">
+                    <div class="qr-wrapper"><div id="qrcode"></div></div>
+                    <div class="codigo-texto" id="codigoTexto"></div>
+                    <div class="badge-usado" id="qrUsadoBadge" style="display: none;">QR ya usado</div>
+                </div>
+                <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerar">Generar QR para venta</button>
+                <div class="footer-buttons">
+                    <button class="btn btn-secondary" onclick="enviarQREmail()">Enviar por Email</button>
+                </div>
+                <div class="instrucciones">
+                    <h4>Como usar este QR</h4>
+                    <p><span class="step-number">1</span> Genera un nuevo QR para cada venta</p>
+                    <p><span class="step-number">2</span> Muestra el QR al cajero</p>
+                    <p><span class="step-number">3</span> El QR se usa una sola vez</p>
+                    <p><span class="step-number">4</span> Despues de usado, genera uno nuevo</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">Cada QR es valido para una sola venta</p>
+                </div>
+            </div>
+
+            <!-- Panel Asistencia Manual -->
+            <div id="panelAsistencia" class="panel">
+                <div id="asistenciaContent">
+                    <div class="loading-puntos">Cargando tu estado...</div>
+                </div>
+                <div class="footer-buttons" style="margin-top: 15px; gap: 10px;">
+                    <button class="btn btn-success" onclick="marcarEntrada()" id="btnEntrada" style="background: #2e7d32;">Marcar Entrada</button>
+                    <button class="btn btn-danger" onclick="marcarSalida()" id="btnSalida" style="background: #c62828;">Marcar Salida</button>
+                </div>
+                <div class="instrucciones">
+                    <h4>Sistema de Asistencia</h4>
+                    <p><span class="step-number">1</span> Al llegar, presiona "Marcar Entrada"</p>
+                    <p><span class="step-number">2</span> Al retirarte, presiona "Marcar Salida"</p>
+                    <p><span class="step-number">3</span> Tu registro quedara guardado automaticamente</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">El horario se registra automaticamente</p>
+                </div>
+            </div>
+
+            <!-- Panel Puntos -->
+            <div id="panelPuntos" class="panel">
+                <div id="puntosContent">
+                    <div class="loading-puntos">Cargando tus estadisticas...</div>
+                </div>
+                <button class="btn btn-secondary" onclick="cargarMisPuntos()" style="margin-top: 15px;">
+                    Actualizar datos
                 </button>
             </div>
-        </div>
-        <button class="btn btn-primary" onclick="loginAdmin()">Iniciar Sesión</button>
-        <div style="margin-top: 15px;">
-            <button class="btn btn-secondary" onclick="mostrarRecuperacion()" style="background:none; color:#A63C89;">¿Olvidaste tu contraseña?</button>
-        </div>
-    </div>
 
-    <div id="mainApp" style="display: none;">
-        <div class="header">
-            <h1>Admin Chepita</h1>
-            <p>Panel de control - Sistema de Gestión</p>
-        </div>
-
-        <div class="tabs">
-            <button class="tab active" data-tab="dashboard">Dashboard</button>
-            <button class="tab" data-tab="scanner">Escáner QR</button>
-            <button class="tab" data-tab="inventario">Inventario</button>
-            <button class="tab" data-tab="vendedores">Vendedores</button>
-            <button class="tab" data-tab="asistencia">Asistencia</button>
-        </div>
-
-        <div class="content">
-            <!-- Panel Dashboard -->
-            <div id="dashboard" class="panel active-panel">
-                <div class="stats-grid" id="statsContainer">
-                    <div class="stat-card"><div class="stat-number" id="totalProductos">---</div><div class="stat-label">Productos</div></div>
-                    <div class="stat-card"><div class="stat-number" id="totalVentasHoy">---</div><div class="stat-label">Ventas Hoy</div></div>
-                    <div class="stat-card"><div class="stat-number" id="totalVendedores">---</div><div class="stat-label">Vendedores Activos</div></div>
-                    <div class="stat-card"><div class="stat-number" id="stockBajo">---</div><div class="stat-label">Stock Bajo</div></div>
-                </div>
-                <div class="card">
-                    <h3>Productos más vendidos</h3>
-                    <div class="table-container">
-                        <table id="topProductos">
-                            <thead><tr><th>Producto</th><th>Cantidad</th></tr></thead>
-                            <tbody><tr><td colspan="2">Cargando...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- Cerrar Sesion -->
+            <div class="footer-buttons" style="margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="cerrarSesion()">Cerrar sesion</button>
             </div>
-
-            <!-- Panel Escáner QR con cámara -->
-            <div id="scanner" class="panel">
-                <div class="card">
-                    <h3>Escáner QR de Asistencia</h3>
-                    <div class="scanner-container">
-                        <video id="scannerVideo" class="scanner-video" autoplay playsinline></video>
-                        <button class="btn btn-secondary" onclick="iniciarCamara()" style="margin-top: 10px;">Activar Cámara</button>
-                        <button class="btn btn-secondary" onclick="detenerCamara()" style="margin-top: 10px;">Detener Cámara</button>
-                        <div class="scanner-input" style="margin-top: 15px;">
-                            <input type="text" id="codigoQR" placeholder="O ingresa el código QR manualmente">
-                            <button class="btn btn-primary" onclick="escanearQR()" style="width: auto;">Validar</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card" id="qrResultado" style="display: none;">
-                    <h3>Resultado del escaneo</h3>
-                    <div id="qrInfo"></div>
-                </div>
-            </div>
-
-            <!-- Panel Inventario (primero lista, luego formulario) -->
-            <div id="inventario" class="panel">
-                <div class="card">
-                    <h3>Lista de Productos</h3>
-                    <div class="table-container">
-                        <table id="listaProductos">
-                            <thead>
-                                <tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr>
-                            </thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Agregar Producto</h3>
-                    <div class="two-columns">
-                        <div class="form-group">
-                            <label>Nombre del producto</label>
-                            <input type="text" id="prodNombre" placeholder="Nombre">
-                        </div>
-                        <div class="form-group">
-                            <label>Precio</label>
-                            <input type="number" id="prodPrecio" placeholder="Precio">
-                        </div>
-                        <div class="form-group">
-                            <label>Stock inicial</label>
-                            <input type="number" id="prodStock" placeholder="Stock">
-                        </div>
-                        <div class="form-group">
-                            <label>Proveedor</label>
-                            <select id="prodProveedor"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Categoría</label>
-                            <select id="prodCategoria"></select>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" onclick="agregarProducto()">Agregar Producto</button>
-                </div>
-            </div>
-
-            <!-- Panel Vendedores con rendimiento -->
-            <div id="vendedores" class="panel">
-                <div class="card">
-                    <h3>Rendimiento de Vendedores</h3>
-                    <div class="table-container">
-                        <table id="tablaRendimiento">
-                            <thead>
-                                <tr><th>Vendedor</th><th>Ventas</th><th>Días Activos</th><th>Promedio</th><th>Puntaje</th><th>Premio</th></tr>
-                            </thead>
-                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Registrar Vendedor</h3>
-                    <div class="two-columns">
-                        <div class="form-group">
-                            <label>Nombre completo</label>
-                            <input type="text" id="venNombre" placeholder="Nombre completo">
-                        </div>
-                        <div class="form-group">
-                            <label>Teléfono / Celular</label>
-                            <input type="text" id="venCelular" placeholder="Número de celular">
-                        </div>
-                        <div class="form-group">
-                            <label>Correo electrónico</label>
-                            <input type="email" id="venEmail" placeholder="Correo electrónico">
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" onclick="registrarVendedor()">Registrar Vendedor</button>
-                </div>
-                <div class="card">
-                    <h3>Lista de Vendedores</h3>
-                    <div class="table-container">
-                        <table id="listaVendedores">
-                            <thead>
-                                <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Celular</th><th>Estado</th><th></th></tr>
-                            </thead>
-                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel Asistencia -->
-            <div id="asistencia" class="panel">
-                <div class="card">
-                    <h3>Registro de Asistencia</h3>
-                    <div class="form-group">
-                        <label>Filtrar por fecha</label>
-                        <input type="date" id="filtroFecha" onchange="cargarRegistroAsistencia()">
-                    </div>
-                    <div class="table-container">
-                        <table id="tablaAsistencia">
-                            <thead>
-                                <tr><th>Vendedor</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr>
-                            </thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            Chepita - Sistema de Gestión Comercial
-        </div>
-    </div>
-
-    <!-- Modales -->
-    <div id="recuperacionModal" class="modal">
-        <div class="modal-content">
-            <h3>Recuperar Contraseña</h3>
-            <div class="form-group">
-                <label>Correo electrónico</label>
-                <input type="email" id="recEmail" placeholder="admin@chepita.com">
-            </div>
-            <div class="modal-buttons">
-                <button class="btn btn-primary" onclick="enviarRecuperacion()">Enviar</button>
-                <button class="btn btn-secondary" onclick="cerrarModalRecuperacion()">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="mensajeModal" class="modal">
-        <div class="modal-content">
-            <p id="mensajeTexto"></p>
-            <button class="btn btn-primary" onclick="cerrarMensaje()">Aceptar</button>
         </div>
     </div>
 
     <script>
         let token = null;
-        let videoStream = null;
-        let scannerActive = false;
-
-        // ================= FUNCIONES GENERALES =================
-        function togglePassword() {
-            const passwordInput = document.getElementById('adminPassword');
-            passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-        }
+        let vendedor = null;
+        let qrActual = null;
+        let qrActivo = false;
+        let trabajadores = [];
+        let vendedorSeleccionado = null;
 
         function obtenerPremio(puntaje) {
-            if (puntaje >= 50) return { texto: "C$ 1,000 + Diploma", clase: "badge-success-light" };
-            if (puntaje >= 40) return { texto: "C$ 750", clase: "badge-success-light" };
-            if (puntaje >= 30) return { texto: "C$ 500", clase: "badge-info" };
-            if (puntaje >= 20) return { texto: "C$ 250", clase: "badge-warning" };
-            if (puntaje >= 10) return { texto: "Vale C$ 100", clase: "badge-info" };
-            return { texto: "Sin premio", clase: "badge-danger-light" };
+            if (puntaje >= 50) return { texto: "C$ 1,000 + Diploma", clase: "premio-oro" };
+            if (puntaje >= 40) return { texto: "C$ 750", clase: "premio-plata" };
+            if (puntaje >= 30) return { texto: "C$ 500", clase: "premio-bronce" };
+            if (puntaje >= 20) return { texto: "C$ 250", clase: "premio-cobre" };
+            if (puntaje >= 10) return { texto: "Vale C$ 100", clase: "premio-vale" };
+            return { texto: "Sin premio", clase: "premio-nada" };
         }
 
-        function mostrarMensaje(texto, esError = true) {
-            const modal = document.getElementById('mensajeModal');
-            const textoEl = document.getElementById('mensajeTexto');
-            textoEl.style.color = esError ? '#c62828' : '#2e7d32';
-            textoEl.innerText = texto;
-            modal.classList.add('active');
-        }
-
-        function cerrarMensaje() {
-            document.getElementById('mensajeModal').classList.remove('active');
-        }
-
-        // ================= CÁMARA Y ESCÁNER =================
-        async function iniciarCamara() {
-            try {
-                const video = document.getElementById('scannerVideo');
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                video.srcObject = videoStream;
-                await video.play();
-                scannerActive = true;
-                empezarEscaneo();
-            } catch (error) {
-                mostrarMensaje('Error al acceder a la cámara: ' + error.message);
-            }
-        }
-
-        function detenerCamara() {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-            scannerActive = false;
-        }
-
-        function empezarEscaneo() {
-            if (!scannerActive) return;
-            const video = document.getElementById('scannerVideo');
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                // Simulación de escaneo (en producción usar librería como jsQR)
-                setTimeout(() => {
-                    if (scannerActive) empezarEscaneo();
-                }, 500);
+        function cambiarTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+            
+            document.getElementById('panelQR').classList.remove('active-panel');
+            document.getElementById('panelAsistencia').classList.remove('active-panel');
+            document.getElementById('panelPuntos').classList.remove('active-panel');
+            
+            if (tab === 'qr') {
+                document.getElementById('panelQR').classList.add('active-panel');
+            } else if (tab === 'asistencia') {
+                document.getElementById('panelAsistencia').classList.add('active-panel');
+                cargarAsistencia();
             } else {
-                setTimeout(() => empezarEscaneo(), 100);
+                document.getElementById('panelPuntos').classList.add('active-panel');
+                cargarMisPuntos();
             }
         }
 
-        // ================= LOGIN =================
-        async function loginAdmin() {
-            const usuario = document.getElementById('adminUser').value;
-            const password = document.getElementById('adminPassword').value;
-
-            if (!usuario || !password) {
-                mostrarMensaje('Ingrese usuario y contraseña');
-                return;
-            }
-
+        async function cargarAsistencia() {
+            const content = document.getElementById('asistenciaContent');
+            content.innerHTML = '<div class="loading-puntos">Cargando tu estado...</div>';
+            
             try {
-                const response = await fetch('/api/admin/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usuario, password })
-                });
+                const response = await fetch(`/api/asistencia/estado/${vendedor.id}`);
                 const data = await response.json();
-
+                
                 if (data.success) {
-                    token = data.token;
-                    localStorage.setItem('token_admin', token);
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    cargarDatosIniciales();
+                    let estadoTexto = '';
+                    let estadoClase = '';
+                    
+                    if (data.estado === 'pendiente') {
+                        estadoTexto = 'No has marcado asistencia hoy';
+                        estadoClase = 'estado-pendiente';
+                    } else if (data.estado === 'en_jornada') {
+                        estadoTexto = `En jornada - Entrada: ${data.entrada}`;
+                        estadoClase = 'estado-en_jornada';
+                    } else if (data.estado === 'completo') {
+                        estadoTexto = `Jornada completada - Entrada: ${data.entrada} | Salida: ${data.salida}`;
+                        estadoClase = 'estado-completo';
+                    } else {
+                        estadoTexto = data.mensaje || 'Estado desconocido';
+                        estadoClase = 'estado-ausente';
+                    }
+                    
+                    let html = `
+                        <div class="asistencia-card">
+                            <div class="asistencia-fecha">${new Date().toLocaleDateString()}</div>
+                            <div class="asistencia-estado ${estadoClase}">
+                                ${estadoTexto}
+                            </div>
+                        </div>
+                    `;
+                    content.innerHTML = html;
                 } else {
-                    mostrarMensaje(data.message);
+                    content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
                 }
             } catch (error) {
-                mostrarMensaje('Error de conexión: ' + error.message);
+                console.error('Error cargando asistencia:', error);
+                content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
             }
+        }
+
+        async function marcarEntrada() {
+            const btn = document.getElementById('btnEntrada');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Procesando...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/asistencia/marcar-entrada', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ id_vendedor: vendedor.id })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarMensaje(data.message, false);
+                    cargarAsistencia();
+                } else {
+                    mostrarMensaje(data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function marcarSalida() {
+            const btn = document.getElementById('btnSalida');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Procesando...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/asistencia/marcar-salida', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ id_vendedor: vendedor.id })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarMensaje(data.message, false);
+                    cargarAsistencia();
+                } else {
+                    mostrarMensaje(data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function cargarMisPuntos() {
+            const puntosContent = document.getElementById('puntosContent');
+            puntosContent.innerHTML = '<div class="loading-puntos">Cargando tus estadisticas...</div>';
+            
+            try {
+                const response = await fetch(`/api/puntos-vendedor/${vendedor.id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const premio = obtenerPremio(data.puntaje_total);
+                    
+                    let html = `
+                        <div class="puntaje-card">
+                            <div class="puntaje-valor">${data.puntaje_total} pts</div>
+                            <div>Puntaje Total</div>
+                            <div class="premio-badge ${premio.clase}">${premio.texto}</div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">${data.total_ventas}</div>
+                                <div class="stat-label">Ventas Realizadas</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.dias_activos}</div>
+                                <div class="stat-label">Dias Activos</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.promedio_diario}</div>
+                                <div class="stat-label">Promedio Diario</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">C$${data.total_ventas_cordobas || 0}</div>
+                                <div class="stat-label">Total Ventas</div>
+                            </div>
+                        </div>
+                    `;
+                    puntosContent.innerHTML = html;
+                } else {
+                    puntosContent.innerHTML = `<div class="loading-puntos" style="color:#c62828;">Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                console.error('Error cargando puntos:', error);
+                puntosContent.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
+            }
+        }
+
+        function mostrarMensaje(texto, esError) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-message';
+            modal.innerHTML = `
+                <div class="modal-message-content">
+                    <p style="color: ${esError ? '#c62828' : '#2e7d32'}">${texto}</p>
+                    <button onclick="this.parentElement.parentElement.remove()">Aceptar</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.remove(), 3000);
         }
 
         function mostrarRecuperacion() {
-            document.getElementById('recuperacionModal').classList.add('active');
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = 'recuperacionModal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Recuperar Contraseña</h3>
+                    <div class="input-group">
+                        <label>Correo electronico</label>
+                        <input type="email" id="recEmail" placeholder="ejemplo@correo.com">
+                    </div>
+                    <div class="footer-buttons" style="margin-top:15px;">
+                        <button class="btn btn-primary" onclick="enviarRecuperacion()">Enviar</button>
+                        <button class="btn btn-secondary" onclick="cerrarModalRecuperacion()">Cancelar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         function cerrarModalRecuperacion() {
-            document.getElementById('recuperacionModal').classList.remove('active');
+            const modal = document.getElementById('recuperacionModal');
+            if (modal) modal.remove();
         }
 
         async function enviarRecuperacion() {
             const email = document.getElementById('recEmail').value;
             if (!email) {
-                mostrarMensaje('Ingrese su correo electrónico');
+                mostrarMensaje('Ingresa tu correo electronico', true);
                 return;
             }
-
             try {
-                const response = await fetch('/api/admin/recuperar-email', {
+                const response = await fetch('/api/trabajadores/recuperar-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
                 });
                 const data = await response.json();
                 if (data.success) {
-                    mostrarMensaje(data.message || 'Se ha enviado un enlace a su correo', false);
+                    mostrarMensaje(`Nueva contraseña temporal: ${data.nuevaPassword}`, false);
                     cerrarModalRecuperacion();
                 } else {
-                    mostrarMensaje(data.message);
+                    mostrarMensaje('Error: ' + data.message, true);
                 }
             } catch (error) {
-                mostrarMensaje('Error: ' + error.message);
+                mostrarMensaje('Error de conexion: ' + error.message, true);
             }
         }
 
-        // ================= TABS =================
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabId = tab.getAttribute('data-tab');
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
-                document.getElementById(tabId).classList.add('active-panel');
-                
-                if (tabId === 'asistencia') cargarRegistroAsistencia();
-                if (tabId === 'vendedores') cargarRendimientoVendedores();
-            });
+        async function cargarTrabajadores() {
+            try {
+                const response = await fetch('/api/trabajadores/activos');
+                const data = await response.json();
+                trabajadores = data;
+            } catch (error) {
+                console.error('Error cargando trabajadores:', error);
+            }
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsDiv = document.getElementById('suggestions');
+        const passwordSection = document.getElementById('passwordSection');
+        const selectedUserInfo = document.getElementById('selectedUserInfo');
+        const selectedUserName = document.getElementById('selectedUserName');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            if (query.length < 1) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+            const filtered = trabajadores.filter(t => 
+                t.NombreCompleto.toLowerCase().includes(query) ||
+                (t.nombre_usuario && t.nombre_usuario.toLowerCase().includes(query))
+            );
+            if (filtered.length > 0) {
+                suggestionsDiv.innerHTML = filtered.map(t => `
+                    <div class="suggestion-item" onclick="seleccionarVendedor(${t.Id_Trabajador}, '${t.NombreCompleto.replace(/'/g, "\\'")}', '${t.nombre_usuario || ''}')">
+                        <div class="nombre">${t.NombreCompleto}</div>
+                        <div class="email">${t.email || 'Sin email'} | Usuario: ${t.nombre_usuario || 'Sin usuario'}</div>
+                    </div>
+                `).join('');
+                suggestionsDiv.style.display = 'block';
+            } else {
+                suggestionsDiv.style.display = 'none';
+            }
         });
 
-        // ================= DATOS INICIALES =================
-        async function cargarDatosIniciales() {
-            await Promise.all([
-                cargarDashboard(),
-                cargarProductos(),
-                cargarVendedores(),
-                cargarCategorias(),
-                cargarProveedores(),
-                cargarRendimientoVendedores()
-            ]);
+        function seleccionarVendedor(id, nombre, usuario) {
+            vendedorSeleccionado = { id, nombre, usuario };
+            searchInput.value = nombre;
+            suggestionsDiv.style.display = 'none';
+            selectedUserInfo.classList.remove('hidden');
+            selectedUserName.innerHTML = 'Seleccionado: ' + nombre;
+            passwordSection.classList.remove('hidden');
         }
 
-        async function cargarDashboard() {
-            try {
-                const prodRes = await fetch('/api/productos');
-                const productos = await prodRes.json();
-                document.getElementById('totalProductos').innerText = productos.length;
-
-                const statsRes = await fetch('/api/estadisticas-ventas');
-                const stats = await statsRes.json();
-                document.getElementById('totalVentasHoy').innerText = 'C$' + (stats.total_hoy || 0);
-
-                const vendedoresRes = await fetch('/api/trabajadores/activos');
-                const vendedores = await vendedoresRes.json();
-                document.getElementById('totalVendedores').innerText = vendedores.length;
-
-                const bajoStockRes = await fetch('/api/productos/bajo-stock');
-                const bajoStock = await bajoStockRes.json();
-                document.getElementById('stockBajo').innerText = bajoStock.length;
-
-                const topRes = await fetch('/api/top-productos?limite=5');
-                const topProductos = await topRes.json();
-                document.querySelector('#topProductos tbody').innerHTML = topProductos.map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`).join('') || '<tr><td colspan="2">Sin datos</td></tr>';
-            } catch (error) {
-                console.error('Error cargando dashboard:', error);
-            }
+        function clearSelection() {
+            vendedorSeleccionado = null;
+            searchInput.value = '';
+            selectedUserInfo.classList.add('hidden');
+            passwordSection.classList.add('hidden');
+            document.getElementById('passwordInput').value = '';
         }
 
-        // ================= INVENTARIO =================
-        async function cargarProductos() {
-            try {
-                const response = await fetch('/api/productos');
-                const productos = await response.json();
-                document.querySelector('#listaProductos tbody').innerHTML = productos.map(p => `
-                    <tr>
-                        <td>${p.Id_Producto}</td>
-                        <td>${p.Nombre}</td>
-                        <td>C$${p.Precio}</td>
-                        <td><span class="badge ${p.Stock <= 10 ? 'badge-warning' : 'badge-success'}">${p.Stock}</span></td>
-                        <td><button class="btn btn-danger btn-sm" onclick="eliminarProducto(${p.Id_Producto})">Eliminar</button></td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error cargando productos:', error);
-            }
-        }
-
-        async function cargarCategorias() {
-            try {
-                const response = await fetch('/api/categorias');
-                const categorias = await response.json();
-                const select = document.getElementById('prodCategoria');
-                select.innerHTML = '<option value="">Seleccionar categoría</option>' + categorias.map(c => `<option value="${c.Id_Categoria}">${c.Nombre}</option>`).join('');
-            } catch (error) {
-                console.error('Error cargando categorías:', error);
-            }
-        }
-
-        async function cargarProveedores() {
-            try {
-                const response = await fetch('/api/proveedores');
-                const proveedores = await response.json();
-                const select = document.getElementById('prodProveedor');
-                select.innerHTML = '<option value="">Seleccionar proveedor</option>' + proveedores.map(p => `<option value="${p.Id_Proveedor}">${p.Nombre} - ${p.Empresa}</option>`).join('');
-            } catch (error) {
-                console.error('Error cargando proveedores:', error);
-            }
-        }
-
-        async function agregarProducto() {
-            const nombre = document.getElementById('prodNombre').value;
-            const precio = parseFloat(document.getElementById('prodPrecio').value);
-            const stock = parseInt(document.getElementById('prodStock').value);
-            const idProveedor = document.getElementById('prodProveedor').value;
-            const idCategoria = document.getElementById('prodCategoria').value;
-
-            if (!nombre || !precio || !stock || !idProveedor) {
-                mostrarMensaje('Complete todos los campos');
+        async function iniciarSesion() {
+            if (!vendedorSeleccionado) {
+                mostrarMensaje('Primero selecciona tu nombre de la lista', true);
                 return;
             }
-
-            try {
-                const response = await fetch('/api/productos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Nombre: nombre, Precio: precio, Stock: stock, Id_Proveedor: idProveedor, Id_Categoria: idCategoria || null })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    mostrarMensaje('Producto agregado correctamente', false);
-                    document.getElementById('prodNombre').value = '';
-                    document.getElementById('prodPrecio').value = '';
-                    document.getElementById('prodStock').value = '';
-                    cargarProductos();
-                    cargarDashboard();
-                } else {
-                    mostrarMensaje(data.error || 'Error al agregar');
-                }
-            } catch (error) {
-                mostrarMensaje('Error: ' + error.message);
-            }
-        }
-
-        async function eliminarProducto(id) {
-            if (!confirm('¿Eliminar este producto?')) return;
-            try {
-                await fetch(`/api/productos/${id}`, { method: 'DELETE' });
-                cargarProductos();
-                cargarDashboard();
-            } catch (error) {
-                mostrarMensaje('Error: ' + error.message);
-            }
-        }
-
-        // ================= VENDEDORES =================
-        async function cargarVendedores() {
-            try {
-                const response = await fetch('/api/trabajadores');
-                const vendedores = await response.json();
-                document.querySelector('#listaVendedores tbody').innerHTML = vendedores.map(v => `
-                    <tr>
-                        <td>${v.Id_Trabajador}</td>
-                        <td>${v.NombreCompleto}</td>
-                        <td>${v.email || '-'}</td>
-                        <td>${v.Celular || '-'}</td>
-                        <td><span class="badge ${v.Activo ? 'badge-success' : 'badge-danger'}">${v.Activo ? 'Activo' : 'Inactivo'}</span></td>
-                        <td><button class="btn btn-danger btn-sm" onclick="toggleVendedor(${v.Id_Trabajador}, ${v.Activo})">${v.Activo ? 'Desactivar' : 'Activar'}</button></td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error cargando vendedores:', error);
-            }
-        }
-
-        async function cargarRendimientoVendedores() {
-            try {
-                const response = await fetch('/api/puntos-vendedores');
-                const datos = await response.json();
-                document.querySelector('#tablaRendimiento tbody').innerHTML = datos.map(v => {
-                    const premio = obtenerPremio(v.puntaje_total);
-                    return `<tr>
-                        <td><strong>${v.nombre_completo}</strong></td>
-                        <td>${v.total_ventas}</td>
-                        <td>${v.dias_activos}</td>
-                        <td>${v.promedio_diario}</td>
-                        <td><span class="badge ${premio.clase}">${v.puntaje_total} pts</span></td>
-                        <td><span class="badge ${premio.clase}">${premio.texto}</span></td>
-                    </tr>`;
-                }).join('');
-            } catch (error) {
-                console.error('Error cargando rendimiento:', error);
-            }
-        }
-
-        async function registrarVendedor() {
-            const nombre = document.getElementById('venNombre').value;
-            const celular = document.getElementById('venCelular').value;
-            const email = document.getElementById('venEmail').value;
-
-            if (!nombre || !celular || !email) {
-                mostrarMensaje('Complete todos los campos');
+            const password = document.getElementById('passwordInput').value;
+            if (!password) {
+                mostrarMensaje('Ingresa tu contraseña', true);
                 return;
             }
-
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Verificando...';
+            btn.disabled = true;
             try {
-                const response = await fetch('/api/trabajadores', {
+                const response = await fetch('/api/trabajadores/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ NombreCompleto: nombre, Celular: celular, email: email, Activo: 1 })
+                    body: JSON.stringify({ 
+                        nombre_usuario: vendedorSeleccionado.usuario || vendedorSeleccionado.nombre, 
+                        password: password 
+                    })
                 });
                 const data = await response.json();
-                if (response.ok) {
-                    mostrarMensaje('Vendedor registrado correctamente', false);
-                    document.getElementById('venNombre').value = '';
-                    document.getElementById('venCelular').value = '';
-                    document.getElementById('venEmail').value = '';
-                    cargarVendedores();
-                    cargarDashboard();
-                    cargarRendimientoVendedores();
-                } else {
-                    mostrarMensaje(data.error || 'Error al registrar');
-                }
-            } catch (error) {
-                mostrarMensaje('Error: ' + error.message);
-            }
-        }
-
-        async function toggleVendedor(id, activo) {
-            try {
-                await fetch(`/api/trabajadores/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Activo: activo ? 0 : 1 })
-                });
-                cargarVendedores();
-                cargarDashboard();
-                cargarRendimientoVendedores();
-            } catch (error) {
-                mostrarMensaje('Error: ' + error.message);
-            }
-        }
-
-        // ================= ESCÁNER QR =================
-        async function escanearQR() {
-            const codigo = document.getElementById('codigoQR').value.trim();
-            if (!codigo) {
-                mostrarMensaje('Ingrese el código QR');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/asistencia/escanear', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ codigo })
-                });
-                const data = await response.json();
-
-                const resultadoDiv = document.getElementById('qrResultado');
-                const infoDiv = document.getElementById('qrInfo');
-                resultadoDiv.style.display = 'block';
-
                 if (data.success) {
-                    infoDiv.innerHTML = `
-                        <p><strong>Estado:</strong> <span style="color:#2e7d32;">${data.message}</span></p>
-                        <p><strong>Tipo:</strong> ${data.tipo === 'entrada' ? 'Entrada registrada' : 'Salida registrada'}</p>
-                        <p><strong>Hora:</strong> ${data.hora}</p>
-                    `;
-                    document.getElementById('codigoQR').value = '';
-                    cargarRegistroAsistencia();
+                    token = data.token;
+                    vendedor = data.trabajador;
+                    localStorage.setItem('token_vendedor', token);
+                    localStorage.setItem('vendedor', JSON.stringify(vendedor));
+                    mostrarApp();
+                    verificarQR();
                 } else {
-                    infoDiv.innerHTML = `<p><strong>Error:</strong> <span style="color:#c62828;">${data.message}</span></p>`;
+                    mostrarMensaje('Error: ' + data.message, true);
                 }
             } catch (error) {
-                mostrarMensaje('Error: ' + error.message);
+                mostrarMensaje('Error de conexion: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
-        // ================= ASISTENCIA =================
-        async function cargarRegistroAsistencia() {
-            const fecha = document.getElementById('filtroFecha').value || new Date().toISOString().split('T')[0];
-            document.getElementById('filtroFecha').value = fecha;
+        function mostrarApp() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('appSection').classList.remove('hidden');
+            document.getElementById('vendedorNombre').innerHTML = vendedor.nombre;
+            document.getElementById('vendedorId').innerHTML = 'ID: ' + vendedor.id + ' | ' + (vendedor.email || 'Sin email');
+        }
 
+        async function verificarQR() {
             try {
-                const response = await fetch(`/api/asistencia/registro?fecha=${fecha}`);
+                const response = await fetch('/api/vendedor/qr-activo/' + vendedor.id);
                 const data = await response.json();
-                
-                if (data.length === 0) {
-                    document.querySelector('#tablaAsistencia tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay registros de asistencia para esta fecha</td></tr>';
+                if (data.tiene_qr_activo && !data.usado) {
+                    qrActual = data.codigo;
+                    qrActivo = true;
+                    mostrarQR(data.codigo, data.usado);
                 } else {
-                    document.querySelector('#tablaAsistencia tbody').innerHTML = data.map(a => `
-                        <tr>
-                            <td><strong>${a.vendedor}</strong></td>
-                            <td>${a.fecha}</td>
-                            <td>${a.hora_entrada || '-'}</td>
-                            <td>${a.hora_salida || '-'}</td>
-                            <td><span class="badge ${a.estado === 'completo' ? 'badge-success' : 'badge-warning'}">${a.estado === 'completo' ? 'Completo' : 'Pendiente'}</span></td>
-                        </tr>
-                    `).join('');
+                    document.getElementById('qrContainer').style.display = 'none';
+                    qrActivo = false;
                 }
             } catch (error) {
-                console.error('Error cargando asistencia:', error);
+                console.error('Error verificando QR:', error);
             }
         }
 
-        // Verificar sesión guardada
-        const tokenGuardado = localStorage.getItem('token_admin');
-        if (tokenGuardado) {
+        async function generarNuevoQR() {
+            const btn = document.getElementById('btnGenerar');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Generando...';
+            btn.disabled = true;
+            try {
+                const response = await fetch('/api/vendedor/generar-qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ id_vendedor: vendedor.id })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    qrActual = data.codigo;
+                    qrActivo = true;
+                    mostrarQR(data.codigo, false);
+                    mostrarMensaje('QR generado correctamente', false);
+                } else {
+                    mostrarMensaje('Error: ' + data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error generando QR: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function mostrarQR(codigo, usado) {
+            document.getElementById('qrContainer').style.display = 'block';
+            document.getElementById('codigoTexto').textContent = codigo;
+            const qrDiv = document.getElementById('qrcode');
+            qrDiv.innerHTML = '';
+            new QRCode(qrDiv, {
+                text: codigo,
+                width: 220,
+                height: 220,
+                colorDark: "#A63C89",
+                colorLight: "#ffffff"
+            });
+            
+            if (usado) {
+                document.getElementById('qrUsadoBadge').style.display = 'block';
+                document.getElementById('qrContainer').style.opacity = '0.5';
+                qrActivo = false;
+            } else {
+                document.getElementById('qrUsadoBadge').style.display = 'none';
+                document.getElementById('qrContainer').style.opacity = '1';
+                qrActivo = true;
+            }
+        }
+
+        async function enviarQREmail() {
+            if (!vendedor.email) {
+                mostrarMensaje('Tu cuenta no tiene correo registrado', true);
+                return;
+            }
+            if (!qrActual) {
+                mostrarMensaje('Primero genera un QR', true);
+                return;
+            }
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Enviando...';
+            btn.disabled = true;
+            try {
+                const response = await fetch('/api/vendedor/enviar-qr-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: vendedor.email,
+                        codigo: qrActual,
+                        nombre_vendedor: vendedor.nombre
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    mostrarMensaje('QR enviado a tu correo', false);
+                } else {
+                    mostrarMensaje('Error: ' + data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('token_vendedor');
+            localStorage.removeItem('vendedor');
+            token = null;
+            vendedor = null;
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('appSection').classList.add('hidden');
+            document.getElementById('passwordInput').value = '';
+            clearSelection();
+        }
+
+        cargarTrabajadores();
+        const tokenGuardado = localStorage.getItem('token_vendedor');
+        const vendedorGuardado = localStorage.getItem('vendedor');
+        if (tokenGuardado && vendedorGuardado) {
             token = tokenGuardado;
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            cargarDatosIniciales();
+            vendedor = JSON.parse(vendedorGuardado);
+            mostrarApp();
+            verificarQR();
         }
     </script>
 </body>
