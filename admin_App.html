@@ -3,604 +3,991 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Chepita Vendedor</title>
+    <title>Chepita Admin</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(145deg, #4a1d6d 0%, #7b2c8d 50%, #A63C89 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
             min-height: 100vh;
-            padding: 20px;
         }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.98);
-            border-radius: 48px;
-            padding: 28px 24px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
-        }
+
+        /* Header */
         .header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-        .header h1 {
-            font-size: 32px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #A63C89, #4a1d6d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .input-group {
+            background: linear-gradient(135deg, #4a1d6d, #A63C89);
+            color: white;
+            padding: 20px;
+            padding-top: 50px;
+            border-radius: 0 0 30px 30px;
             margin-bottom: 20px;
         }
-        .input-group label {
+
+        .header h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            margin: 0 15px;
+            border-radius: 30px;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+
+        .tab {
+            padding: 12px 16px;
+            text-align: center;
+            background: none;
+            border: none;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            box-shadow: 0 2px 8px rgba(166,60,137,0.3);
+        }
+
+        /* Contenido */
+        .content {
+            padding: 0 15px 20px;
+        }
+
+        .panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .panel.active-panel {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tarjetas */
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            color: #4a1d6d;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Estadísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff, white);
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(166,60,137,0.2);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #A63C89;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Tablas */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        th {
+            color: #A63C89;
+            font-weight: 600;
+        }
+
+        /* Formularios */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
             display: block;
             font-size: 13px;
             font-weight: 600;
             color: #4a1d6d;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
-        input {
+
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 16px 18px;
+            padding: 12px;
             border: 2px solid #e8e8f0;
-            border-radius: 24px;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            border-radius: 20px;
+            font-size: 14px;
         }
-        input:focus {
+
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #A63C89;
         }
+
+        /* Botones */
         .btn {
-            padding: 16px 24px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 40px;
-            font-size: 16px;
-            font-weight: 700;
-            width: 100%;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
         }
+
         .btn-primary {
             background: linear-gradient(135deg, #A63C89, #4a1d6d);
             color: white;
+            width: 100%;
         }
-        .btn-primary:active { transform: scale(0.98); }
+
         .btn-secondary {
             background: #f0f0f0;
             color: #4a1d6d;
         }
-        .btn-link {
-            background: none;
-            color: #A63C89;
-            font-size: 14px;
-            margin-top: 10px;
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
         }
-        .suggestions {
-            background: white;
-            border: 2px solid #e8e8f0;
-            border-radius: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 5px;
+
+        .btn-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Modal */
+        .modal {
             display: none;
-        }
-        .suggestion-item {
-            padding: 12px 18px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-        }
-        .suggestion-item:hover {
-            background: #f5f0ff;
-        }
-        .suggestion-item .nombre {
-            font-weight: 600;
-            color: #4a1d6d;
-        }
-        .suggestion-item .email {
-            font-size: 12px;
-            color: #999;
-        }
-        .vendedor-card {
-            background: linear-gradient(135deg, #A63C89, #4a1d6d);
-            border-radius: 28px;
-            padding: 20px;
-            text-align: center;
-            color: white;
-            margin-bottom: 24px;
-        }
-        .vendedor-nombre { font-size: 22px; font-weight: 800; }
-        .qr-card {
-            background: white;
-            border-radius: 32px;
-            padding: 24px;
-            text-align: center;
-            margin: 20px 0;
-            border: 1px solid rgba(166,60,137,0.2);
-        }
-        .qr-wrapper { background: white; padding: 20px; border-radius: 28px; display: inline-block; }
-        .timer-card {
-            background: #f0f9ff;
-            border-radius: 24px;
-            padding: 14px;
-            text-align: center;
-            margin: 16px 0;
-        }
-        .timer-time { font-size: 28px; font-weight: 800; font-family: monospace; }
-        .footer-buttons { display: flex; gap: 12px; margin-top: 20px; }
-        .footer-buttons .btn { flex: 1; margin: 0; }
-        .instrucciones {
-            background: linear-gradient(135deg, #f5f0ff, #faf5ff);
-            border-radius: 28px;
-            padding: 20px;
-            margin-top: 24px;
-            border-left: 4px solid #A63C89;
-        }
-        .step-number {
-            display: inline-flex;
-            width: 24px;
-            height: 24px;
-            background: #A63C89;
-            color: white;
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .hidden { display: none; }
-        
-        /* Modal de mensajes */
-        .modal-message {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0,0,0,0.5);
-            display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: fadeIn 0.3s ease;
+            padding: 20px;
         }
-        .modal-message-content {
-            background: white;
-            border-radius: 32px;
-            padding: 24px;
-            max-width: 300px;
-            text-align: center;
-        }
-        .modal-message-content p {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .modal-message-content button {
-            background: linear-gradient(135deg, #A63C89, #4a1d6d);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* Modal recuperación */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
+
+        .modal.active {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
         }
+
         .modal-content {
             background: white;
             border-radius: 32px;
             padding: 24px;
-            max-width: 350px;
-            width: 90%;
+            max-width: 400px;
+            width: 100%;
         }
+
         .modal-content h3 {
+            margin-bottom: 20px;
+            color: #4a1d6d;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Escáner QR */
+        .scanner-container {
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .scanner-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .scanner-input input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e8e8f0;
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        .scanner-input button {
+            width: auto;
+            padding: 12px 20px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        /* Login */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            border-radius: 48px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .login-container h2 {
             color: #4a1d6d;
             margin-bottom: 20px;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #A63C89;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            th, td {
+                font-size: 11px;
+                padding: 8px 4px;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab {
+                flex: 1;
+                min-width: 80px;
+            }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div id="loginContainer" class="login-container">
+        <h2>Acceso Administrador</h2>
+        <div class="form-group">
+            <label>Usuario</label>
+            <input type="text" id="adminUser" placeholder="Ingresa tu usuario">
+        </div>
+        <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="adminPassword" placeholder="Ingresa tu contraseña">
+        </div>
+        <button class="btn btn-primary" onclick="loginAdmin()">Iniciar Sesión</button>
+        <div style="margin-top: 15px;">
+            <button class="btn btn-secondary" onclick="mostrarRecuperacion()" style="background:none; color:#A63C89;">¿Olvidaste tu contraseña?</button>
+        </div>
+    </div>
+
+    <div id="mainApp" style="display: none;">
         <div class="header">
-            <h1>Chepita Vendedor</h1>
-            <p>Sistema de Ventas</p>
+            <h1>Admin Chepita</h1>
+            <p>Panel de control - Sistema de Gestión</p>
         </div>
 
-        <!-- Pantalla de Login con Buscador -->
-        <div id="loginSection">
-            <div class="input-group">
-                <label>Busca tu nombre</label>
-                <input type="text" id="searchInput" placeholder="Escribe tu nombre..." autocomplete="off">
-                <div id="suggestions" class="suggestions"></div>
-            </div>
-            <div id="passwordSection" class="hidden">
-                <div class="input-group">
-                    <label>Contraseña</label>
-                    <input type="password" id="passwordInput" placeholder="Ingresa tu contraseña">
+        <div class="tabs">
+            <button class="tab active" data-tab="dashboard">Dashboard</button>
+            <button class="tab" data-tab="scanner">Escáner QR</button>
+            <button class="tab" data-tab="inventario">Inventario</button>
+            <button class="tab" data-tab="vendedores">Vendedores</button>
+            <button class="tab" data-tab="asistencia">Asistencia</button>
+            <button class="tab" data-tab="reportes">Reportes</button>
+        </div>
+
+        <div class="content">
+            <!-- Panel Dashboard -->
+            <div id="dashboard" class="panel active-panel">
+                <div class="stats-grid" id="statsContainer">
+                    <div class="stat-card"><div class="stat-number" id="totalProductos">---</div><div class="stat-label">Productos</div></div>
+                    <div class="stat-card"><div class="stat-number" id="totalVentasHoy">---</div><div class="stat-label">Ventas Hoy</div></div>
+                    <div class="stat-card"><div class="stat-number" id="totalVendedores">---</div><div class="stat-label">Vendedores Activos</div></div>
+                    <div class="stat-card"><div class="stat-number" id="stockBajo">---</div><div class="stat-label">Stock Bajo</div></div>
                 </div>
-                <button class="btn btn-primary" onclick="iniciarSesion()">Iniciar Sesion</button>
-                <button class="btn btn-link" onclick="mostrarRecuperacion()">Olvidaste tu contrasena?</button>
+                <div class="card">
+                    <h3>Productos más vendidos</h3>
+                    <div class="table-container">
+                        <table id="topProductos">
+                            <thead><tr><th>Producto</th><th>Cantidad</th></tr></thead>
+                            <tbody><tr><td colspan="2">Cargando...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Mejores vendedores</h3>
+                    <div class="table-container">
+                        <table id="topVendedores">
+                            <thead><tr><th>Vendedor</th><th>Ventas</th><th>Puntaje</th></tr></thead>
+                            <tbody><tr><td colspan="3">Cargando...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div id="selectedUserInfo" class="hidden" style="background:#f5f0ff; padding:12px; border-radius:20px; margin-top:10px; text-align:center;">
-                <span id="selectedUserName"></span>
-                <button onclick="clearSelection()" style="background:none; border:none; color:#A63C89; margin-left:10px;">X</button>
+
+            <!-- Panel Escáner QR -->
+            <div id="scanner" class="panel">
+                <div class="card">
+                    <h3>Escáner QR - Asistencia</h3>
+                    <div class="scanner-container">
+                        <p>Escanee el código QR del vendedor o ingrese el código manualmente</p>
+                        <div class="scanner-input">
+                            <input type="text" id="codigoQR" placeholder="Código QR del vendedor">
+                            <button class="btn btn-primary" onclick="escanearQR()" style="width: auto;">Validar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" id="qrResultado" style="display: none;">
+                    <h3>Resultado del escaneo</h3>
+                    <div id="qrInfo"></div>
+                </div>
+            </div>
+
+            <!-- Panel Inventario -->
+            <div id="inventario" class="panel">
+                <div class="card">
+                    <h3>Agregar Producto</h3>
+                    <div class="form-group">
+                        <label>Nombre del producto</label>
+                        <input type="text" id="prodNombre" placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Precio</label>
+                        <input type="number" id="prodPrecio" placeholder="Precio">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock inicial</label>
+                        <input type="number" id="prodStock" placeholder="Stock">
+                    </div>
+                    <div class="form-group">
+                        <label>Proveedor</label>
+                        <select id="prodProveedor"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="prodCategoria"></select>
+                    </div>
+                    <button class="btn btn-primary" onclick="agregarProducto()">Agregar Producto</button>
+                </div>
+                <div class="card">
+                    <h3>Lista de Productos</h3>
+                    <div class="table-container">
+                        <table id="listaProductos">
+                            <thead><tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Vendedores -->
+            <div id="vendedores" class="panel">
+                <div class="card">
+                    <h3>Registrar Vendedor</h3>
+                    <div class="form-group">
+                        <label>Nombre completo</label>
+                        <input type="text" id="venNombre" placeholder="Nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono / Celular</label>
+                        <input type="text" id="venCelular" placeholder="Número de celular">
+                    </div>
+                    <div class="form-group">
+                        <label>Correo electrónico</label>
+                        <input type="email" id="venEmail" placeholder="Correo electrónico">
+                    </div>
+                    <button class="btn btn-primary" onclick="registrarVendedor()">Registrar Vendedor</button>
+                </div>
+                <div class="card">
+                    <h3>Lista de Vendedores</h3>
+                    <div class="table-container">
+                        <table id="listaVendedores">
+                            <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Celular</th><th>Estado</th><th></th></tr></thead>
+                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Asistencia (Registro) -->
+            <div id="asistencia" class="panel">
+                <div class="card">
+                    <h3>Registro de Asistencia</h3>
+                    <div class="form-group">
+                        <label>Filtrar por fecha</label>
+                        <input type="date" id="filtroFecha" onchange="cargarRegistroAsistencia()">
+                    </div>
+                    <div class="table-container">
+                        <table id="tablaAsistencia">
+                            <thead><tr><th>Vendedor</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr></thead>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Reportes -->
+            <div id="reportes" class="panel">
+                <div class="card">
+                    <h3>Filtrar Reportes</h3>
+                    <div class="stats-grid" style="margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label>Año</label>
+                            <select id="reportYear" onchange="cargarReportes()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mes</label>
+                            <select id="reportMonth" onchange="cargarReportes()">
+                                <option value="">Todos</option>
+                                <option value="1">Enero</option><option value="2">Febrero</option>
+                                <option value="3">Marzo</option><option value="4">Abril</option>
+                                <option value="5">Mayo</option><option value="6">Junio</option>
+                                <option value="7">Julio</option><option value="8">Agosto</option>
+                                <option value="9">Septiembre</option><option value="10">Octubre</option>
+                                <option value="11">Noviembre</option><option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Rendimiento de Vendedores</h3>
+                    <div class="table-container">
+                        <table id="tablaPuntos">
+                            <thead><tr><th>Vendedor</th><th>Ventas</th><th>Días Activos</th><th>Promedio</th><th>Puntaje</th></tr></thead>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Pantalla Principal QR -->
-        <div id="appSection" class="hidden">
-            <div class="vendedor-card">
-                <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
-                <div style="font-size:13px; opacity:0.9;" id="vendedorId"></div>
+        <div class="footer">
+            Chepita - Sistema de Gestión Comercial
+        </div>
+    </div>
+
+    <!-- Modal Recuperación -->
+    <div id="recuperacionModal" class="modal">
+        <div class="modal-content">
+            <h3>Recuperar Contraseña</h3>
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                <input type="email" id="recEmail" placeholder="admin@chepita.com">
             </div>
-            <div class="qr-card" id="qrContainer" style="display: none;">
-                <div class="qr-wrapper"><div id="qrcode"></div></div>
-                <div class="codigo-texto" id="codigoTexto" style="font-family:monospace; font-size:12px; background:#f5f5f5; padding:10px; border-radius:20px; margin-top:16px;"></div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="enviarRecuperacion()">Enviar</button>
+                <button class="btn btn-secondary" onclick="cerrarModalRecuperacion()">Cancelar</button>
             </div>
-            <div class="timer-card" id="tiempoInfo" style="display: none;">
-                <div class="timer-text">Valido por</div>
-                <div class="timer-time" id="timerTime">00:00</div>
-            </div>
-            <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerar">Generar nuevo QR</button>
-            <div class="footer-buttons">
-                <button class="btn btn-secondary" onclick="enviarQREmail()">Enviar por Email</button>
-                <button class="btn btn-secondary" onclick="cerrarSesion()">Cerrar sesion</button>
-            </div>
-            <div class="instrucciones">
-                <h4>Como usar este QR</h4>
-                <p><span class="step-number">1</span> Muestra este QR en tu celular</p>
-                <p><span class="step-number">2</span> El cliente lo acerca a la camara de la caja</p>
-                <p><span class="step-number">3</span> La venta se asigna automaticamente a ti</p>
-                <p style="margin-top:12px; font-size:12px; color:#A63C89;">El QR se renueva cada 60 minutos por seguridad</p>
-            </div>
+        </div>
+    </div>
+
+    <div id="mensajeModal" class="modal">
+        <div class="modal-content">
+            <p id="mensajeTexto"></p>
+            <button class="btn btn-primary" onclick="cerrarMensaje()">Aceptar</button>
         </div>
     </div>
 
     <script>
         let token = null;
-        let vendedor = null;
-        let qrActual = null;
-        let intervalo = null;
-        let trabajadores = [];
-        let vendedorSeleccionado = null;
 
-        function mostrarMensaje(texto, esError = false) {
-            const modal = document.createElement('div');
-            modal.className = 'modal-message';
-            modal.innerHTML = `
-                <div class="modal-message-content">
-                    <p style="color: ${esError ? '#c62828' : '#2e7d32'}">${texto}</p>
-                    <button onclick="this.parentElement.parentElement.remove()">Aceptar</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            setTimeout(() => modal.remove(), 3000);
+        // ================= LOGIN =================
+        async function loginAdmin() {
+            const usuario = document.getElementById('adminUser').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (!usuario || !password) {
+                mostrarMensaje('Ingrese usuario y contraseña');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, password })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    token = data.token;
+                    localStorage.setItem('token_admin', token);
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    cargarDatosIniciales();
+                } else {
+                    mostrarMensaje(data.message);
+                }
+            } catch (error) {
+                mostrarMensaje('Error de conexión: ' + error.message);
+            }
+        }
+
+        function mostrarMensaje(texto, esError = true) {
+            const modal = document.getElementById('mensajeModal');
+            const textoEl = document.getElementById('mensajeTexto');
+            textoEl.style.color = esError ? '#c62828' : '#2e7d32';
+            textoEl.innerText = texto;
+            modal.classList.add('active');
+        }
+
+        function cerrarMensaje() {
+            document.getElementById('mensajeModal').classList.remove('active');
         }
 
         function mostrarRecuperacion() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.id = 'recuperacionModal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3>Recuperar Contraseña</h3>
-                    <div class="input-group">
-                        <label>Correo electronico</label>
-                        <input type="email" id="recEmail" placeholder="ejemplo@correo.com">
-                    </div>
-                    <div class="footer-buttons" style="margin-top:15px;">
-                        <button class="btn btn-primary" onclick="enviarRecuperacion()">Enviar</button>
-                        <button class="btn btn-secondary" onclick="cerrarModalRecuperacion()">Cancelar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
+            document.getElementById('recuperacionModal').classList.add('active');
         }
 
         function cerrarModalRecuperacion() {
-            const modal = document.getElementById('recuperacionModal');
-            if (modal) modal.remove();
+            document.getElementById('recuperacionModal').classList.remove('active');
         }
 
         async function enviarRecuperacion() {
             const email = document.getElementById('recEmail').value;
             if (!email) {
-                mostrarMensaje('Ingresa tu correo electronico', true);
+                mostrarMensaje('Ingrese su correo electrónico');
                 return;
             }
 
             try {
-                const response = await fetch('/api/trabajadores/recuperar-password', {
+                const response = await fetch('/api/admin/recuperar-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
                 });
                 const data = await response.json();
                 if (data.success) {
-                    mostrarMensaje('Si el correo esta registrado, recibiras un enlace para restablecer tu contrasena.');
+                    mostrarMensaje(data.message || 'Se ha enviado un enlace a su correo', false);
                     cerrarModalRecuperacion();
                 } else {
-                    mostrarMensaje('Error: ' + data.message, true);
+                    mostrarMensaje(data.message);
                 }
             } catch (error) {
-                mostrarMensaje('Error de conexion: ' + error.message, true);
+                mostrarMensaje('Error: ' + error.message);
             }
         }
 
-        async function cargarTrabajadores() {
-            try {
-                const response = await fetch('/api/trabajadores/activos');
-                const data = await response.json();
-                trabajadores = data;
-            } catch (error) {
-                console.error('Error cargando trabajadores:', error);
-            }
-        }
-
-        const searchInput = document.getElementById('searchInput');
-        const suggestionsDiv = document.getElementById('suggestions');
-        const passwordSection = document.getElementById('passwordSection');
-        const selectedUserInfo = document.getElementById('selectedUserInfo');
-        const selectedUserName = document.getElementById('selectedUserName');
-
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            if (query.length < 1) {
-                suggestionsDiv.style.display = 'none';
-                return;
-            }
-            
-            const filtered = trabajadores.filter(t => 
-                t.NombreCompleto.toLowerCase().includes(query) ||
-                (t.nombre_usuario && t.nombre_usuario.toLowerCase().includes(query))
-            );
-            
-            if (filtered.length > 0) {
-                suggestionsDiv.innerHTML = filtered.map(t => `
-                    <div class="suggestion-item" onclick="seleccionarVendedor(${t.Id_Trabajador}, '${t.NombreCompleto.replace(/'/g, "\\'")}', '${t.nombre_usuario || ''}')">
-                        <div class="nombre">${t.NombreCompleto}</div>
-                        <div class="email">${t.email || 'Sin email'} | Usuario: ${t.nombre_usuario || 'Sin usuario'}</div>
-                    </div>
-                `).join('');
-                suggestionsDiv.style.display = 'block';
-            } else {
-                suggestionsDiv.style.display = 'none';
-            }
+        // ================= TABS =================
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
+                document.getElementById(tabId).classList.add('active-panel');
+                
+                if (tabId === 'asistencia') cargarRegistroAsistencia();
+                if (tabId === 'reportes') cargarReportes();
+            });
         });
 
-        function seleccionarVendedor(id, nombre, usuario) {
-            vendedorSeleccionado = { id, nombre, usuario };
-            searchInput.value = nombre;
-            suggestionsDiv.style.display = 'none';
-            selectedUserInfo.classList.remove('hidden');
-            selectedUserName.innerHTML = 'Seleccionado: ' + nombre;
-            passwordSection.classList.remove('hidden');
+        // ================= DATOS INICIALES =================
+        async function cargarDatosIniciales() {
+            await Promise.all([
+                cargarDashboard(),
+                cargarProductos(),
+                cargarVendedores(),
+                cargarCategorias(),
+                cargarProveedores(),
+                cargarAniosReporte()
+            ]);
         }
 
-        function clearSelection() {
-            vendedorSeleccionado = null;
-            searchInput.value = '';
-            selectedUserInfo.classList.add('hidden');
-            passwordSection.classList.add('hidden');
-            document.getElementById('passwordInput').value = '';
-        }
-
-        async function iniciarSesion() {
-            if (!vendedorSeleccionado) {
-                mostrarMensaje('Primero selecciona tu nombre de la lista', true);
-                return;
-            }
-            
-            const password = document.getElementById('passwordInput').value;
-            if (!password) {
-                mostrarMensaje('Ingresa tu contrasena', true);
-                return;
-            }
-            
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Verificando...';
-            btn.disabled = true;
-            
+        async function cargarDashboard() {
             try {
-                const response = await fetch('/api/trabajadores/login', {
+                const prodRes = await fetch('/api/productos');
+                const productos = await prodRes.json();
+                document.getElementById('totalProductos').innerText = productos.length;
+
+                const statsRes = await fetch('/api/estadisticas-ventas');
+                const stats = await statsRes.json();
+                document.getElementById('totalVentasHoy').innerText = 'C$' + (stats.total_hoy || 0);
+
+                const vendedoresRes = await fetch('/api/trabajadores/activos');
+                const vendedores = await vendedoresRes.json();
+                document.getElementById('totalVendedores').innerText = vendedores.length;
+
+                const bajoStockRes = await fetch('/api/productos/bajo-stock');
+                const bajoStock = await bajoStockRes.json();
+                document.getElementById('stockBajo').innerText = bajoStock.length;
+
+                const topRes = await fetch('/api/top-productos?limite=5');
+                const topProductos = await topRes.json();
+                document.querySelector('#topProductos tbody').innerHTML = topProductos.map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`).join('') || '<tr><td colspan="2">Sin datos</td></tr>';
+
+                const puntosRes = await fetch('/api/puntos-vendedores');
+                const puntos = await puntosRes.json();
+                document.querySelector('#topVendedores tbody').innerHTML = puntos.slice(0,5).map(v => `<tr><td>${v.nombre_completo}</td><td>${v.total_ventas}</td><td>${v.puntaje_total}</td></tr>`).join('') || '<tr><td colspan="3">Sin datos</td></tr>';
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+            }
+        }
+
+        // ================= INVENTARIO =================
+        async function cargarProductos() {
+            try {
+                const response = await fetch('/api/productos');
+                const productos = await response.json();
+                document.querySelector('#listaProductos tbody').innerHTML = productos.map(p => `
+                    <tr>
+                        <td>${p.Id_Producto}</td>
+                        <td>${p.Nombre}</td>
+                        <td>C$${p.Precio}</td>
+                        <td><span class="badge ${p.Stock <= 10 ? 'badge-warning' : 'badge-success'}">${p.Stock}</span></td>
+                        <td><button class="btn btn-danger btn-sm" onclick="eliminarProducto(${p.Id_Producto})">Eliminar</button></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+            }
+        }
+
+        async function cargarCategorias() {
+            try {
+                const response = await fetch('/api/categorias');
+                const categorias = await response.json();
+                const select = document.getElementById('prodCategoria');
+                select.innerHTML = '<option value="">Seleccionar categoría</option>' + categorias.map(c => `<option value="${c.Id_Categoria}">${c.Nombre}</option>`).join('');
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+            }
+        }
+
+        async function cargarProveedores() {
+            try {
+                const response = await fetch('/api/proveedores');
+                const proveedores = await response.json();
+                const select = document.getElementById('prodProveedor');
+                select.innerHTML = '<option value="">Seleccionar proveedor</option>' + proveedores.map(p => `<option value="${p.Id_Proveedor}">${p.Nombre} - ${p.Empresa}</option>`).join('');
+            } catch (error) {
+                console.error('Error cargando proveedores:', error);
+            }
+        }
+
+        async function agregarProducto() {
+            const nombre = document.getElementById('prodNombre').value;
+            const precio = parseFloat(document.getElementById('prodPrecio').value);
+            const stock = parseInt(document.getElementById('prodStock').value);
+            const idProveedor = document.getElementById('prodProveedor').value;
+            const idCategoria = document.getElementById('prodCategoria').value;
+
+            if (!nombre || !precio || !stock || !idProveedor) {
+                mostrarMensaje('Complete todos los campos');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/productos', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        nombre_usuario: vendedorSeleccionado.usuario || vendedorSeleccionado.nombre, 
-                        password: password 
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    token = data.token;
-                    vendedor = data.trabajador;
-                    localStorage.setItem('token_vendedor', token);
-                    localStorage.setItem('vendedor', JSON.stringify(vendedor));
-                    mostrarApp();
-                    cargarQRActivo();
-                } else {
-                    mostrarMensaje('Error: ' + data.message, true);
-                }
-            } catch (error) {
-                mostrarMensaje('Error de conexion: ' + error.message, true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        function mostrarApp() {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('appSection').classList.remove('hidden');
-            document.getElementById('vendedorNombre').innerHTML = vendedor.nombre;
-            document.getElementById('vendedorId').innerHTML = 'ID: ' + vendedor.id + ' | ' + (vendedor.email || 'Sin email');
-        }
-
-        async function cargarQRActivo() {
-            try {
-                const response = await fetch('/api/vendedor/qr-activo/' + vendedor.id);
-                const data = await response.json();
-                if (data.tiene_qr_activo && new Date(data.expira) > new Date()) {
-                    mostrarQR(data.codigo, data.expira);
-                } else {
-                    await generarNuevoQR();
-                }
-            } catch (error) {
-                console.error('Error cargando QR:', error);
-            }
-        }
-
-        async function generarNuevoQR() {
-            const btn = document.getElementById('btnGenerar');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Generando...';
-            btn.disabled = true;
-            
-            try {
-                const response = await fetch('/api/vendedor/generar-qr', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ id_vendedor: vendedor.id, duracion_minutos: 60 })
+                    body: JSON.stringify({ Nombre: nombre, Precio: precio, Stock: stock, Id_Proveedor: idProveedor, Id_Categoria: idCategoria || null })
                 });
                 const data = await response.json();
-                if (data.success) {
-                    mostrarQR(data.codigo, data.expira);
+                if (response.ok) {
+                    mostrarMensaje('Producto agregado correctamente', false);
+                    document.getElementById('prodNombre').value = '';
+                    document.getElementById('prodPrecio').value = '';
+                    document.getElementById('prodStock').value = '';
+                    cargarProductos();
+                    cargarDashboard();
                 } else {
-                    mostrarMensaje('Error: ' + data.message, true);
+                    mostrarMensaje(data.error || 'Error al agregar');
                 }
             } catch (error) {
-                mostrarMensaje('Error generando QR: ' + error.message, true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                mostrarMensaje('Error: ' + error.message);
             }
         }
 
-        function mostrarQR(codigo, expira) {
-            qrActual = codigo;
-            document.getElementById('qrContainer').style.display = 'block';
-            document.getElementById('tiempoInfo').style.display = 'block';
-            document.getElementById('codigoTexto').textContent = codigo;
-            
-            const qrDiv = document.getElementById('qrcode');
-            qrDiv.innerHTML = '';
-            new QRCode(qrDiv, {
-                text: codigo,
-                width: 220,
-                height: 220,
-                colorDark: "#A63C89",
-                colorLight: "#ffffff"
-            });
-            
-            actualizarTiempo(expira);
-            if (intervalo) clearInterval(intervalo);
-            intervalo = setInterval(() => actualizarTiempo(expira), 1000);
-        }
-
-        function actualizarTiempo(expira) {
-            const diff = new Date(expira) - new Date();
-            const timerDiv = document.getElementById('tiempoInfo');
-            const timeSpan = document.getElementById('timerTime');
-            
-            if (diff <= 0) {
-                timerDiv.className = 'timer-card timer-expired';
-                timeSpan.innerHTML = 'EXPIRADO';
-                document.getElementById('qrContainer').style.opacity = '0.5';
-            } else {
-                const minutos = Math.floor(diff / 60000);
-                const segundos = Math.floor((diff % 60000) / 1000);
-                timerDiv.className = 'timer-card timer-active';
-                timeSpan.innerHTML = minutos.toString().padStart(2, '0') + ':' + segundos.toString().padStart(2, '0');
-                document.getElementById('qrContainer').style.opacity = '1';
-            }
-        }
-
-        async function enviarQREmail() {
-            if (!vendedor.email) {
-                mostrarMensaje('Tu cuenta no tiene correo registrado', true);
-                return;
-            }
-            if (!qrActual) {
-                mostrarMensaje('Primero genera un QR', true);
-                return;
-            }
-            
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Enviando...';
-            btn.disabled = true;
-            
+        async function eliminarProducto(id) {
+            if (!confirm('¿Eliminar este producto?')) return;
             try {
-                const response = await fetch('/api/vendedor/enviar-qr-email', {
+                await fetch(`/api/productos/${id}`, { method: 'DELETE' });
+                cargarProductos();
+                cargarDashboard();
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message);
+            }
+        }
+
+        // ================= VENDEDORES =================
+        async function cargarVendedores() {
+            try {
+                const response = await fetch('/api/trabajadores');
+                const vendedores = await response.json();
+                document.querySelector('#listaVendedores tbody').innerHTML = vendedores.map(v => `
+                    <tr>
+                        <td>${v.Id_Trabajador}</td>
+                        <td>${v.NombreCompleto}</td>
+                        <td>${v.email || '-'}</td>
+                        <td>${v.Celular || '-'}</td>
+                        <td><span class="badge ${v.Activo ? 'badge-success' : 'badge-danger'}">${v.Activo ? 'Activo' : 'Inactivo'}</span></td>
+                        <td><button class="btn btn-danger btn-sm" onclick="toggleVendedor(${v.Id_Trabajador}, ${v.Activo})">${v.Activo ? 'Desactivar' : 'Activar'}</button></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error cargando vendedores:', error);
+            }
+        }
+
+        async function registrarVendedor() {
+            const nombre = document.getElementById('venNombre').value;
+            const celular = document.getElementById('venCelular').value;
+            const email = document.getElementById('venEmail').value;
+
+            if (!nombre || !celular || !email) {
+                mostrarMensaje('Complete todos los campos');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/trabajadores', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: vendedor.email,
-                        codigo: qrActual,
-                        nombre_vendedor: vendedor.nombre
-                    })
+                    body: JSON.stringify({ NombreCompleto: nombre, Celular: celular, email: email, Activo: 1 })
                 });
                 const data = await response.json();
-                if (data.success) {
-                    mostrarMensaje('QR enviado a tu correo');
+                if (response.ok) {
+                    mostrarMensaje('Vendedor registrado correctamente', false);
+                    document.getElementById('venNombre').value = '';
+                    document.getElementById('venCelular').value = '';
+                    document.getElementById('venEmail').value = '';
+                    cargarVendedores();
+                    cargarDashboard();
                 } else {
-                    mostrarMensaje('Error: ' + data.message, true);
+                    mostrarMensaje(data.error || 'Error al registrar');
                 }
             } catch (error) {
-                mostrarMensaje('Error: ' + error.message, true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                mostrarMensaje('Error: ' + error.message);
             }
         }
 
-        function cerrarSesion() {
-            localStorage.removeItem('token_vendedor');
-            localStorage.removeItem('vendedor');
-            token = null;
-            vendedor = null;
-            if (intervalo) clearInterval(intervalo);
-            document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('appSection').classList.add('hidden');
-            document.getElementById('passwordInput').value = '';
-            clearSelection();
+        async function toggleVendedor(id, activo) {
+            try {
+                await fetch(`/api/trabajadores/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Activo: activo ? 0 : 1 })
+                });
+                cargarVendedores();
+                cargarDashboard();
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message);
+            }
         }
 
-        cargarTrabajadores();
-        
-        const tokenGuardado = localStorage.getItem('token_vendedor');
-        const vendedorGuardado = localStorage.getItem('vendedor');
-        if (tokenGuardado && vendedorGuardado) {
+        // ================= ESCÁNER QR =================
+        async function escanearQR() {
+            const codigo = document.getElementById('codigoQR').value.trim();
+            if (!codigo) {
+                mostrarMensaje('Ingrese el código QR');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/asistencia/escanear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ codigo })
+                });
+                const data = await response.json();
+
+                const resultadoDiv = document.getElementById('qrResultado');
+                const infoDiv = document.getElementById('qrInfo');
+                resultadoDiv.style.display = 'block';
+
+                if (data.success) {
+                    infoDiv.innerHTML = `
+                        <p><strong>Estado:</strong> <span style="color:#2e7d32;">${data.message}</span></p>
+                        <p><strong>Tipo:</strong> ${data.tipo === 'entrada' ? 'Entrada registrada' : 'Salida registrada'}</p>
+                        <p><strong>Hora:</strong> ${data.hora}</p>
+                    `;
+                    document.getElementById('codigoQR').value = '';
+                    cargarRegistroAsistencia();
+                } else {
+                    infoDiv.innerHTML = `<p><strong>Error:</strong> <span style="color:#c62828;">${data.message}</span></p>`;
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message);
+            }
+        }
+
+        // ================= ASISTENCIA =================
+        async function cargarRegistroAsistencia() {
+            const fecha = document.getElementById('filtroFecha').value || new Date().toISOString().split('T')[0];
+            document.getElementById('filtroFecha').value = fecha;
+
+            try {
+                const response = await fetch(`/api/asistencia/registro?fecha=${fecha}`);
+                const data = await response.json();
+                document.querySelector('#tablaAsistencia tbody').innerHTML = data.map(a => `
+                    <tr>
+                        <td>${a.vendedor}</td>
+                        <td>${a.fecha}</td>
+                        <td>${a.hora_entrada || '-'}</td>
+                        <td>${a.hora_salida || '-'}</td>
+                        <td><span class="badge ${a.estado === 'completo' ? 'badge-success' : 'badge-warning'}">${a.estado === 'completo' ? 'Completo' : 'Pendiente'}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error cargando asistencia:', error);
+            }
+        }
+
+        // ================= REPORTES =================
+        async function cargarAniosReporte() {
+            try {
+                const response = await fetch('/api/anios-disponibles');
+                const anios = await response.json();
+                const select = document.getElementById('reportYear');
+                anios.forEach(anio => {
+                    select.innerHTML += `<option value="${anio}">${anio}</option>`;
+                });
+            } catch (error) {
+                console.error('Error cargando años:', error);
+            }
+        }
+
+        async function cargarReportes() {
+            const year = document.getElementById('reportYear').value;
+            const month = document.getElementById('reportMonth').value;
+            
+            let url = '/api/puntos-vendedores';
+            const params = [];
+            if (year) params.push(`year=${year}`);
+            if (month) params.push(`month=${month}`);
+            if (params.length) url += `?${params.join('&')}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                document.querySelector('#tablaPuntos tbody').innerHTML = data.map(v => `
+                    <tr>
+                        <td>${v.nombre_completo}</td>
+                        <td>${v.total_ventas}</td>
+                        <td>${v.dias_activos}</td>
+                        <td>${v.promedio_diario}</td>
+                        <td><strong style="color:#A63C89;">${v.puntaje_total}</strong> pts</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error cargando reportes:', error);
+            }
+        }
+
+        // Verificar sesión guardada
+        const tokenGuardado = localStorage.getItem('token_admin');
+        if (tokenGuardado) {
             token = tokenGuardado;
-            vendedor = JSON.parse(vendedorGuardado);
-            mostrarApp();
-            cargarQRActivo();
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            cargarDatosIniciales();
         }
     </script>
 </body>
