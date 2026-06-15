@@ -41,7 +41,7 @@
             color: #4a1d6d;
             margin-bottom: 8px;
         }
-        input, select {
+        input {
             width: 100%;
             padding: 16px 18px;
             border: 2px solid #e8e8f0;
@@ -49,7 +49,7 @@
             font-size: 16px;
             transition: all 0.3s ease;
         }
-        input:focus, select:focus {
+        input:focus {
             outline: none;
             border-color: #A63C89;
         }
@@ -72,6 +72,12 @@
             background: #f0f0f0;
             color: #4a1d6d;
         }
+        .btn-link {
+            background: none;
+            color: #A63C89;
+            font-size: 14px;
+            margin-top: 10px;
+        }
         .suggestions {
             background: white;
             border: 2px solid #e8e8f0;
@@ -85,7 +91,6 @@
             padding: 12px 18px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
-            transition: background 0.2s;
         }
         .suggestion-item:hover {
             background: #f5f0ff;
@@ -146,43 +151,92 @@
             font-weight: bold;
         }
         .hidden { display: none; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .modal-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
-        .animate-in { animation: fadeIn 0.4s ease-out; }
+        .modal-message-content {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 300px;
+            text-align: center;
+        }
+        .modal-message-content p {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .modal-message-content button {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 350px;
+            width: 90%;
+        }
+        .modal-content h3 {
+            color: #4a1d6d;
+            margin-bottom: 20px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏪 Chepita Vendedor</h1>
-            <p>Sistema de Ventas con QR</p>
+            <h1>Chepita Vendedor</h1>
+            <p>Sistema de Ventas</p>
         </div>
 
-        <!-- PANTALLA DE LOGIN CON BUSCADOR -->
-        <div id="loginSection" class="animate-in">
+        <div id="loginSection">
             <div class="input-group">
-                <label>🔍 Busca tu nombre (ej: jordy, maria, rosa)</label>
+                <label>Busca tu nombre</label>
                 <input type="text" id="searchInput" placeholder="Escribe tu nombre..." autocomplete="off">
                 <div id="suggestions" class="suggestions"></div>
             </div>
             <div id="passwordSection" class="hidden">
                 <div class="input-group">
-                    <label>🔐 Contraseña</label>
-                    <input type="password" id="passwordInput" placeholder="Ingresa tu contraseña">
+                    <label>Contrasena</label>
+                    <input type="password" id="passwordInput" placeholder="Ingresa tu contrasena">
                 </div>
-                <button class="btn btn-primary" onclick="iniciarSesion()">Iniciar Sesión</button>
+                <button class="btn btn-primary" onclick="iniciarSesion()">Iniciar Sesion</button>
+                <button class="btn btn-link" onclick="mostrarRecuperacion()">Olvidaste tu contrasena?</button>
             </div>
             <div id="selectedUserInfo" class="hidden" style="background:#f5f0ff; padding:12px; border-radius:20px; margin-top:10px; text-align:center;">
                 <span id="selectedUserName"></span>
-                <button onclick="clearSelection()" style="background:none; border:none; color:#A63C89; margin-left:10px;">✖</button>
+                <button onclick="clearSelection()" style="background:none; border:none; color:#A63C89; margin-left:10px;">X</button>
             </div>
         </div>
 
-        <!-- PANTALLA PRINCIPAL (QR) -->
-        <div id="appSection" class="hidden animate-in">
+        <div id="appSection" class="hidden">
             <div class="vendedor-card">
                 <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
                 <div style="font-size:13px; opacity:0.9;" id="vendedorId"></div>
@@ -192,19 +246,19 @@
                 <div class="codigo-texto" id="codigoTexto" style="font-family:monospace; font-size:12px; background:#f5f5f5; padding:10px; border-radius:20px; margin-top:16px;"></div>
             </div>
             <div class="timer-card" id="tiempoInfo" style="display: none;">
-                <div class="timer-text">Válido por</div>
+                <div class="timer-text">Valido por</div>
                 <div class="timer-time" id="timerTime">00:00</div>
             </div>
-            <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerar">📱 Generar nuevo QR</button>
+            <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerar">Generar nuevo QR</button>
             <div class="footer-buttons">
-                <button class="btn btn-secondary" onclick="enviarQREmail()">📧 Enviar por Email</button>
-                <button class="btn btn-secondary" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+                <button class="btn btn-secondary" onclick="enviarQREmail()">Enviar por Email</button>
+                <button class="btn btn-secondary" onclick="cerrarSesion()">Cerrar sesion</button>
             </div>
             <div class="instrucciones">
-                <h4>📌 Cómo usar este QR</h4>
+                <h4>Como usar este QR</h4>
                 <p><span class="step-number">1</span> Muestra este QR en tu celular</p>
-                <p><span class="step-number">2</span> El cliente lo acerca a la cámara de la caja</p>
-                <p><span class="step-number">3</span> La venta se asigna automáticamente a ti</p>
+                <p><span class="step-number">2</span> El cliente lo acerca a la camara de la caja</p>
+                <p><span class="step-number">3</span> La venta se asigna automaticamente a ti</p>
                 <p style="margin-top:12px; font-size:12px; color:#A63C89;">El QR se renueva cada 60 minutos por seguridad</p>
             </div>
         </div>
@@ -218,19 +272,78 @@
         let trabajadores = [];
         let vendedorSeleccionado = null;
 
-        // Cargar lista de trabajadores al inicio
+        function mostrarMensaje(texto, esError) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-message';
+            modal.innerHTML = `
+                <div class="modal-message-content">
+                    <p style="color: ${esError ? '#c62828' : '#2e7d32'}">${texto}</p>
+                    <button onclick="this.parentElement.parentElement.remove()">Aceptar</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.remove(), 3000);
+        }
+
+        function mostrarRecuperacion() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = 'recuperacionModal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Recuperar Contrasena</h3>
+                    <div class="input-group">
+                        <label>Correo electronico</label>
+                        <input type="email" id="recEmail" placeholder="ejemplo@correo.com">
+                    </div>
+                    <div class="footer-buttons" style="margin-top:15px;">
+                        <button class="btn btn-primary" onclick="enviarRecuperacion()">Enviar</button>
+                        <button class="btn btn-secondary" onclick="cerrarModalRecuperacion()">Cancelar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function cerrarModalRecuperacion() {
+            const modal = document.getElementById('recuperacionModal');
+            if (modal) modal.remove();
+        }
+
+        async function enviarRecuperacion() {
+            const email = document.getElementById('recEmail').value;
+            if (!email) {
+                mostrarMensaje('Ingresa tu correo electronico', true);
+                return;
+            }
+            try {
+                const response = await fetch('/api/trabajadores/recuperar-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    mostrarMensaje('Si el correo esta registrado, recibiras un enlace para restablecer tu contrasena.', false);
+                    cerrarModalRecuperacion();
+                } else {
+                    mostrarMensaje('Error: ' + data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error de conexion: ' + error.message, true);
+            }
+        }
+
         async function cargarTrabajadores() {
             try {
                 const response = await fetch('/api/trabajadores/activos');
                 const data = await response.json();
                 trabajadores = data;
-                console.log('📋 Trabajadores cargados:', trabajadores.length);
             } catch (error) {
                 console.error('Error cargando trabajadores:', error);
             }
         }
 
-        // Buscador con autocompletado
         const searchInput = document.getElementById('searchInput');
         const suggestionsDiv = document.getElementById('suggestions');
         const passwordSection = document.getElementById('passwordSection');
@@ -243,17 +356,15 @@
                 suggestionsDiv.style.display = 'none';
                 return;
             }
-            
             const filtered = trabajadores.filter(t => 
                 t.NombreCompleto.toLowerCase().includes(query) ||
                 (t.nombre_usuario && t.nombre_usuario.toLowerCase().includes(query))
             );
-            
             if (filtered.length > 0) {
                 suggestionsDiv.innerHTML = filtered.map(t => `
                     <div class="suggestion-item" onclick="seleccionarVendedor(${t.Id_Trabajador}, '${t.NombreCompleto.replace(/'/g, "\\'")}', '${t.nombre_usuario || ''}')">
-                        <div class="nombre">👤 ${t.NombreCompleto}</div>
-                        <div class="email">📧 ${t.email || 'Sin email'} | 👤 ${t.nombre_usuario || 'Sin usuario'}</div>
+                        <div class="nombre">${t.NombreCompleto}</div>
+                        <div class="email">${t.email || 'Sin email'} | Usuario: ${t.nombre_usuario || 'Sin usuario'}</div>
                     </div>
                 `).join('');
                 suggestionsDiv.style.display = 'block';
@@ -267,7 +378,7 @@
             searchInput.value = nombre;
             suggestionsDiv.style.display = 'none';
             selectedUserInfo.classList.remove('hidden');
-            selectedUserName.innerHTML = `✅ Seleccionado: ${nombre}`;
+            selectedUserName.innerHTML = 'Seleccionado: ' + nombre;
             passwordSection.classList.remove('hidden');
         }
 
@@ -281,21 +392,18 @@
 
         async function iniciarSesion() {
             if (!vendedorSeleccionado) {
-                alert('Primero selecciona tu nombre de la lista');
+                mostrarMensaje('Primero selecciona tu nombre de la lista', true);
                 return;
             }
-            
             const password = document.getElementById('passwordInput').value;
             if (!password) {
-                alert('Ingresa tu contraseña');
+                mostrarMensaje('Ingresa tu contrasena', true);
                 return;
             }
-            
             const btn = event.target;
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Verificando...';
+            btn.innerHTML = 'Verificando...';
             btn.disabled = true;
-            
             try {
                 const response = await fetch('/api/trabajadores/login', {
                     method: 'POST',
@@ -305,9 +413,7 @@
                         password: password 
                     })
                 });
-                
                 const data = await response.json();
-                
                 if (data.success) {
                     token = data.token;
                     vendedor = data.trabajador;
@@ -316,10 +422,10 @@
                     mostrarApp();
                     cargarQRActivo();
                 } else {
-                    alert('Error: ' + data.message);
+                    mostrarMensaje('Error: ' + data.message, true);
                 }
             } catch (error) {
-                alert('Error de conexión: ' + error.message);
+                mostrarMensaje('Error de conexion: ' + error.message, true);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -335,7 +441,7 @@
 
         async function cargarQRActivo() {
             try {
-                const response = await fetch(`/api/vendedor/qr-activo/${vendedor.id}`);
+                const response = await fetch('/api/vendedor/qr-activo/' + vendedor.id);
                 const data = await response.json();
                 if (data.tiene_qr_activo && new Date(data.expira) > new Date()) {
                     mostrarQR(data.codigo, data.expira);
@@ -350,15 +456,14 @@
         async function generarNuevoQR() {
             const btn = document.getElementById('btnGenerar');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Generando...';
+            btn.innerHTML = 'Generando...';
             btn.disabled = true;
-            
             try {
                 const response = await fetch('/api/vendedor/generar-qr', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({ id_vendedor: vendedor.id, duracion_minutos: 60 })
                 });
@@ -366,10 +471,10 @@
                 if (data.success) {
                     mostrarQR(data.codigo, data.expira);
                 } else {
-                    alert('Error: ' + data.message);
+                    mostrarMensaje('Error: ' + data.message, true);
                 }
             } catch (error) {
-                alert('Error generando QR: ' + error.message);
+                mostrarMensaje('Error generando QR: ' + error.message, true);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -381,7 +486,6 @@
             document.getElementById('qrContainer').style.display = 'block';
             document.getElementById('tiempoInfo').style.display = 'block';
             document.getElementById('codigoTexto').textContent = codigo;
-            
             const qrDiv = document.getElementById('qrcode');
             qrDiv.innerHTML = '';
             new QRCode(qrDiv, {
@@ -391,7 +495,6 @@
                 colorDark: "#A63C89",
                 colorLight: "#ffffff"
             });
-            
             actualizarTiempo(expira);
             if (intervalo) clearInterval(intervalo);
             intervalo = setInterval(() => actualizarTiempo(expira), 1000);
@@ -401,7 +504,6 @@
             const diff = new Date(expira) - new Date();
             const timerDiv = document.getElementById('tiempoInfo');
             const timeSpan = document.getElementById('timerTime');
-            
             if (diff <= 0) {
                 timerDiv.className = 'timer-card timer-expired';
                 timeSpan.innerHTML = 'EXPIRADO';
@@ -417,19 +519,17 @@
 
         async function enviarQREmail() {
             if (!vendedor.email) {
-                alert('Tu cuenta no tiene correo registrado');
+                mostrarMensaje('Tu cuenta no tiene correo registrado', true);
                 return;
             }
             if (!qrActual) {
-                alert('Primero genera un QR');
+                mostrarMensaje('Primero genera un QR', true);
                 return;
             }
-            
             const btn = event.target;
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Enviando...';
+            btn.innerHTML = 'Enviando...';
             btn.disabled = true;
-            
             try {
                 const response = await fetch('/api/vendedor/enviar-qr-email', {
                     method: 'POST',
@@ -442,12 +542,12 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    alert('✅ QR enviado a tu correo');
+                    mostrarMensaje('QR enviado a tu correo', false);
                 } else {
-                    alert('Error: ' + data.message);
+                    mostrarMensaje('Error: ' + data.message, true);
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                mostrarMensaje('Error: ' + error.message, true);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -466,9 +566,7 @@
             clearSelection();
         }
 
-        // Inicializar
         cargarTrabajadores();
-        
         const tokenGuardado = localStorage.getItem('token_vendedor');
         const vendedorGuardado = localStorage.getItem('vendedor');
         if (tokenGuardado && vendedorGuardado) {
