@@ -14,13 +14,21 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-// ================= CONFIGURACIÓN DE GMAIL =================
+// ================= CONFIGURACIÓN DE GMAIL CORREGIDA =================
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
         user: 'isabelchepita678@gmail.com',
         pass: 'hjyk gtno zgjs'
-    }
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000
 });
 
 // Conexión a MySQL (Railway)
@@ -132,6 +140,7 @@ app.post('/api/admin/recuperar-email', (req, res) => {
                 console.error('Error email:', error);
                 return res.status(500).json({ success: false, message: 'Error al enviar el correo. Verifica la configuración.' });
             }
+            console.log('✅ Email enviado a:', email);
             res.json({ success: true, message: 'Correo enviado correctamente. Revisa tu bandeja de entrada o spam.' });
         });
     });
@@ -265,6 +274,7 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
                     console.error('Error email:', error);
                     return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
                 }
+                console.log('✅ Email enviado a:', trabajador.email);
                 res.json({ success: true, message: 'Correo enviado correctamente. Revisa tu bandeja de entrada o spam.' });
             });
         });
