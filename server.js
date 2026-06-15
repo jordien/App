@@ -106,7 +106,7 @@ function verificarTokenTrabajador(req, res, next) {
     });
 }
 
-// ================= LOGIN ADMIN =================
+// ================= LOGIN ADMIN (FUNCIONAL) =================
 app.post('/api/admin/login', async (req, res) => {
     const { usuario, password } = req.body;
     
@@ -119,8 +119,17 @@ app.post('/api/admin/login', async (req, res) => {
         const admin = results[0];
         let passwordValida = false;
         
-        if (admin.password && admin.password.startsWith('$2b$')) {
+        // Verificar MD5
+        const md5pass = crypto.createHash('md5').update(password).digest('hex');
+        if (admin.password === md5pass) {
+            passwordValida = true;
+            console.log('Login MD5 exitoso');
+        }
+        
+        // Verificar bcrypt si no funcionó MD5
+        if (!passwordValida && admin.password && admin.password.startsWith('$2b$')) {
             passwordValida = await bcrypt.compare(password, admin.password);
+            if (passwordValida) console.log('Login bcrypt exitoso');
         }
         
         if (passwordValida) {
@@ -798,6 +807,19 @@ app.get('/reset-password.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'reset-password.html'));
 });
 
+// ================= TEST LOGIN =================
+app.get('/test-login', (req, res) => {
+    const md5admin = crypto.createHash('md5').update('admin').digest('hex');
+    db.query(`SELECT id, usuario, password FROM usuarios_admin WHERE id = 1`, (err, results) => {
+        if (err) return res.json({ error: err.message });
+        res.json({ 
+            md5_de_admin: md5admin,
+            password_en_bd: results[0]?.password,
+            coinciden: md5admin === results[0]?.password
+        });
+    });
+});
+
 // ================= INICIAR SERVIDOR =================
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`
@@ -806,9 +828,7 @@ app.listen(PORT, '0.0.0.0', () => {
     ╠══════════════════════════════════════════════════════════╣
     ║  Puerto: ${PORT}                                          ║
     ║  Base de datos: Railway                                  ║
-    ║  QR un solo uso activado                                 ║
-    ║  Sistema de asistencia activado                          ║
-    ║  Sistema de puntos activado                              ║
+    ║  Login Admin: admin / admin (MD5)                        ║
     ╚══════════════════════════════════════════════════════════╝
     `);
 });
