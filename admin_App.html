@@ -17,6 +17,7 @@
             min-height: 100vh;
         }
 
+        /* Header */
         .header {
             background: linear-gradient(135deg, #4a1d6d, #A63C89);
             color: white;
@@ -39,6 +40,7 @@
             margin-top: 5px;
         }
 
+        /* Tabs */
         .tabs {
             display: flex;
             background: white;
@@ -71,6 +73,7 @@
             box-shadow: 0 2px 8px rgba(166,60,137,0.3);
         }
 
+        /* Contenido */
         .content {
             padding: 0 15px 20px;
         }
@@ -89,6 +92,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Tarjetas */
         .card {
             background: white;
             border-radius: 24px;
@@ -104,8 +108,11 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            border-left: 4px solid #A63C89;
+            padding-left: 12px;
         }
 
+        /* Estadísticas */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -118,6 +125,11 @@
             padding: 16px;
             text-align: center;
             border: 1px solid rgba(166,60,137,0.2);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
         }
 
         .stat-number {
@@ -132,8 +144,10 @@
             margin-top: 5px;
         }
 
+        /* Tablas */
         .table-container {
             overflow-x: auto;
+            border-radius: 16px;
         }
 
         table {
@@ -151,8 +165,14 @@
         th {
             color: #A63C89;
             font-weight: 600;
+            background: #faf5ff;
         }
 
+        tr:hover {
+            background: #faf5ff;
+        }
+
+        /* Formularios */
         .form-group {
             margin-bottom: 15px;
         }
@@ -171,13 +191,16 @@
             border: 2px solid #e8e8f0;
             border-radius: 20px;
             font-size: 14px;
+            transition: all 0.3s;
         }
 
         .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #A63C89;
+            box-shadow: 0 0 0 3px rgba(166,60,137,0.1);
         }
 
+        /* Botones */
         .btn {
             padding: 12px 20px;
             border: none;
@@ -204,11 +227,134 @@
             color: #dc2626;
         }
 
+        .btn-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
         .btn-sm {
             padding: 6px 12px;
             font-size: 12px;
         }
 
+        /* Escáner QR */
+        .scanner-container {
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .scanner-video {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 20px;
+            margin: 0 auto;
+            display: block;
+            border: 2px solid #A63C89;
+        }
+
+        .scanner-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .scanner-input input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e8e8f0;
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        .scanner-input button {
+            width: auto;
+            padding: 12px 20px;
+        }
+
+        /* Login */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            border-radius: 48px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .login-container h2 {
+            color: #4a1d6d;
+            margin-bottom: 20px;
+        }
+
+        .password-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            flex: 1;
+        }
+
+        .password-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 12px;
+            color: #666;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #A63C89;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-success-light {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-danger-light {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -246,66 +392,25 @@
             margin-top: 20px;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
+        /* Layout de dos columnas */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
 
-        .badge-success {
-            background: #e8f5e9;
-            color: #2e7d32;
+        @media (max-width: 768px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .badge-danger {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .badge-warning {
-            background: #fff3e0;
-            color: #e65100;
-        }
-
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            background: white;
-            border-radius: 48px;
-            padding: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
-            text-align: center;
-        }
-
-        .login-container h2 {
-            color: #4a1d6d;
-            margin-bottom: 20px;
-        }
-
+        /* Footer */
         .footer {
             text-align: center;
             padding: 20px;
             color: #999;
             font-size: 12px;
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            th, td {
-                font-size: 11px;
-                padding: 8px 4px;
-            }
-            .tabs {
-                flex-wrap: wrap;
-            }
-            .tab {
-                flex: 1;
-                min-width: 80px;
-            }
         }
     </style>
 </head>
@@ -318,10 +423,13 @@
         </div>
         <div class="form-group">
             <label>Contraseña</label>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <input type="password" id="adminPassword" placeholder="Ingresa tu contraseña" style="flex: 1;">
-                <button type="button" onclick="togglePassword()" style="background: none; border: none; cursor: pointer; font-size: 20px; padding: 12px;">
-                    👁️
+            <div class="password-wrapper">
+                <input type="password" id="adminPassword" placeholder="Ingresa tu contraseña">
+                <button type="button" class="password-toggle" onclick="togglePassword()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
                 </button>
             </div>
         </div>
@@ -343,10 +451,10 @@
             <button class="tab" data-tab="inventario">Inventario</button>
             <button class="tab" data-tab="vendedores">Vendedores</button>
             <button class="tab" data-tab="asistencia">Asistencia</button>
-            <button class="tab" data-tab="reportes">Reportes</button>
         </div>
 
         <div class="content">
+            <!-- Panel Dashboard -->
             <div id="dashboard" class="panel active-panel">
                 <div class="stats-grid" id="statsContainer">
                     <div class="stat-card"><div class="stat-number" id="totalProductos">---</div><div class="stat-label">Productos</div></div>
@@ -359,28 +467,22 @@
                     <div class="table-container">
                         <table id="topProductos">
                             <thead><tr><th>Producto</th><th>Cantidad</th></tr></thead>
-                            <tbody><tr><td colspan="2">Cargando...</td></tr>
-                        </table>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Mejores vendedores</h3>
-                    <div class="table-container">
-                        <table id="topVendedores">
-                            <thead><tr><th>Vendedor</th><th>Ventas</th><th>Puntaje</th></tr></thead>
-                            <tbody><tr><td colspan="3">Cargando...</td></tr>
+                            <tbody><tr><td colspan="2">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
+            <!-- Panel Escáner QR con cámara -->
             <div id="scanner" class="panel">
                 <div class="card">
-                    <h3>Escáner QR - Asistencia</h3>
+                    <h3>Escáner QR de Asistencia</h3>
                     <div class="scanner-container">
-                        <p>Escanee el código QR del vendedor o ingrese el código manualmente</p>
-                        <div class="scanner-input">
-                            <input type="text" id="codigoQR" placeholder="Código QR del vendedor">
+                        <video id="scannerVideo" class="scanner-video" autoplay playsinline></video>
+                        <button class="btn btn-secondary" onclick="iniciarCamara()" style="margin-top: 10px;">Activar Cámara</button>
+                        <button class="btn btn-secondary" onclick="detenerCamara()" style="margin-top: 10px;">Detener Cámara</button>
+                        <div class="scanner-input" style="margin-top: 15px;">
+                            <input type="text" id="codigoQR" placeholder="O ingresa el código QR manualmente">
                             <button class="btn btn-primary" onclick="escanearQR()" style="width: auto;">Validar</button>
                         </div>
                     </div>
@@ -391,56 +493,75 @@
                 </div>
             </div>
 
+            <!-- Panel Inventario (primero lista, luego formulario) -->
             <div id="inventario" class="panel">
-                <div class="card">
-                    <h3>Agregar Producto</h3>
-                    <div class="form-group">
-                        <label>Nombre del producto</label>
-                        <input type="text" id="prodNombre" placeholder="Nombre">
-                    </div>
-                    <div class="form-group">
-                        <label>Precio</label>
-                        <input type="number" id="prodPrecio" placeholder="Precio">
-                    </div>
-                    <div class="form-group">
-                        <label>Stock inicial</label>
-                        <input type="number" id="prodStock" placeholder="Stock">
-                    </div>
-                    <div class="form-group">
-                        <label>Proveedor</label>
-                        <select id="prodProveedor"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Categoría</label>
-                        <select id="prodCategoria"></select>
-                    </div>
-                    <button class="btn btn-primary" onclick="agregarProducto()">Agregar Producto</button>
-                </div>
                 <div class="card">
                     <h3>Lista de Productos</h3>
                     <div class="table-container">
                         <table id="listaProductos">
-                            <thead><tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr>
+                            <thead>
+                                <tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr>
+                            </thead>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
+                <div class="card">
+                    <h3>Agregar Producto</h3>
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Nombre del producto</label>
+                            <input type="text" id="prodNombre" placeholder="Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label>Precio</label>
+                            <input type="number" id="prodPrecio" placeholder="Precio">
+                        </div>
+                        <div class="form-group">
+                            <label>Stock inicial</label>
+                            <input type="number" id="prodStock" placeholder="Stock">
+                        </div>
+                        <div class="form-group">
+                            <label>Proveedor</label>
+                            <select id="prodProveedor"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="prodCategoria"></select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="agregarProducto()">Agregar Producto</button>
+                </div>
             </div>
 
+            <!-- Panel Vendedores con rendimiento -->
             <div id="vendedores" class="panel">
                 <div class="card">
+                    <h3>Rendimiento de Vendedores</h3>
+                    <div class="table-container">
+                        <table id="tablaRendimiento">
+                            <thead>
+                                <tr><th>Vendedor</th><th>Ventas</th><th>Días Activos</th><th>Promedio</th><th>Puntaje</th><th>Premio</th></tr>
+                            </thead>
+                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
                     <h3>Registrar Vendedor</h3>
-                    <div class="form-group">
-                        <label>Nombre completo</label>
-                        <input type="text" id="venNombre" placeholder="Nombre completo">
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono / Celular</label>
-                        <input type="text" id="venCelular" placeholder="Número de celular">
-                    </div>
-                    <div class="form-group">
-                        <label>Correo electrónico</label>
-                        <input type="email" id="venEmail" placeholder="Correo electrónico">
+                    <div class="two-columns">
+                        <div class="form-group">
+                            <label>Nombre completo</label>
+                            <input type="text" id="venNombre" placeholder="Nombre completo">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono / Celular</label>
+                            <input type="text" id="venCelular" placeholder="Número de celular">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo electrónico</label>
+                            <input type="email" id="venEmail" placeholder="Correo electrónico">
+                        </div>
                     </div>
                     <button class="btn btn-primary" onclick="registrarVendedor()">Registrar Vendedor</button>
                 </div>
@@ -448,13 +569,16 @@
                     <h3>Lista de Vendedores</h3>
                     <div class="table-container">
                         <table id="listaVendedores">
-                            <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Celular</th><th>Estado</th><th></th></tr></thead>
-                            <tbody><tr><td colspan="6">Cargando...</td></tr>
+                            <thead>
+                                <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Celular</th><th>Estado</th><th></th></tr>
+                            </thead>
+                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
+            <!-- Panel Asistencia -->
             <div id="asistencia" class="panel">
                 <div class="card">
                     <h3>Registro de Asistencia</h3>
@@ -464,43 +588,10 @@
                     </div>
                     <div class="table-container">
                         <table id="tablaAsistencia">
-                            <thead><tr><th>Vendedor</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr></thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="reportes" class="panel">
-                <div class="card">
-                    <h3>Filtrar Reportes</h3>
-                    <div class="stats-grid" style="margin-bottom: 15px;">
-                        <div class="form-group">
-                            <label>Año</label>
-                            <select id="reportYear" onchange="cargarReportes()">
-                                <option value="">Todos</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Mes</label>
-                            <select id="reportMonth" onchange="cargarReportes()">
-                                <option value="">Todos</option>
-                                <option value="1">Enero</option><option value="2">Febrero</option>
-                                <option value="3">Marzo</option><option value="4">Abril</option>
-                                <option value="5">Mayo</option><option value="6">Junio</option>
-                                <option value="7">Julio</option><option value="8">Agosto</option>
-                                <option value="9">Septiembre</option><option value="10">Octubre</option>
-                                <option value="11">Noviembre</option><option value="12">Diciembre</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Rendimiento de Vendedores</h3>
-                    <div class="table-container">
-                        <table id="tablaPuntos">
-                            <thead><tr><th>Vendedor</th><th>Ventas</th><th>Días Activos</th><th>Promedio</th><th>Puntaje</th></tr></thead>
-                            <tbody><tr><td colspan="5">Cargando...</td></tr>
+                            <thead>
+                                <tr><th>Vendedor</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr>
+                            </thead>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -512,6 +603,7 @@
         </div>
     </div>
 
+    <!-- Modales -->
     <div id="recuperacionModal" class="modal">
         <div class="modal-content">
             <h3>Recuperar Contraseña</h3>
@@ -535,16 +627,72 @@
 
     <script>
         let token = null;
+        let videoStream = null;
+        let scannerActive = false;
 
+        // ================= FUNCIONES GENERALES =================
         function togglePassword() {
             const passwordInput = document.getElementById('adminPassword');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-            } else {
-                passwordInput.type = 'password';
+            passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+        }
+
+        function obtenerPremio(puntaje) {
+            if (puntaje >= 50) return { texto: "C$ 1,000 + Diploma", clase: "badge-success-light" };
+            if (puntaje >= 40) return { texto: "C$ 750", clase: "badge-success-light" };
+            if (puntaje >= 30) return { texto: "C$ 500", clase: "badge-info" };
+            if (puntaje >= 20) return { texto: "C$ 250", clase: "badge-warning" };
+            if (puntaje >= 10) return { texto: "Vale C$ 100", clase: "badge-info" };
+            return { texto: "Sin premio", clase: "badge-danger-light" };
+        }
+
+        function mostrarMensaje(texto, esError = true) {
+            const modal = document.getElementById('mensajeModal');
+            const textoEl = document.getElementById('mensajeTexto');
+            textoEl.style.color = esError ? '#c62828' : '#2e7d32';
+            textoEl.innerText = texto;
+            modal.classList.add('active');
+        }
+
+        function cerrarMensaje() {
+            document.getElementById('mensajeModal').classList.remove('active');
+        }
+
+        // ================= CÁMARA Y ESCÁNER =================
+        async function iniciarCamara() {
+            try {
+                const video = document.getElementById('scannerVideo');
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = videoStream;
+                await video.play();
+                scannerActive = true;
+                empezarEscaneo();
+            } catch (error) {
+                mostrarMensaje('Error al acceder a la cámara: ' + error.message);
             }
         }
 
+        function detenerCamara() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            scannerActive = false;
+        }
+
+        function empezarEscaneo() {
+            if (!scannerActive) return;
+            const video = document.getElementById('scannerVideo');
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                // Simulación de escaneo (en producción usar librería como jsQR)
+                setTimeout(() => {
+                    if (scannerActive) empezarEscaneo();
+                }, 500);
+            } else {
+                setTimeout(() => empezarEscaneo(), 100);
+            }
+        }
+
+        // ================= LOGIN =================
         async function loginAdmin() {
             const usuario = document.getElementById('adminUser').value;
             const password = document.getElementById('adminPassword').value;
@@ -574,18 +722,6 @@
             } catch (error) {
                 mostrarMensaje('Error de conexión: ' + error.message);
             }
-        }
-
-        function mostrarMensaje(texto, esError = true) {
-            const modal = document.getElementById('mensajeModal');
-            const textoEl = document.getElementById('mensajeTexto');
-            textoEl.style.color = esError ? '#c62828' : '#2e7d32';
-            textoEl.innerText = texto;
-            modal.classList.add('active');
-        }
-
-        function cerrarMensaje() {
-            document.getElementById('mensajeModal').classList.remove('active');
         }
 
         function mostrarRecuperacion() {
@@ -621,6 +757,7 @@
             }
         }
 
+        // ================= TABS =================
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const tabId = tab.getAttribute('data-tab');
@@ -628,11 +765,13 @@
                 tab.classList.add('active');
                 document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
                 document.getElementById(tabId).classList.add('active-panel');
+                
                 if (tabId === 'asistencia') cargarRegistroAsistencia();
-                if (tabId === 'reportes') cargarReportes();
+                if (tabId === 'vendedores') cargarRendimientoVendedores();
             });
         });
 
+        // ================= DATOS INICIALES =================
         async function cargarDatosIniciales() {
             await Promise.all([
                 cargarDashboard(),
@@ -640,7 +779,7 @@
                 cargarVendedores(),
                 cargarCategorias(),
                 cargarProveedores(),
-                cargarAniosReporte()
+                cargarRendimientoVendedores()
             ]);
         }
 
@@ -665,15 +804,12 @@
                 const topRes = await fetch('/api/top-productos?limite=5');
                 const topProductos = await topRes.json();
                 document.querySelector('#topProductos tbody').innerHTML = topProductos.map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`).join('') || '<tr><td colspan="2">Sin datos</td></tr>';
-
-                const puntosRes = await fetch('/api/puntos-vendedores');
-                const puntos = await puntosRes.json();
-                document.querySelector('#topVendedores tbody').innerHTML = puntos.slice(0,5).map(v => `<tr><td>${v.nombre_completo}</td><td>${v.total_ventas}</td><td>${v.puntaje_total}</td></tr>`).join('') || '<tr><td colspan="3">Sin datos</td></tr>';
             } catch (error) {
                 console.error('Error cargando dashboard:', error);
             }
         }
 
+        // ================= INVENTARIO =================
         async function cargarProductos() {
             try {
                 const response = await fetch('/api/productos');
@@ -759,6 +895,7 @@
             }
         }
 
+        // ================= VENDEDORES =================
         async function cargarVendedores() {
             try {
                 const response = await fetch('/api/trabajadores');
@@ -775,6 +912,26 @@
                 `).join('');
             } catch (error) {
                 console.error('Error cargando vendedores:', error);
+            }
+        }
+
+        async function cargarRendimientoVendedores() {
+            try {
+                const response = await fetch('/api/puntos-vendedores');
+                const datos = await response.json();
+                document.querySelector('#tablaRendimiento tbody').innerHTML = datos.map(v => {
+                    const premio = obtenerPremio(v.puntaje_total);
+                    return `<tr>
+                        <td><strong>${v.nombre_completo}</strong></td>
+                        <td>${v.total_ventas}</td>
+                        <td>${v.dias_activos}</td>
+                        <td>${v.promedio_diario}</td>
+                        <td><span class="badge ${premio.clase}">${v.puntaje_total} pts</span></td>
+                        <td><span class="badge ${premio.clase}">${premio.texto}</span></td>
+                    </tr>`;
+                }).join('');
+            } catch (error) {
+                console.error('Error cargando rendimiento:', error);
             }
         }
 
@@ -802,6 +959,7 @@
                     document.getElementById('venEmail').value = '';
                     cargarVendedores();
                     cargarDashboard();
+                    cargarRendimientoVendedores();
                 } else {
                     mostrarMensaje(data.error || 'Error al registrar');
                 }
@@ -819,11 +977,13 @@
                 });
                 cargarVendedores();
                 cargarDashboard();
+                cargarRendimientoVendedores();
             } catch (error) {
                 mostrarMensaje('Error: ' + error.message);
             }
         }
 
+        // ================= ESCÁNER QR =================
         async function escanearQR() {
             const codigo = document.getElementById('codigoQR').value.trim();
             if (!codigo) {
@@ -859,6 +1019,7 @@
             }
         }
 
+        // ================= ASISTENCIA =================
         async function cargarRegistroAsistencia() {
             const fecha = document.getElementById('filtroFecha').value || new Date().toISOString().split('T')[0];
             document.getElementById('filtroFecha').value = fecha;
@@ -866,60 +1027,26 @@
             try {
                 const response = await fetch(`/api/asistencia/registro?fecha=${fecha}`);
                 const data = await response.json();
-                document.querySelector('#tablaAsistencia tbody').innerHTML = data.map(a => `
-                    <tr>
-                        <td>${a.vendedor}</td>
-                        <td>${a.fecha}</td>
-                        <td>${a.hora_entrada || '-'}</td>
-                        <td>${a.hora_salida || '-'}</td>
-                        <td><span class="badge ${a.estado === 'completo' ? 'badge-success' : 'badge-warning'}">${a.estado === 'completo' ? 'Completo' : 'Pendiente'}</span></td>
-                    </tr>
-                `).join('');
+                
+                if (data.length === 0) {
+                    document.querySelector('#tablaAsistencia tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay registros de asistencia para esta fecha</td></tr>';
+                } else {
+                    document.querySelector('#tablaAsistencia tbody').innerHTML = data.map(a => `
+                        <tr>
+                            <td><strong>${a.vendedor}</strong></td>
+                            <td>${a.fecha}</td>
+                            <td>${a.hora_entrada || '-'}</td>
+                            <td>${a.hora_salida || '-'}</td>
+                            <td><span class="badge ${a.estado === 'completo' ? 'badge-success' : 'badge-warning'}">${a.estado === 'completo' ? 'Completo' : 'Pendiente'}</span></td>
+                        </tr>
+                    `).join('');
+                }
             } catch (error) {
                 console.error('Error cargando asistencia:', error);
             }
         }
 
-        async function cargarAniosReporte() {
-            try {
-                const response = await fetch('/api/anios-disponibles');
-                const anios = await response.json();
-                const select = document.getElementById('reportYear');
-                anios.forEach(anio => {
-                    select.innerHTML += `<option value="${anio}">${anio}</option>`;
-                });
-            } catch (error) {
-                console.error('Error cargando años:', error);
-            }
-        }
-
-        async function cargarReportes() {
-            const year = document.getElementById('reportYear').value;
-            const month = document.getElementById('reportMonth').value;
-            
-            let url = '/api/puntos-vendedores';
-            const params = [];
-            if (year) params.push(`year=${year}`);
-            if (month) params.push(`month=${month}`);
-            if (params.length) url += `?${params.join('&')}`;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                document.querySelector('#tablaPuntos tbody').innerHTML = data.map(v => `
-                    <tr>
-                        <td>${v.nombre_completo}</td>
-                        <td>${v.total_ventas}</td>
-                        <td>${v.dias_activos}</td>
-                        <td>${v.promedio_diario}</td>
-                        <td><strong style="color:#A63C89;">${v.puntaje_total}</strong> pts</span></td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error cargando reportes:', error);
-            }
-        }
-
+        // Verificar sesión guardada
         const tokenGuardado = localStorage.getItem('token_admin');
         if (tokenGuardado) {
             token = tokenGuardado;
