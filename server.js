@@ -30,7 +30,7 @@ db.connect(err => {
     }
     console.log('✅ Conectado a MySQL');
     crearTablas();
-    crearTablasAsistencia(); // ← Agregado: crea tablas de asistencia
+    crearTablasAsistencia(); // ← IMPORTANTE: llamar a esta función
 });
 
 const SECRET_KEY = 'chepita_secret_key_2025';
@@ -65,7 +65,7 @@ function crearTablas() {
     });
 }
 
-// ================= NUEVAS TABLAS DE ASISTENCIA =================
+// ================= TABLAS DE ASISTENCIA =================
 function crearTablasAsistencia() {
     db.query(`
         CREATE TABLE IF NOT EXISTS asistencia_qr_vendedores (
@@ -382,9 +382,8 @@ app.post('/api/vendedor/enviar-qr-email', (req, res) => {
     });
 });
 
-// ================= NUEVO: SISTEMA DE ASISTENCIA QR =================
+// ================= SISTEMA DE ASISTENCIA QR =================
 
-// Generar QR de asistencia para vendedor (QR permanente)
 app.post('/api/asistencia/generar-qr', verificarTokenTrabajador, (req, res) => {
     const { id_vendedor } = req.body;
     
@@ -409,7 +408,6 @@ app.post('/api/asistencia/generar-qr', verificarTokenTrabajador, (req, res) => {
     });
 });
 
-// Obtener QR de asistencia del vendedor
 app.get('/api/asistencia/vendedor/:id', (req, res) => {
     const { id } = req.params;
     const hoy = new Date().toISOString().split('T')[0];
@@ -451,7 +449,6 @@ app.get('/api/asistencia/vendedor/:id', (req, res) => {
     });
 });
 
-// Escanear QR de asistencia (para ADMIN/CAJA)
 app.post('/api/asistencia/escanear', (req, res) => {
     const { codigo } = req.body;
     const hoy = new Date().toISOString().split('T')[0];
@@ -515,7 +512,6 @@ app.post('/api/asistencia/escanear', (req, res) => {
     });
 });
 
-// Obtener registro de asistencia (para ADMIN)
 app.get('/api/asistencia/registro', (req, res) => {
     const { fecha } = req.query;
     const fechaBuscar = fecha || new Date().toISOString().split('T')[0];
@@ -676,13 +672,16 @@ app.get('/api/estadisticas-ventas', (req, res) => {
     });
 });
 
+// ================= TOP PRODUCTOS CORREGIDO (FIX UNDEFINED) =================
 app.get('/api/top-productos', (req, res) => {
     const { limite = 5 } = req.query;
     db.query(`
-        SELECT p.Nombre, SUM(o.CantidadVendida) as cantidad
+        SELECT 
+            p.Nombre as nombre, 
+            SUM(o.CantidadVendida) as cantidad
         FROM orden o
         JOIN producto p ON o.Id_Producto = p.Id_Producto
-        GROUP BY p.Id_Producto
+        GROUP BY p.Id_Producto, p.Nombre
         ORDER BY cantidad DESC
         LIMIT ?
     `, [parseInt(limite)], (err, results) => {
