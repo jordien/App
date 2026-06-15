@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-// Conexión a MySQL (Railway)
+// ================= CONEXIÓN A MYSQL (RAILWAY) =================
 const db = mysql.createConnection({
     host: process.env.MYSQLHOST || 'acela.proxy.rlwy.net',
     user: process.env.MYSQLUSER || 'root',
@@ -25,14 +25,32 @@ const db = mysql.createConnection({
 
 db.connect(err => {
     if (err) {
-        console.error('❌ Error de conexión:', err);
+        console.error('Error de conexion:', err);
         return;
     }
-    console.log('✅ Conectado a MySQL en Railway');
+    console.log('Conectado a MySQL en Railway');
     crearTablas();
+    crearTablaQRVendedores();
+    crearTablaAsistencia();
 });
 
+const SECRET_KEY = 'chepita_secret_key_2025';
+const resetTokens = {};
+
+// ================= CREAR TABLAS =================
 function crearTablas() {
+    db.query(`
+        CREATE TABLE IF NOT EXISTS trabajador_recuperacion_tokens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            id_trabajador INT NOT NULL,
+            token VARCHAR(255) NOT NULL,
+            expira_en DATETIME NOT NULL,
+            usado TINYINT DEFAULT 0
+        )
+    `);
+}
+
+function crearTablaQRVendedores() {
     db.query(`
         CREATE TABLE IF NOT EXISTS qr_vendedores (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,23 +58,37 @@ function crearTablas() {
             id_vendedor INT NOT NULL,
             nombre_vendedor VARCHAR(100),
             generado_en DATETIME DEFAULT NOW(),
-            expira_en DATETIME NOT NULL,
             usado TINYINT DEFAULT 0
+        )
+    `, (err) => {
+        if (err) console.error('Error creando qr_vendedores:', err);
+        else console.log('Tabla qr_vendedores lista');
+    });
+}
+
+function crearTablaAsistencia() {
+    db.query(`
+        CREATE TABLE IF NOT EXISTS vendedor_qr_asistencia (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            id_vendedor INT NOT NULL UNIQUE,
+            codigo VARCHAR(100) NOT NULL UNIQUE,
+            generado_en DATETIME DEFAULT NOW()
+        )
+    `);
+    
+    db.query(`
+        CREATE TABLE IF NOT EXISTS asistencia_vendedores (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            id_vendedor INT NOT NULL,
+            fecha DATE NOT NULL,
+            hora_entrada TIME,
+            hora_salida TIME,
+            estado VARCHAR(20) DEFAULT 'pendiente'
         )
     `);
 }
 
-const SECRET_KEY = 'chepita_secret_key_2025';
-const resetTokens = {};
-
-function generarCodigoUnico(idVendedor) {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 10).toUpperCase();
-    const hash = crypto.createHash('md5').update(`${idVendedor}${timestamp}${random}`).digest('hex').substring(0, 8);
-    return `CHP${idVendedor}${timestamp}${hash}`;
-}
-
-// ================= VERIFICAR TOKEN TRABAJADOR =================
+// ================= VERIFICAR TOKEN =================
 function verificarTokenTrabajador(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -67,7 +99,7 @@ function verificarTokenTrabajador(req, res, next) {
     
     jwt.verify(token, SECRET_KEY, (err, decoded) => {
         if (err) {
-            return res.status(403).json({ autenticado: false, message: "Token inválido o expirado" });
+            return res.status(403).json({ autenticado: false, message: "Token invalido o expirado" });
         }
         req.usuario = decoded;
         next();
@@ -81,7 +113,7 @@ app.post('/api/admin/login', async (req, res) => {
     db.query(`SELECT * FROM usuarios_admin WHERE usuario = ?`, [usuario], async (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) {
-            return res.status(401).json({ success: false, message: "Usuario o contraseña incorrectos" });
+            return res.status(401).json({ success: false, message: "Usuario o contrasena incorrectos" });
         }
         
         const admin = results[0];
@@ -100,16 +132,16 @@ app.post('/api/admin/login', async (req, res) => {
             return res.json({ success: true, token: token, user: admin.usuario });
         }
         
-        res.status(401).json({ success: false, message: "Contraseña incorrecta" });
+        res.status(401).json({ success: false, message: "Contrasena incorrecta" });
     });
 });
 
-// ================= RECUPERACIÓN ADMIN =================
+// ================= RECUPERACION ADMIN =================
 app.post('/api/admin/recuperar-email', (req, res) => {
     const { email } = req.body;
     
     if (!email) {
-        return res.status(400).json({ success: false, message: 'Ingresa tu correo electrónico' });
+        return res.status(400).json({ success: false, message: 'Ingresa tu correo electronico' });
     }
     
     db.query(`SELECT usuario FROM usuarios_admin WHERE email = ?`, [email], (err, results) => {
@@ -118,7 +150,7 @@ app.post('/api/admin/recuperar-email', (req, res) => {
         }
         
         if (results.length === 0) {
-            return res.json({ success: false, message: 'No existe una cuenta con ese correo electrónico' });
+            return res.json({ success: false, message: 'No existe una cuenta con ese correo' });
         }
         
         const nuevaPassword = crypto.randomBytes(4).toString('hex').toUpperCase();
@@ -126,62 +158,43 @@ app.post('/api/admin/recuperar-email', (req, res) => {
         
         db.query(`UPDATE usuarios_admin SET password = ? WHERE email = ?`, [hashedPassword, email], (err) => {
             if (err) {
-                return res.status(500).json({ success: false, message: 'Error actualizando contraseña' });
+                return res.status(500).json({ success: false, message: 'Error actualizando contrasena' });
             }
             
             res.json({ 
                 success: true, 
-                message: `Nueva contraseña temporal: ${nuevaPassword}`,
+                message: `Nueva contrasena temporal: ${nuevaPassword}`,
                 nuevaPassword: nuevaPassword
             });
         });
     });
 });
 
-// ================= LOGIN TRABAJADOR (CORREGIDO) =================
+// ================= LOGIN TRABAJADOR =================
 app.post('/api/trabajadores/login', async (req, res) => {
     const { nombre_usuario, password } = req.body;
     
-    console.log('🔐 Intento de login:', { nombre_usuario, password });
-    
-    // Buscar por nombre_usuario o email
     db.query(`SELECT * FROM trabajadores WHERE (nombre_usuario = ? OR email = ?) AND Activo = 1`, 
         [nombre_usuario, nombre_usuario], async (err, results) => {
-        if (err) {
-            console.error('Error DB:', err);
-            return res.status(500).json({ error: err.message });
-        }
-        
+        if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) {
-            console.log('❌ Usuario no encontrado:', nombre_usuario);
-            return res.status(401).json({ success: false, message: "Usuario o contraseña incorrectos" });
+            return res.status(401).json({ success: false, message: "Usuario o contrasena incorrectos" });
         }
         
         const trabajador = results[0];
-        console.log('👤 Trabajador encontrado:', trabajador.NombreCompleto);
-        console.log('🔑 Hash guardado:', trabajador.password_hash);
-        
         let passwordValida = false;
         
-        // Probar MD5
         const md5pass = crypto.createHash('md5').update(password).digest('hex');
-        console.log('🔐 MD5 calculado:', md5pass);
-        
         if (trabajador.password_hash === md5pass) {
             passwordValida = true;
-            console.log('✅ Login exitoso con MD5');
         }
         
-        // Probar bcrypt si no funcionó MD5
         if (!passwordValida && trabajador.password_hash && trabajador.password_hash.startsWith('$2b$')) {
             passwordValida = await bcrypt.compare(password, trabajador.password_hash);
-            if (passwordValida) console.log('✅ Login exitoso con bcrypt');
         }
         
-        // Probar contraseña temporal 1234
         if (!passwordValida && password === '1234') {
             passwordValida = true;
-            console.log('⚠️ Login con contraseña temporal 1234');
         }
         
         if (passwordValida) {
@@ -190,7 +203,6 @@ app.post('/api/trabajadores/login', async (req, res) => {
                 SECRET_KEY,
                 { expiresIn: '8h' }
             );
-            
             return res.json({
                 success: true,
                 token: token,
@@ -203,17 +215,16 @@ app.post('/api/trabajadores/login', async (req, res) => {
             });
         }
         
-        console.log('❌ Contraseña incorrecta');
-        res.status(401).json({ success: false, message: "Contraseña incorrecta" });
+        res.status(401).json({ success: false, message: "Contrasena incorrecta" });
     });
 });
 
-// ================= RECUPERACIÓN TRABAJADOR =================
+// ================= RECUPERACION TRABAJADOR =================
 app.post('/api/trabajadores/recuperar-password', (req, res) => {
     const { email } = req.body;
     
     if (!email) {
-        return res.status(400).json({ success: false, message: 'Ingresa tu correo electrónico' });
+        return res.status(400).json({ success: false, message: 'Ingresa tu correo' });
     }
     
     db.query(`SELECT Id_Trabajador, NombreCompleto, email FROM trabajadores WHERE email = ? AND Activo = 1`, [email], (err, results) => {
@@ -222,7 +233,7 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
         }
         
         if (results.length === 0) {
-            return res.json({ success: false, message: 'No existe una cuenta activa con ese correo electrónico' });
+            return res.json({ success: false, message: 'No existe una cuenta con ese correo' });
         }
         
         const nuevaPassword = Math.random().toString(36).slice(-6);
@@ -230,12 +241,12 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
         
         db.query(`UPDATE trabajadores SET password_hash = ?, debe_cambiar_password = 1 WHERE Id_Trabajador = ?`, [md5pass, results[0].Id_Trabajador], (err) => {
             if (err) {
-                return res.status(500).json({ success: false, message: 'Error actualizando contraseña' });
+                return res.status(500).json({ success: false, message: 'Error actualizando' });
             }
             
             res.json({ 
                 success: true, 
-                message: `Nueva contraseña temporal: ${nuevaPassword}`,
+                message: `Nueva contrasena temporal: ${nuevaPassword}`,
                 nuevaPassword: nuevaPassword,
                 nombre: results[0].NombreCompleto
             });
@@ -243,7 +254,7 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
     });
 });
 
-// ================= VERIFICAR SESIÓN =================
+// ================= VERIFICAR SESION =================
 app.get('/api/verificar-sesion', (req, res) => {
     const token = req.headers['x-auth-token'];
     if (!token) return res.status(401).json({ autenticado: false });
@@ -253,27 +264,13 @@ app.get('/api/verificar-sesion', (req, res) => {
         res.json({ autenticado: true, usuario: decoded });
     });
 });
-// ================= SISTEMA QR PARA VENDEDORES (UN SOLO USO) =================
 
+// ================= SISTEMA QR UN SOLO USO =================
 function generarCodigoUnico(idVendedor) {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substring(2, 10).toUpperCase();
     const hash = crypto.createHash('md5').update(`${idVendedor}${timestamp}${random}`).digest('hex').substring(0, 8);
     return `CHP${idVendedor}${timestamp}${hash}`;
-}
-
-function crearTablaQRVendedores() {
-    db.query(`
-        CREATE TABLE IF NOT EXISTS qr_vendedores (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            codigo VARCHAR(100) NOT NULL UNIQUE,
-            id_vendedor INT NOT NULL,
-            nombre_vendedor VARCHAR(100),
-            generado_en DATETIME DEFAULT NOW(),
-            usado TINYINT DEFAULT 0,
-            FOREIGN KEY (id_vendedor) REFERENCES trabajadores(Id_Trabajador)
-        )
-    `);
 }
 
 app.get('/api/vendedor/qr-activo/:id', (req, res) => {
@@ -322,16 +319,15 @@ app.post('/api/vendedor/generar-qr', verificarTokenTrabajador, (req, res) => {
         
         const nombreVendedor = results[0].NombreCompleto;
         
-        // Marcar todos los QR anteriores como usados
         db.query(`UPDATE qr_vendedores SET usado = 1 WHERE id_vendedor = ? AND usado = 0`, [id_vendedor], (err) => {
-            if (err) console.error('Error actualizando QR anteriores:', err);
+            if (err) console.error('Error actualizando QR:', err);
             
             db.query(`
                 INSERT INTO qr_vendedores (codigo, id_vendedor, nombre_vendedor, usado) 
                 VALUES (?, ?, ?, 0)
             `, [codigo, id_vendedor, nombreVendedor], (err2) => {
                 if (err2) {
-                    return res.status(500).json({ success: false, message: 'Error guardando QR: ' + err2.message });
+                    return res.status(500).json({ success: false, message: 'Error guardando QR' });
                 }
                 
                 res.json({
@@ -344,7 +340,6 @@ app.post('/api/vendedor/generar-qr', verificarTokenTrabajador, (req, res) => {
     });
 });
 
-// Endpoint para validar QR (para la caja)
 app.post('/api/validar-qr-vendedor', (req, res) => {
     const { codigo } = req.body;
     
@@ -365,57 +360,12 @@ app.post('/api/validar-qr-vendedor', (req, res) => {
         }
         
         const qr = results[0];
-        
-        // Marcar como usado
         db.query(`UPDATE qr_vendedores SET usado = 1 WHERE id = ?`, [qr.id]);
         
         res.json({
             valido: true,
             id_vendedor: qr.id_vendedor,
             nombre_vendedor: qr.NombreCompleto
-        });
-    });
-});
-
-app.post('/api/vendedor/generar-qr', verificarTokenTrabajador, (req, res) => {
-    const { id_vendedor, duracion_minutos = 60 } = req.body;
-    
-    if (!id_vendedor) {
-        return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
-    }
-    
-    if (req.usuario.id !== id_vendedor) {
-        return res.status(403).json({ success: false, message: 'No autorizado' });
-    }
-    
-    const codigo = generarCodigoUnico(id_vendedor);
-    const expiraEn = new Date(Date.now() + duracion_minutos * 60000);
-    
-    db.query(`SELECT NombreCompleto FROM trabajadores WHERE Id_Trabajador = ?`, [id_vendedor], (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, message: 'Error en servidor' });
-        }
-        
-        if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'Vendedor no encontrado' });
-        }
-        
-        const nombreVendedor = results[0].NombreCompleto;
-        
-        db.query(`
-            INSERT INTO qr_vendedores (codigo, id_vendedor, nombre_vendedor, expira_en, generado_desde_app) 
-            VALUES (?, ?, ?, ?, 1)
-        `, [codigo, id_vendedor, nombreVendedor, expiraEn], (err2) => {
-            if (err2) {
-                return res.status(500).json({ success: false, message: 'Error guardando QR: ' + err2.message });
-            }
-            
-            res.json({
-                success: true,
-                codigo: codigo,
-                expira: expiraEn,
-                vendedor: nombreVendedor
-            });
         });
     });
 });
@@ -429,21 +379,165 @@ app.post('/api/vendedor/enviar-qr-email', (req, res) => {
     
     qrcode.toBuffer(codigo, { errorCorrectionLevel: 'H' }, (err, qrBuffer) => {
         if (err) {
-            console.error('Error generando QR:', err);
             return res.status(500).json({ success: false, message: 'Error generando QR' });
         }
         
         const qrBase64 = qrBuffer.toString('base64');
-        const qrImageSrc = `data:image/png;base64,${qrBase64}`;
-        
-        console.log('📧 QR generado para:', email);
-        console.log('📱 Código:', codigo);
-        
         res.json({ 
             success: true, 
-            message: 'QR generado (simulado). En Railway el envío de correos está deshabilitado.',
-            qrCode: qrImageSrc
+            message: 'QR generado correctamente',
+            qrImage: qrBase64
         });
+    });
+});
+
+// ================= ASISTENCIA =================
+app.post('/api/asistencia/generar-qr', verificarTokenTrabajador, (req, res) => {
+    const { id_vendedor } = req.body;
+    
+    if (!id_vendedor) {
+        return res.status(400).json({ success: false, message: 'ID requerido' });
+    }
+    
+    const codigo = `ASIS${id_vendedor}${Date.now()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    
+    db.query(`INSERT INTO vendedor_qr_asistencia (id_vendedor, codigo) VALUES (?, ?) 
+              ON DUPLICATE KEY UPDATE codigo = ?, generado_en = NOW()`, 
+              [id_vendedor, codigo, codigo], (err) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: 'Error generando QR' });
+        }
+        res.json({ success: true, codigo: codigo });
+    });
+});
+
+app.get('/api/asistencia/vendedor/:id', (req, res) => {
+    const { id } = req.params;
+    const hoy = new Date().toISOString().split('T')[0];
+    const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    
+    db.query(`SELECT codigo FROM vendedor_qr_asistencia WHERE id_vendedor = ?`, [id], (err, qrResults) => {
+        const codigoQR = qrResults.length > 0 ? qrResults[0].codigo : null;
+        
+        db.query(`SELECT * FROM asistencia_vendedores WHERE id_vendedor = ? AND fecha = ?`, [id, hoy], (err, results) => {
+            let estado = 'ausente';
+            let estadoTexto = 'Sin registro hoy';
+            let ultimoRegistro = null;
+            let registrosHoy = [];
+            
+            if (results.length > 0) {
+                const reg = results[0];
+                if (reg.hora_entrada && reg.hora_salida) {
+                    estado = 'completo';
+                    estadoTexto = 'Jornada completada';
+                    ultimoRegistro = reg.hora_salida;
+                } else if (reg.hora_entrada) {
+                    estado = 'presente';
+                    estadoTexto = `Entrada: ${reg.hora_entrada}`;
+                    ultimoRegistro = reg.hora_entrada;
+                }
+                
+                if (reg.hora_entrada) registrosHoy.push({ tipo: 'Entrada', hora: reg.hora_entrada });
+                if (reg.hora_salida) registrosHoy.push({ tipo: 'Salida', hora: reg.hora_salida });
+            }
+            
+            res.json({
+                success: true,
+                codigo_qr: codigoQR,
+                estado: estado,
+                estado_texto: estadoTexto,
+                ultimo_registro: ultimoRegistro,
+                registros_hoy: registrosHoy
+            });
+        });
+    });
+});
+
+// ================= PUNTOS DEL VENDEDOR =================
+app.get('/api/puntos-vendedor/:id', (req, res) => {
+    const { id } = req.params;
+    
+    const sql = `
+        SELECT 
+            t.Id_Trabajador as id_trabajador,
+            t.NombreCompleto as nombre_completo,
+            COUNT(c.Num_Factura) as total_ventas,
+            COUNT(DISTINCT DATE(c.Fecha)) as dias_activos,
+            ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) as promedio_diario,
+            ROUND(
+                (COUNT(c.Num_Factura) * 0.4) + 
+                (COUNT(DISTINCT DATE(c.Fecha)) * 0.3) + 
+                (ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) * 0.3), 
+                2
+            ) as puntaje_total,
+            COALESCE(SUM(c.Monto), 0) as total_ventas_cordobas
+        FROM compra c
+        INNER JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
+        WHERE t.Id_Trabajador = ?
+        GROUP BY t.Id_Trabajador, t.NombreCompleto
+    `;
+    
+    db.query(sql, [id], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        
+        if (results.length === 0) {
+            return res.json({ 
+                success: true, 
+                total_ventas: 0, 
+                dias_activos: 0, 
+                promedio_diario: 0, 
+                puntaje_total: 0,
+                total_ventas_cordobas: 0
+            });
+        }
+        
+        res.json({ success: true, ...results[0] });
+    });
+});
+
+// ================= PUNTOS GENERALES =================
+app.get('/api/puntos-vendedores', (req, res) => {
+    const { year, month } = req.query;
+    
+    let fechaFiltro = '';
+    let params = [];
+    
+    if (year && month) {
+        fechaFiltro = 'WHERE YEAR(c.Fecha) = ? AND MONTH(c.Fecha) = ?';
+        params = [parseInt(year), parseInt(month)];
+    } else if (year) {
+        fechaFiltro = 'WHERE YEAR(c.Fecha) = ?';
+        params = [parseInt(year)];
+    }
+    
+    const sql = `
+        SELECT 
+            t.Id_Trabajador as id_trabajador,
+            t.NombreCompleto as nombre_completo,
+            COUNT(c.Num_Factura) as total_ventas,
+            COUNT(DISTINCT DATE(c.Fecha)) as dias_activos,
+            ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) as promedio_diario,
+            ROUND(
+                (COUNT(c.Num_Factura) * 0.4) + 
+                (COUNT(DISTINCT DATE(c.Fecha)) * 0.3) + 
+                (ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) * 0.3), 
+                2
+            ) as puntaje_total,
+            SUM(c.Monto) as total_ventas_cordobas
+        FROM compra c
+        INNER JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
+        ${fechaFiltro}
+        GROUP BY t.Id_Trabajador, t.NombreCompleto
+        ORDER BY puntaje_total DESC
+    `;
+    
+    db.query(sql, params, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results);
     });
 });
 
@@ -475,7 +569,7 @@ app.get('/api/productos/bajo-stock', (req, res) => {
     });
 });
 
-// ================= CATEGORÍAS =================
+// ================= CATEGORIAS =================
 app.get('/api/categorias', (req, res) => {
     db.query(`SELECT Id_Categoria, Nombre FROM categoria ORDER BY Nombre`, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -525,7 +619,7 @@ app.post('/api/trabajadores', async (req, res) => {
         });
 });
 
-// ================= ESTADÍSTICAS =================
+// ================= ESTADISTICAS =================
 app.get('/api/estadisticas-ventas', (req, res) => {
     db.query(`
         SELECT 
@@ -552,20 +646,6 @@ app.get('/api/top-productos', (req, res) => {
     });
 });
 
-app.get('/api/puntos-vendedores', (req, res) => {
-    db.query(`
-        SELECT t.NombreCompleto as nombre_completo, COUNT(c.Num_Factura) as total_ventas,
-               ROUND(COUNT(c.Num_Factura) * 10, 2) as puntaje_total
-        FROM compra c
-        JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
-        GROUP BY t.Id_Trabajador
-        ORDER BY puntaje_total DESC
-    `, (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
-    });
-});
-
 app.get('/api/ventas-recientes', (req, res) => {
     db.query(`
         SELECT c.Fecha, c.Monto as Subtotal,
@@ -582,60 +662,19 @@ app.get('/api/ventas-recientes', (req, res) => {
         res.json(results);
     });
 });
-// ================= PUNTOS POR VENDEDOR INDIVIDUAL =================
-app.get('/api/puntos-vendedor/:id', (req, res) => {
-    const { id } = req.params;
-    
-    const sql = `
-        SELECT 
-            t.Id_Trabajador as id_trabajador,
-            t.NombreCompleto as nombre_completo,
-            COUNT(c.Num_Factura) as total_ventas,
-            COUNT(DISTINCT DATE(c.Fecha)) as dias_activos,
-            ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) as promedio_diario,
-            ROUND(
-                (COUNT(c.Num_Factura) * 0.4) + 
-                (COUNT(DISTINCT DATE(c.Fecha)) * 0.3) + 
-                (ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) * 0.3), 
-                2
-            ) as puntaje_total,
-            COALESCE(SUM(c.Monto), 0) as total_ventas_cordobas
-        FROM compra c
-        INNER JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
-        WHERE t.Id_Trabajador = ?
-        GROUP BY t.Id_Trabajador, t.NombreCompleto
-    `;
-    
-    db.query(sql, [id], (err, results) => {
-        if (err) {
-            console.error('Error en /api/puntos-vendedor:', err);
-            return res.status(500).json({ error: err.message });
-        }
-        
-        if (results.length === 0) {
-            return res.json({ 
-                success: true, 
-                total_ventas: 0, 
-                dias_activos: 0, 
-                promedio_diario: 0, 
-                puntaje_total: 0,
-                total_ventas_cordobas: 0
-            });
-        }
-        
-        res.json({
-            success: true,
-            ...results[0]
-        });
-    });
-});
+
 // ================= RUTAS PRINCIPALES =================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.get('/reset-password.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'reset-password.html'));
+});
+
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor Chepita corriendo en puerto ${PORT}`);
-    console.log(`📌 Login trabajador: usa nombre_usuario o email`);
-    console.log(`📌 Contraseña temporal por defecto: 1234`);
+    console.log(`Servidor Chepita corriendo en puerto ${PORT}`);
+    console.log(`QR de un solo uso activado`);
+    console.log(`Sistema de asistencia activado`);
+    console.log(`Sistema de puntos activado`);
 });
