@@ -241,11 +241,6 @@
             color: #4a1d6d;
         }
 
-        .suggestion-item .email {
-            font-size: 12px;
-            color: #999;
-        }
-
         .qr-card {
             background: white;
             border-radius: 32px;
@@ -320,7 +315,7 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         .badge-usado {
@@ -485,6 +480,15 @@
         .estado-en_jornada { background: #e3f2fd; color: #1565c0; }
         .estado-completo { background: #e8f5e9; color: #2e7d32; }
         .estado-ausente { background: #ffebee; color: #c62828; }
+
+        /* Login Section */
+        #loginSection {
+            display: block;
+        }
+
+        #appSection.hidden {
+            display: none !important;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
@@ -837,21 +841,35 @@
             }
         }
 
-        // ===== FUNCIÓN CERRAR SESIÓN VENDEDOR =====
+        // ===== FUNCIÓN CERRAR SESIÓN VENDEDOR (CORREGIDA) =====
         function cerrarSesion() {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                // Limpiar localStorage
                 localStorage.removeItem('token_vendedor');
                 localStorage.removeItem('vendedor');
+                
+                // Limpiar variables
                 token = null;
                 vendedor = null;
-                document.getElementById('loginSection').style.display = 'block';
-                document.getElementById('appSection').classList.add('hidden');
-                document.getElementById('passwordInput').value = '';
-                clearSelection();
-                // Resetear el QR
-                document.getElementById('qrContainer').style.display = 'none';
                 qrActual = null;
                 qrActivo = false;
+                
+                // Limpiar campos del login
+                document.getElementById('searchInput').value = '';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordSection').classList.add('hidden');
+                document.getElementById('selectedUserInfo').classList.add('hidden');
+                vendedorSeleccionado = null;
+                
+                // Mostrar login y ocultar app
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('appSection').classList.add('hidden');
+                
+                // Resetear QR
+                document.getElementById('qrContainer').style.display = 'none';
+                
+                // Recargar lista de trabajadores
+                cargarTrabajadores();
             }
         }
 
@@ -871,6 +889,7 @@
         const selectedUserInfo = document.getElementById('selectedUserInfo');
         const selectedUserName = document.getElementById('selectedUserName');
 
+        // SOLO MUESTRA EL NOMBRE - SIN EMAIL NI USUARIO
         searchInput.addEventListener('input', function() {
             const query = this.value.toLowerCase();
             if (query.length < 1) {
@@ -878,14 +897,12 @@
                 return;
             }
             const filtered = trabajadores.filter(t => 
-                t.NombreCompleto.toLowerCase().includes(query) ||
-                (t.nombre_usuario && t.nombre_usuario.toLowerCase().includes(query))
+                t.NombreCompleto.toLowerCase().includes(query)
             );
             if (filtered.length > 0) {
                 suggestionsDiv.innerHTML = filtered.map(t => `
-                    <div class="suggestion-item" onclick="seleccionarVendedor(${t.Id_Trabajador}, '${t.NombreCompleto.replace(/'/g, "\\'")}', '${t.nombre_usuario || ''}')">
+                    <div class="suggestion-item" onclick="seleccionarVendedor(${t.Id_Trabajador}, '${t.NombreCompleto.replace(/'/g, "\\'")}')">
                         <div class="nombre">${t.NombreCompleto}</div>
-                        <div class="email">${t.email || 'Sin email'} | Usuario: ${t.nombre_usuario || 'Sin usuario'}</div>
                     </div>
                 `).join('');
                 suggestionsDiv.style.display = 'block';
@@ -894,8 +911,8 @@
             }
         });
 
-        function seleccionarVendedor(id, nombre, usuario) {
-            vendedorSeleccionado = { id, nombre, usuario };
+        function seleccionarVendedor(id, nombre) {
+            vendedorSeleccionado = { id, nombre };
             searchInput.value = nombre;
             suggestionsDiv.style.display = 'none';
             selectedUserInfo.classList.remove('hidden');
@@ -930,7 +947,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        nombre_usuario: vendedorSeleccionado.usuario || vendedorSeleccionado.nombre, 
+                        nombre_usuario: vendedorSeleccionado.nombre, 
                         password: password 
                     })
                 });
@@ -957,7 +974,7 @@
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('appSection').classList.remove('hidden');
             document.getElementById('vendedorNombre').innerHTML = vendedor.nombre;
-            document.getElementById('vendedorId').innerHTML = 'ID: ' + vendedor.id + ' | ' + (vendedor.email || 'Sin email');
+            document.getElementById('vendedorId').innerHTML = 'ID: ' + vendedor.id;
         }
 
         async function verificarQR() {
@@ -1069,16 +1086,12 @@
             }
         }
 
-        // Inicializar
+        // Inicializar - NO GUARDA SESIÓN AUTOMÁTICAMENTE
         cargarTrabajadores();
-        const tokenGuardado = localStorage.getItem('token_vendedor');
-        const vendedorGuardado = localStorage.getItem('vendedor');
-        if (tokenGuardado && vendedorGuardado) {
-            token = tokenGuardado;
-            vendedor = JSON.parse(vendedorGuardado);
-            mostrarApp();
-            verificarQR();
-        }
+        
+        // Limpiar cualquier sesión guardada
+        localStorage.removeItem('token_vendedor');
+        localStorage.removeItem('vendedor');
     </script>
 </body>
 </html>
