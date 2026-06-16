@@ -329,45 +329,6 @@
             align-items: center;
         }
 
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            background: white;
-            border-radius: 48px;
-            padding: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
-            text-align: center;
-        }
-
-        .login-container h2 {
-            color: #4a1d6d;
-            margin-bottom: 20px;
-        }
-
-        .password-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .password-wrapper input {
-            flex: 1;
-        }
-
-        .password-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            padding: 12px;
-            color: #666;
-            transition: color 0.2s;
-        }
-
-        .password-toggle:hover {
-            color: #A63C89;
-        }
-
         .badge {
             display: inline-block;
             padding: 4px 10px;
@@ -454,9 +415,19 @@
             color: #999;
             font-size: 12px;
         }
+
+        /* Ocultar login */
+        #loginContainer {
+            display: none !important;
+        }
+
+        #mainApp {
+            display: block !important;
+        }
     </style>
 </head>
 <body>
+    <!-- Login oculto -->
     <div id="loginContainer" class="login-container">
         <h2>Acceso Administrador</h2>
         <div class="form-group">
@@ -481,7 +452,7 @@
         </div>
     </div>
 
-    <div id="mainApp" style="display: none;">
+    <div id="mainApp">
         <div class="header">
             <div class="header-content">
                 <div>
@@ -695,10 +666,7 @@
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
                 localStorage.removeItem('token_admin');
                 token = null;
-                document.getElementById('loginContainer').style.display = 'block';
-                document.getElementById('mainApp').style.display = 'none';
-                document.getElementById('adminUser').value = '';
-                document.getElementById('adminPassword').value = '';
+                window.location.href = '/';
             }
         }
 
@@ -1168,13 +1136,17 @@
             }
         }
 
-        // Verificar si hay sesión guardada
+        // ===== INICIALIZAR =====
         const tokenGuardado = localStorage.getItem('token_admin');
+
         if (tokenGuardado) {
             token = tokenGuardado;
             document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             cargarDatosIniciales();
+        } else {
+            // Si no hay sesión, redirigir al login
+            window.location.href = '/';
         }
     </script>
 </body>
