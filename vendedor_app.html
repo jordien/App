@@ -435,9 +435,6 @@
                     <div class="badge-usado" id="qrUsadoBadge" style="display: none;">QR ya usado</div>
                 </div>
                 <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerar">Generar QR para venta</button>
-                <div class="footer-buttons">
-                    <button class="btn btn-secondary" onclick="enviarQREmail()">Enviar por Email</button>
-                </div>
                 <div class="instrucciones">
                     <h4>Como usar este QR</h4>
                     <p><span class="step-number">1</span> Genera un nuevo QR para cada venta</p>
@@ -757,43 +754,6 @@
                 document.getElementById('qrUsadoBadge').style.display = 'none';
                 document.getElementById('qrContainer').style.opacity = '1';
                 qrActivo = true;
-            }
-        }
-
-        async function enviarQREmail() {
-            if (!vendedor.email) {
-                mostrarMensaje('Tu cuenta no tiene correo registrado', true);
-                return;
-            }
-            if (!qrActual) {
-                mostrarMensaje('Primero genera un QR', true);
-                return;
-            }
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Enviando...';
-            btn.disabled = true;
-            try {
-                const response = await fetch('/api/vendedor/enviar-qr-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: vendedor.email,
-                        codigo: qrActual,
-                        nombre_vendedor: vendedor.nombre
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    mostrarMensaje('QR enviado a tu correo', false);
-                } else {
-                    mostrarMensaje('Error: ' + data.message, true);
-                }
-            } catch (error) {
-                mostrarMensaje('Error: ' + error.message, true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
             }
         }
 
