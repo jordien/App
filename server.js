@@ -16,14 +16,50 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
-// ================= CONFIGURACIÓN DE GMAIL =================
+// ================= CONFIGURACIÓN DE GMAIL (MEJORADA) =================
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true para puerto 465
     auth: {
         user: 'isabelchepita678@gmail.com',
         pass: 'cazx kvss xagg zepm'
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    debug: true,
+    logger: true
+});
+
+// Verificar conexión al iniciar
+transporter.verify(function(error, success) {
+    if (error) {
+        console.log('❌ Error de conexión con Gmail:', error);
+    } else {
+        console.log('✅ Servidor de correo Gmail listo para enviar emails');
     }
 });
+
+// ================= FUNCIÓN PARA ENVIAR CORREOS =================
+function enviarCorreo(destinatario, asunto, html, callback) {
+    const mailOptions = {
+        from: 'Tienda Chepita <isabelchepita678@gmail.com>',
+        to: destinatario,
+        subject: asunto,
+        html: html
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('❌ Error enviando correo a', destinatario, ':', error.message);
+            if (callback) callback(false, error.message);
+        } else {
+            console.log('✅ Correo enviado a', destinatario);
+            if (callback) callback(true, info);
+        }
+    });
+}
 
 // ================= CONEXIÓN A MYSQL =================
 const db = mysql.createConnection({
@@ -160,6 +196,33 @@ function verificarTokenTrabajador(req, res, next) {
     });
 }
 
+// ================= TEST DE EMAIL =================
+app.get('/api/test-email', (req, res) => {
+    const { email } = req.query;
+    
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'Falta el email' });
+    }
+    
+    const html = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 2px solid #A63C89; border-radius: 10px; max-width: 500px;">
+            <h2 style="color: #A63C89;">✅ Test de Correo Exitoso</h2>
+            <p>Este es un mensaje de prueba del sistema <strong>Chepita</strong>.</p>
+            <p>Si estás viendo esto, el sistema de correo funciona correctamente.</p>
+            <hr>
+            <p style="color: #999; font-size: 12px;">Chepita - Sistema de Gestión Comercial</p>
+        </div>
+    `;
+    
+    enviarCorreo(email, '🧪 Test - Sistema Chepita', html, (exito, resultado) => {
+        if (exito) {
+            res.json({ success: true, message: '✅ Correo de prueba enviado a ' + email });
+        } else {
+            res.status(500).json({ success: false, message: '❌ Error al enviar: ' + resultado });
+        }
+    });
+});
+
 // ================= LOGIN ADMIN =================
 app.post('/api/admin/login', async (req, res) => {
     const { usuario, password } = req.body;
@@ -230,32 +293,26 @@ app.post('/api/admin/recuperar-email', (req, res) => {
             
             const resetLink = `http://localhost:3000/admin-reset-password.html?token=${token}`;
             
-            const mailOptions = {
-                from: 'Tienda Chepita <isabelchepita678@gmail.com>',
-                to: email,
-                subject: '🔐 Recuperación de Contraseña - Chepita Admin',
-                html: `
-                    <div style="font-family: Arial, sans-serif; border: 2px solid #A63C89; padding: 20px; border-radius: 10px; max-width: 500px;">
-                        <h2 style="color: #A63C89;">🔐 Recuperación de Contraseña</h2>
-                        <p>Hola <strong>${admin.usuario}</strong>,</p>
-                        <p>Hemos recibido una solicitud para restablecer tu contraseña de Administrador.</p>
-                        <div style="text-align: center; margin: 25px 0;">
-                            <a href="${resetLink}" style="background-color: #A63C89; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
-                        </div>
-                        <p style="color: #666; font-size: 12px;">Este enlace es válido por 1 hora.</p>
-                        <hr>
-                        <p style="color: #999; font-size: 11px;">Chepita - Sistema de Gestión Comercial</p>
+            const html = `
+                <div style="font-family: Arial, sans-serif; border: 2px solid #A63C89; padding: 20px; border-radius: 10px; max-width: 500px;">
+                    <h2 style="color: #A63C89;">🔐 Recuperación de Contraseña</h2>
+                    <p>Hola <strong>${admin.usuario}</strong>,</p>
+                    <p>Hemos recibido una solicitud para restablecer tu contraseña de Administrador.</p>
+                    <div style="text-align: center; margin: 25px 0;">
+                        <a href="${resetLink}" style="background-color: #A63C89; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
                     </div>
-                `
-            };
+                    <p style="color: #666; font-size: 12px;">Este enlace es válido por 1 hora.</p>
+                    <hr>
+                    <p style="color: #999; font-size: 11px;">Chepita - Sistema de Gestión Comercial</p>
+                </div>
+            `;
             
-            transporter.sendMail(mailOptions, (error) => {
-                if (error) {
-                    console.error('Error enviando email admin:', error);
-                    return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
+            enviarCorreo(email, '🔐 Recuperación de Contraseña - Chepita Admin', html, (exito, resultado) => {
+                if (exito) {
+                    res.json({ success: true, message: `Se ha enviado un enlace a tu correo ${email}` });
+                } else {
+                    res.status(500).json({ success: false, message: 'Error al enviar el correo: ' + resultado });
                 }
-                console.log(`✅ Email de recuperación enviado a ADMIN: ${email}`);
-                res.json({ success: true, message: `Se ha enviado un enlace a tu correo ${email}` });
             });
         });
     });
@@ -423,32 +480,26 @@ app.post('/api/trabajadores/recuperar-password', (req, res) => {
             
             const resetLink = `http://localhost:3000/trabajador-reset-password.html?token=${token}`;
             
-            const mailOptions = {
-                from: 'Tienda Chepita <isabelchepita678@gmail.com>',
-                to: email,
-                subject: '🔐 Recuperación de Contraseña - Chepita Vendedor',
-                html: `
-                    <div style="font-family: Arial, sans-serif; border: 2px solid #A63C89; padding: 20px; border-radius: 10px; max-width: 500px;">
-                        <h2 style="color: #A63C89;">🔐 Recuperación de Contraseña</h2>
-                        <p>Hola <strong>${trabajador.NombreCompleto}</strong>,</p>
-                        <p>Hemos recibido una solicitud para restablecer tu contraseña de Vendedor.</p>
-                        <div style="text-align: center; margin: 25px 0;">
-                            <a href="${resetLink}" style="background-color: #A63C89; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
-                        </div>
-                        <p style="color: #666; font-size: 12px;">Este enlace es válido por 1 hora.</p>
-                        <hr>
-                        <p style="color: #999; font-size: 11px;">Chepita - Sistema de Gestión Comercial</p>
+            const html = `
+                <div style="font-family: Arial, sans-serif; border: 2px solid #A63C89; padding: 20px; border-radius: 10px; max-width: 500px;">
+                    <h2 style="color: #A63C89;">🔐 Recuperación de Contraseña</h2>
+                    <p>Hola <strong>${trabajador.NombreCompleto}</strong>,</p>
+                    <p>Hemos recibido una solicitud para restablecer tu contraseña de Vendedor.</p>
+                    <div style="text-align: center; margin: 25px 0;">
+                        <a href="${resetLink}" style="background-color: #A63C89; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
                     </div>
-                `
-            };
+                    <p style="color: #666; font-size: 12px;">Este enlace es válido por 1 hora.</p>
+                    <hr>
+                    <p style="color: #999; font-size: 11px;">Chepita - Sistema de Gestión Comercial</p>
+                </div>
+            `;
             
-            transporter.sendMail(mailOptions, (error) => {
-                if (error) {
-                    console.error('Error enviando email trabajador:', error);
-                    return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
+            enviarCorreo(email, '🔐 Recuperación de Contraseña - Chepita Vendedor', html, (exito, resultado) => {
+                if (exito) {
+                    res.json({ success: true, message: `Se ha enviado un enlace a tu correo ${email}` });
+                } else {
+                    res.status(500).json({ success: false, message: 'Error al enviar el correo: ' + resultado });
                 }
-                console.log(`✅ Email de recuperación enviado a TRABAJADOR: ${email}`);
-                res.json({ success: true, message: `Se ha enviado un enlace a tu correo ${email}` });
             });
         });
     });
@@ -567,32 +618,26 @@ app.post('/api/recuperar-password-unificado', (req, res) => {
                 
                 const resetLink = `http://localhost:3000/admin-reset-password.html?token=${token}`;
                 
-                const mailOptions = {
-                    from: 'Tienda Chepita <isabelchepita678@gmail.com>',
-                    to: email,
-                    subject: '🔐 Recuperación de Contraseña - Chepita',
-                    html: `
-                        <div style="font-family: Arial, sans-serif; border: 2px solid #A63C89; padding: 20px; border-radius: 10px; max-width: 500px;">
-                            <h2 style="color: #A63C89;">🔐 Recuperación de Contraseña</h2>
-                            <p>Hola <strong>${admin.usuario}</strong> (Administrador),</p>
-                            <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
-                            <div style="text-align: center; margin: 25px 0;">
-                                <a href="${resetLink}" style="background-color: #A63C89; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
-                            </div>
-                            <p style="color: #666; font-size: 12px;">Este enlace es válido por 1 hora.</p>
-                            <hr>
-                            <p style="color: #999; font-size: 11px;">Chepita - Sistema de Gestión Comercial</p>
+                const html = `
+                    <div style="font-family: Arial, sans-serif; border: 2px solid #A63C89; padding: 20px; border-radius: 10px; max-width: 500px;">
+                        <h2 style="color: #A63C89;">🔐 Recuperación de Contraseña</h2>
+                        <p>Hola <strong>${admin.usuario}</strong> (Administrador),</p>
+                        <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+                        <div style="text-align: center; margin: 25px 0;">
+                            <a href="${resetLink}" style="background-color: #A63C89; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
                         </div>
-                    `
-                };
+                        <p style="color: #666; font-size: 12px;">Este enlace es válido por 1 hora.</p>
+                        <hr>
+                        <p style="color: #999; font-size: 11px;">Chepita - Sistema de Gestión Comercial</p>
+                    </div>
+                `;
                 
-                transporter.sendMail(mailOptions, (error) => {
-                    if (error) {
-                        console.error('Error enviando email admin:', error);
-                        return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
+                enviarCorreo(email, '🔐 Recuperación de Contraseña - Chepita', html, (exito, resultado) => {
+                    if (exito) {
+                        res.json({ success: true, message: 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.' });
+                    } else {
+                        res.status(500).json({ success: false, message: 'Error al enviar el correo: ' + resultado });
                     }
-                    console.log(`✅ Email de recuperación enviado a ADMIN: ${email}`);
-                    res.json({ success: true, message: 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.' });
                 });
             });
         } else {
@@ -618,32 +663,26 @@ app.post('/api/recuperar-password-unificado', (req, res) => {
                         
                         const resetLink = `http://localhost:3000/trabajador-reset-password.html?token=${token}`;
                         
-                        const mailOptions = {
-                            from: 'Tienda Chepita <isabelchepita678@gmail.com>',
-                            to: email,
-                            subject: '🔐 Recuperación de Contraseña - Chepita',
-                            html: `
-                                <div style="font-family: Arial, sans-serif; border: 2px solid #A63C89; padding: 20px; border-radius: 10px; max-width: 500px;">
-                                    <h2 style="color: #A63C89;">🔐 Recuperación de Contraseña</h2>
-                                    <p>Hola <strong>${trabajador.NombreCompleto}</strong> (Vendedor),</p>
-                                    <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
-                                    <div style="text-align: center; margin: 25px 0;">
-                                        <a href="${resetLink}" style="background-color: #A63C89; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
-                                    </div>
-                                    <p style="color: #666; font-size: 12px;">Este enlace es válido por 1 hora.</p>
-                                    <hr>
-                                    <p style="color: #999; font-size: 11px;">Chepita - Sistema de Gestión Comercial</p>
+                        const html = `
+                            <div style="font-family: Arial, sans-serif; border: 2px solid #A63C89; padding: 20px; border-radius: 10px; max-width: 500px;">
+                                <h2 style="color: #A63C89;">🔐 Recuperación de Contraseña</h2>
+                                <p>Hola <strong>${trabajador.NombreCompleto}</strong> (Vendedor),</p>
+                                <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+                                <div style="text-align: center; margin: 25px 0;">
+                                    <a href="${resetLink}" style="background-color: #A63C89; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
                                 </div>
-                            `
-                        };
+                                <p style="color: #666; font-size: 12px;">Este enlace es válido por 1 hora.</p>
+                                <hr>
+                                <p style="color: #999; font-size: 11px;">Chepita - Sistema de Gestión Comercial</p>
+                            </div>
+                        `;
                         
-                        transporter.sendMail(mailOptions, (error) => {
-                            if (error) {
-                                console.error('Error enviando email trabajador:', error);
-                                return res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
+                        enviarCorreo(email, '🔐 Recuperación de Contraseña - Chepita', html, (exito, resultado) => {
+                            if (exito) {
+                                res.json({ success: true, message: 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.' });
+                            } else {
+                                res.status(500).json({ success: false, message: 'Error al enviar el correo: ' + resultado });
                             }
-                            console.log(`✅ Email de recuperación enviado a TRABAJADOR: ${email}`);
-                            res.json({ success: true, message: 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.' });
                         });
                     });
                 } else {
