@@ -7,7 +7,7 @@
     <link rel="manifest" href="/manifest.json">
     <title>Chepita - Portal de Acceso</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -68,7 +68,7 @@
             backdrop-filter: blur(10px);
             border-radius: 48px;
             padding: 48px 40px;
-            max-width: 500px;
+            max-width: 450px;
             width: 100%;
             text-align: center;
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
@@ -81,7 +81,7 @@
         }
 
         .login-header {
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .login-header h1 {
@@ -91,21 +91,21 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             letter-spacing: -0.5px;
         }
 
         .login-header h2 {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 600;
             color: #2d1b3d;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .login-header p {
             color: #7a6b8a;
             font-size: 14px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .fecha-login {
@@ -120,67 +120,267 @@
             font-weight: 500;
         }
 
-        .rol-buttons {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 0;
-            flex-wrap: wrap;
+        .input-group {
+            margin-bottom: 18px;
+            text-align: left;
         }
 
-        .btn-rol {
-            flex: 1;
-            padding: 18px 24px;
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a1d6d;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e8e8f0;
+            border-radius: 24px;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #A63C89;
+            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 50px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+            font-size: 18px;
+            padding: 8px;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #A63C89;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
             border: none;
             border-radius: 40px;
             font-size: 18px;
             font-weight: 700;
-            text-decoration: none;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
             font-family: 'Poppins', sans-serif;
-        }
-
-        .btn-admin {
             background: linear-gradient(135deg, #A63C89, #4a1d6d);
             color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(166, 60, 137, 0.4);
+            margin-top: 8px;
         }
 
-        .btn-admin:hover {
+        .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(166, 60, 137, 0.5);
         }
 
-        .btn-vendedor {
-            background: white;
-            color: #4a1d6d;
-            border: 2px solid #A63C89;
+        .btn-login:active {
+            transform: scale(0.98);
         }
 
-        .btn-vendedor:hover {
-            background: linear-gradient(135deg, #A63C89, #4a1d6d);
-            color: white;
-            border-color: transparent;
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .forgot-password {
+            margin-top: 16px;
+            display: block;
+            color: #A63C89;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .forgot-password:hover {
+            color: #4a1d6d;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0 20px;
+            gap: 16px;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e0dce8, transparent);
+        }
+
+        .divider-text {
+            font-size: 12px;
+            color: #999;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .btn-rol {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-rol-link {
+            flex: 1;
+            padding: 12px;
+            border-radius: 30px;
+            border: 2px solid #e8e8f0;
+            background: white;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-rol-link:hover {
+            border-color: #A63C89;
+            color: #A63C89;
             transform: translateY(-2px);
         }
 
+        .btn-rol-link.active {
+            border-color: #A63C89;
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(166, 60, 137, 0.3);
+        }
+
         .footer {
-            margin-top: 32px;
+            margin-top: 28px;
             font-size: 12px;
             color: #bbb;
         }
 
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            text-align: left;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            text-align: left;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Modal Recuperación */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: #4a1d6d;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-modal {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
+        }
+
+        .btn-secondary-modal {
+            background: #f0f0f0;
+            color: #4a1d6d;
+        }
+
         @media (max-width: 480px) {
-            .portal-card { padding: 32px 24px; }
+            .portal-card { padding: 32px 20px; }
             .login-header h1 { font-size: 36px; }
-            .login-header h2 { font-size: 24px; }
-            .btn-rol { padding: 14px 20px; font-size: 16px; }
-            .rol-buttons { flex-direction: column; }
+            .login-header h2 { font-size: 20px; }
+            .btn-rol { flex-direction: column; }
+            .btn-rol-link { padding: 14px; }
         }
     </style>
 </head>
@@ -198,8 +398,8 @@
         <div class="portal-card">
             <div class="login-header">
                 <h1>🏪 Chepita</h1>
-                <h2>✨ Bienvenido ✨</h2>
-                <p>Sistema de Gestión de Variedades Chepita</p>
+                <h2>Iniciar Sesión</h2>
+                <p>Accede al sistema de gestión</p>
                 <div class="fecha-login">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span id="fecha"></span>
@@ -209,13 +409,38 @@
                 </div>
             </div>
 
-            <div class="rol-buttons">
-                <a href="/admin_App.html" class="btn-rol btn-admin">
+            <!-- Botones de selección de rol -->
+            <div class="btn-rol">
+                <button class="btn-rol-link active" onclick="seleccionarRol('admin')" id="btnRolAdmin">
                     👑 Administrador
-                </a>
-                <a href="/vendedor_app.html" class="btn-rol btn-vendedor">
+                </button>
+                <button class="btn-rol-link" onclick="seleccionarRol('vendedor')" id="btnRolVendedor">
                     👤 Vendedor
-                </a>
+                </button>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <form id="loginForm" onsubmit="event.preventDefault(); iniciarSesion();">
+                    <div class="input-group">
+                        <label>Usuario o Correo</label>
+                        <input type="text" id="usuarioInput" placeholder="Ingresa tu usuario o correo" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Contraseña</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="passwordInput" placeholder="Ingresa tu contraseña" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-login" id="btnLogin">Ingresar</button>
+                </form>
+
+                <a class="forgot-password" onclick="mostrarRecuperacion()">¿Olvidaste tu contraseña?</a>
             </div>
 
             <div class="footer">
@@ -224,7 +449,174 @@
         </div>
     </div>
 
+    <!-- Modal Recuperación -->
+    <div id="recuperacionModal" class="modal">
+        <div class="modal-content">
+            <h3>🔐 Recuperar Contraseña</h3>
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Ingresa tu correo electrónico para restablecer tu contraseña</p>
+            <div class="input-group" style="text-align: left;">
+                <label>Correo electrónico</label>
+                <input type="email" id="recEmail" placeholder="ejemplo@correo.com">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-primary-modal" onclick="enviarRecuperacion()">Enviar</button>
+                <button class="btn-secondary-modal" onclick="cerrarModalRecuperacion()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let rolSeleccionado = 'admin';
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.querySelector('.password-toggle i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'fa-regular fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'fa-regular fa-eye';
+            }
+        }
+
+        function seleccionarRol(rol) {
+            rolSeleccionado = rol;
+            document.getElementById('btnRolAdmin').classList.toggle('active', rol === 'admin');
+            document.getElementById('btnRolVendedor').classList.toggle('active', rol === 'vendedor');
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        function mostrarError(mensaje) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = mensaje;
+            errorDiv.classList.add('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        function mostrarExito(mensaje) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = mensaje;
+            successDiv.classList.add('show');
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        function ocultarMensajes() {
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        async function iniciarSesion() {
+            const usuario = document.getElementById('usuarioInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const btn = document.getElementById('btnLogin');
+            const textoOriginal = btn.innerHTML;
+            
+            ocultarMensajes();
+
+            if (!usuario || !password) {
+                mostrarError('Por favor, ingresa tu usuario y contraseña');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+            btn.disabled = true;
+
+            try {
+                if (rolSeleccionado === 'admin') {
+                    // Login de Administrador
+                    const response = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usuario, password })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        localStorage.setItem('token_admin', data.token);
+                        mostrarExito('¡Bienvenido Administrador! Redirigiendo...');
+                        setTimeout(() => {
+                            window.location.href = '/admin_App.html';
+                        }, 800);
+                    } else {
+                        mostrarError(data.message || 'Usuario o contraseña incorrectos');
+                    }
+                } else {
+                    // Login de Vendedor
+                    const response = await fetch('/api/trabajadores/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre_usuario: usuario, password })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        localStorage.setItem('token_vendedor', data.token);
+                        localStorage.setItem('vendedor', JSON.stringify(data.trabajador));
+                        mostrarExito('¡Bienvenido Vendedor! Redirigiendo...');
+                        setTimeout(() => {
+                            window.location.href = '/vendedor_app.html';
+                        }, 800);
+                    } else {
+                        mostrarError(data.message || 'Usuario o contraseña incorrectos');
+                    }
+                }
+            } catch (error) {
+                mostrarError('Error de conexión: ' + error.message);
+            } finally {
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+            }
+        }
+
+        // Recuperación de contraseña
+        function mostrarRecuperacion() {
+            document.getElementById('recuperacionModal').classList.add('active');
+        }
+
+        function cerrarModalRecuperacion() {
+            document.getElementById('recuperacionModal').classList.remove('active');
+            document.getElementById('recEmail').value = '';
+        }
+
+        async function enviarRecuperacion() {
+            const email = document.getElementById('recEmail').value.trim();
+            if (!email) {
+                mostrarError('Ingresa tu correo electrónico');
+                return;
+            }
+
+            try {
+                // Intentar recuperar como admin primero
+                let response = await fetch('/api/admin/recuperar-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                let data = await response.json();
+
+                // Si no es admin, intentar como vendedor
+                if (!data.success) {
+                    response = await fetch('/api/trabajadores/recuperar-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    data = await response.json();
+                }
+
+                if (data.success) {
+                    alert(`✅ ${data.message || 'Se ha enviado un enlace a tu correo'}`);
+                    cerrarModalRecuperacion();
+                } else {
+                    mostrarError(data.message || 'No se encontró una cuenta con ese correo');
+                }
+            } catch (error) {
+                mostrarError('Error de conexión: ' + error.message);
+            }
+        }
+
         function actualizarFechaHora() {
             const ahora = new Date();
             const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -237,6 +629,17 @@
 
         actualizarFechaHora();
         setInterval(actualizarFechaHora, 60000);
+
+        // Enter para enviar formulario
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const form = document.getElementById('loginForm');
+                if (form.contains(e.target)) {
+                    e.preventDefault();
+                    iniciarSesion();
+                }
+            }
+        });
     </script>
 </body>
 </html>
