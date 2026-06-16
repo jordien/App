@@ -397,12 +397,13 @@ app.post('/api/admin/restablecer-password', async (req, res) => {
     });
 });
 
-// ================= LOGIN TRABAJADOR =================
+// ================= LOGIN TRABAJADOR (CORREGIDO) =================
 app.post('/api/trabajadores/login', async (req, res) => {
     const { nombre_usuario, password } = req.body;
     
-    db.query(`SELECT * FROM trabajadores WHERE (nombre_usuario = ? OR email = ?) AND Activo = 1`, 
-        [nombre_usuario, nombre_usuario], async (err, results) => {
+    // ✅ CORREGIDO: Ahora busca también por NombreCompleto
+    db.query(`SELECT * FROM trabajadores WHERE (nombre_usuario = ? OR email = ? OR NombreCompleto = ?) AND Activo = 1`, 
+        [nombre_usuario, nombre_usuario, nombre_usuario], async (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) {
             return res.status(401).json({ success: false, message: "Usuario o contraseña incorrectos" });
@@ -1507,6 +1508,7 @@ app.listen(PORT, '0.0.0.0', () => {
     ║  ⏰ Asistencia: ACTIVADO                                  ║
     ║  📧 Recuperación por Gmail: ACTIVADO                      ║
     ║  🗄️ Base de datos: ${process.env.MYSQLDATABASE || 'railway'}   ║
+    ║  🔑 Login Vendedor: por NombreCompleto                    ║
     ╚══════════════════════════════════════════════════════════╝
     `);
 });
