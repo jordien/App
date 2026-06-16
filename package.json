@@ -1,35 +1,17 @@
 {
-  "name": "chepita-interfaz-prototipo",
+  "name": "chepitaapp",
   "version": "1.0.0",
-  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.3",
-    "compression": "^1.8.1",
-    "cors": "^2.8.6",
-    "crypto": "^1.0.1",
-    "dotenv": "^17.4.2",
-    "expo-secure-store": "^56.0.4",
-    "express": "^5.2.1",
-    "express-session": "^1.19.0",
-    "helmet": "^8.2.0",
-    "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.11.0",
-    "multer": "^2.2.0",
-    "mysql2": "^3.22.5",
-    "nodemailer": "^8.0.7",
-    "qrcode": "^1.5.4",
-    "react-native-countdown-circle-timer": "^3.2.1",
-    "react-native-qrcode-svg": "^6.3.21",
-    "react-native-svg": "^15.15.5"
-  },
-  "description": ""
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.22.2",
+    "jsonwebtoken": "^9.0.0",
+    "mysql2": "^3.9.0",
+    "node-cache": "^5.1.2",
+    "nodemailer": "^6.10.1",
+    "qrcode": "^1.5.0"
+  }
 }
