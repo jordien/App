@@ -26,6 +26,12 @@
             margin-bottom: 20px;
         }
 
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .header h1 {
             font-size: 24px;
             display: flex;
@@ -37,6 +43,23 @@
             font-size: 12px;
             opacity: 0.8;
             margin-top: 5px;
+        }
+
+        .btn-cerrar-sesion {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
         }
 
         .tabs {
@@ -242,7 +265,6 @@
             padding: 16px;
         }
 
-        /* Buscador de vendedores */
         .buscador-container {
             position: relative;
             margin-bottom: 20px;
@@ -461,8 +483,13 @@
 
     <div id="mainApp" style="display: none;">
         <div class="header">
-            <h1>Admin Chepita</h1>
-            <p>Panel de control - Sistema de Gestión</p>
+            <div class="header-content">
+                <div>
+                    <h1>Admin Chepita</h1>
+                    <p>Panel de control - Sistema de Gestión</p>
+                </div>
+                <button class="btn-cerrar-sesion" onclick="cerrarSesionAdmin()">Cerrar Sesión</button>
+            </div>
         </div>
 
         <div class="tabs">
@@ -486,37 +513,33 @@
                     <div class="table-container">
                         <table id="topProductos">
                             <thead><tr><th>Producto</th><th>Cantidad</th></tr></thead>
-                            <tbody><tr><td colspan="2">Cargando...</span></span></td></tbody>
+                            <tbody><tr><td colspan="2">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel Asistencia Manual con Buscador -->
+            <!-- Panel Asistencia -->
             <div id="asistencia" class="panel">
                 <div class="card">
                     <h3>Marcar Asistencia Manual</h3>
                     
-                    <!-- Buscador de vendedores -->
                     <div class="buscador-container">
                         <label>Buscar Vendedor</label>
                         <input type="text" id="buscarVendedor" class="buscador-input" placeholder="Escribe el nombre del vendedor... ej: jordy, maria" autocomplete="off">
                         <div id="sugerenciasLista" class="sugerencias"></div>
                     </div>
                     
-                    <!-- Vendedor seleccionado -->
                     <div id="vendedorSeleccionado" class="vendedor-seleccionado" style="display: none;">
                         <span id="nombreSeleccionado"></span>
                         <button class="btn btn-sm" onclick="limpiarSeleccionVendedor()" style="background:#fee2e2; color:#c62828;">X</button>
                     </div>
                     <input type="hidden" id="idVendedorSeleccionado" value="">
                     
-                    <!-- Estado actual del vendedor -->
                     <div id="estadoActualVendedor" style="margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 16px; display: none;">
                         <div id="infoEstado"></div>
                     </div>
                     
-                    <!-- Botones de asistencia -->
                     <div class="marcacion-container">
                         <button class="btn btn-success" onclick="marcarEntradaAdmin()" id="btnEntradaAdmin" style="background:#2e7d32;">Marcar Entrada</button>
                         <button class="btn btn-danger" onclick="marcarSalidaAdmin()" id="btnSalidaAdmin" style="background:#c62828;">Marcar Salida</button>
@@ -541,7 +564,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td colspan="5">Cargando...</span></td></tbody>
+                                <tr><td colspan="5">Cargando...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -557,7 +580,7 @@
                             <thead>
                                 <tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr>
                             </thead>
-                            <tbody><tr><td colspan="5">Cargando...</span></td></tbody>
+                            <tbody><tr><td colspan="5">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -583,7 +606,7 @@
                             <thead>
                                 <tr><th>Vendedor</th><th>Ventas</th><th>Días Activos</th><th>Promedio</th><th>Puntaje</th><th>Premio</th></tr>
                             </thead>
-                            <tbody><tr><td colspan="6">Cargando...</span></td></tbody>
+                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -603,7 +626,7 @@
                             <thead>
                                 <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Celular</th><th>Estado</th><th></th></tr>
                             </thead>
-                            <tbody><tr><td colspan="6">Cargando...</span></td></tbody>
+                            <tbody><tr><td colspan="6">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -665,6 +688,18 @@
 
         function cerrarMensaje() {
             document.getElementById('mensajeModal').classList.remove('active');
+        }
+
+        // ===== FUNCIÓN CERRAR SESIÓN ADMIN =====
+        function cerrarSesionAdmin() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                localStorage.removeItem('token_admin');
+                token = null;
+                document.getElementById('loginContainer').style.display = 'block';
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('adminUser').value = '';
+                document.getElementById('adminPassword').value = '';
+            }
         }
 
         async function loginAdmin() {
@@ -792,9 +827,9 @@
                 document.querySelector('#listaProductos tbody').innerHTML = productos.map(p => `
                     <tr>
                         <td>${p.Id_Producto}</td>
-                        <td>${p.Nombre}</span></td>
-                        <td>C$${p.Precio}</span></td>
-                        <td><span class="badge ${p.Stock <= 10 ? 'badge-warning' : 'badge-success'}">${p.Stock}</span></span></td>
+                        <td>${p.Nombre}</td>
+                        <td>C$${p.Precio}</td>
+                        <td><span class="badge ${p.Stock <= 10 ? 'badge-warning' : 'badge-success'}">${p.Stock}</span></td>
                         <td><button class="btn btn-danger btn-sm" onclick="eliminarProducto(${p.Id_Producto})">Eliminar</button></td>
                     </tr>
                 `).join('');
@@ -877,9 +912,9 @@
                 document.querySelector('#listaVendedores tbody').innerHTML = vendedores.map(v => `
                     <tr>
                         <td>${v.Id_Trabajador}</td>
-                        <td>${v.NombreCompleto}</span></td>
-                        <td>${v.email || '-'}</span></td>
-                        <td>${v.Celular || '-'}</span></td>
+                        <td>${v.NombreCompleto}</td>
+                        <td>${v.email || '-'}</td>
+                        <td>${v.Celular || '-'}</td>
                         <td><span class="badge ${v.Activo ? 'badge-success' : 'badge-danger'}">${v.Activo ? 'Activo' : 'Inactivo'}</span></td>
                         <td><button class="btn btn-danger btn-sm" onclick="toggleVendedor(${v.Id_Trabajador}, ${v.Activo})">${v.Activo ? 'Desactivar' : 'Activar'}</button></td>
                     </tr>
@@ -898,7 +933,6 @@
             }
         }
 
-        // Buscador de vendedores
         const buscadorInput = document.getElementById('buscarVendedor');
         const sugerenciasDiv = document.getElementById('sugerenciasLista');
 
@@ -935,8 +969,6 @@
             document.getElementById('vendedorSeleccionado').style.display = 'flex';
             document.getElementById('buscarVendedor').value = nombre;
             sugerenciasDiv.style.display = 'none';
-            
-            // Cargar estado actual del vendedor
             await cargarEstadoVendedor(id);
         }
 
@@ -1119,15 +1151,15 @@
                 const data = await response.json();
                 
                 if (data.length === 0) {
-                    document.querySelector('#tablaAsistencia tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay registros de asistencia para esta fecha</span></td></tbody>';
+                    document.querySelector('#tablaAsistencia tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay registros de asistencia para esta fecha</td></tr>';
                 } else {
                     document.querySelector('#tablaAsistencia tbody').innerHTML = data.map(a => `
                         <tr>
                             <td><strong>${a.vendedor}</strong></td>
-                            <td>${a.fecha}</span></td>
-                            <td>${a.hora_entrada || '-'}</span></td>
-                            <td>${a.hora_salida || '-'}</span></td>
-                            <td><span class="badge ${a.estado === 'completo' ? 'badge-success' : 'badge-warning'}">${a.estado === 'completo' ? 'Completo' : 'Pendiente'}</span></span></td>
+                            <td>${a.fecha}</td>
+                            <td>${a.hora_entrada || '-'}</td>
+                            <td>${a.hora_salida || '-'}</td>
+                            <td><span class="badge ${a.estado === 'completo' ? 'badge-success' : 'badge-warning'}">${a.estado === 'completo' ? 'Completo' : 'Pendiente'}</span></td>
                         </tr>
                     `).join('');
                 }
@@ -1136,6 +1168,7 @@
             }
         }
 
+        // Verificar si hay sesión guardada
         const tokenGuardado = localStorage.getItem('token_admin');
         if (tokenGuardado) {
             token = tokenGuardado;

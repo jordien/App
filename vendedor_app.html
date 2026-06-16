@@ -47,7 +47,54 @@
             margin-top: 4px;
         }
 
-        /* Tabs */
+        .vendedor-card {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            border-radius: 28px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .vendedor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .vendedor-info {
+            text-align: left;
+        }
+
+        .vendedor-nombre {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .vendedor-id {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .btn-cerrar-sesion-vendedor {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cerrar-sesion-vendedor:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
         .tabs {
             display: flex;
             gap: 8px;
@@ -77,7 +124,6 @@
             box-shadow: 0 2px 8px rgba(166, 60, 137, 0.3);
         }
 
-        /* Paneles */
         .panel {
             display: none;
             animation: fadeIn 0.3s ease;
@@ -98,7 +144,6 @@
             }
         }
 
-        /* Inputs */
         .input-group {
             margin-bottom: 20px;
         }
@@ -127,7 +172,6 @@
             box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
         }
 
-        /* Botones */
         .btn {
             padding: 16px 24px;
             border: none;
@@ -170,7 +214,6 @@
             margin-top: 10px;
         }
 
-        /* Sugerencias */
         .suggestions {
             background: white;
             border: 2px solid #e8e8f0;
@@ -203,28 +246,6 @@
             color: #999;
         }
 
-        /* Tarjeta del vendedor */
-        .vendedor-card {
-            background: linear-gradient(135deg, #A63C89, #4a1d6d);
-            border-radius: 28px;
-            padding: 20px;
-            text-align: center;
-            color: white;
-            margin-bottom: 24px;
-        }
-
-        .vendedor-nombre {
-            font-size: 22px;
-            font-weight: 800;
-        }
-
-        .vendedor-id {
-            font-size: 12px;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-
-        /* QR Card */
         .qr-card {
             background: white;
             border-radius: 32px;
@@ -313,7 +334,6 @@
             display: inline-block;
         }
 
-        /* Modales */
         .modal-message {
             position: fixed;
             top: 0;
@@ -376,7 +396,6 @@
             margin-bottom: 20px;
         }
 
-        /* Estadisticas */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -439,7 +458,6 @@
             color: #A63C89;
         }
 
-        /* Asistencia manual */
         .asistencia-card {
             background: white;
             border-radius: 28px;
@@ -502,8 +520,13 @@
         <div id="appSection" class="hidden">
             <!-- Info Vendedor -->
             <div class="vendedor-card">
-                <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
-                <div class="vendedor-id" id="vendedorId"></div>
+                <div class="vendedor-header">
+                    <div class="vendedor-info">
+                        <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
+                        <div class="vendedor-id" id="vendedorId"></div>
+                    </div>
+                    <button class="btn-cerrar-sesion-vendedor" onclick="cerrarSesion()">Cerrar Sesión</button>
+                </div>
             </div>
 
             <!-- Tabs -->
@@ -534,7 +557,7 @@
                 </div>
             </div>
 
-            <!-- Panel Asistencia Manual -->
+            <!-- Panel Asistencia -->
             <div id="panelAsistencia" class="panel">
                 <div id="asistenciaContent">
                     <div class="loading-puntos">Cargando tu estado...</div>
@@ -560,11 +583,6 @@
                 <button class="btn btn-secondary" onclick="cargarMisPuntos()" style="margin-top: 15px;">
                     Actualizar datos
                 </button>
-            </div>
-
-            <!-- Cerrar Sesion -->
-            <div class="footer-buttons" style="margin-top: 20px;">
-                <button class="btn btn-secondary" onclick="cerrarSesion()">Cerrar sesion</button>
             </div>
         </div>
     </div>
@@ -819,6 +837,24 @@
             }
         }
 
+        // ===== FUNCIÓN CERRAR SESIÓN VENDEDOR =====
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                localStorage.removeItem('token_vendedor');
+                localStorage.removeItem('vendedor');
+                token = null;
+                vendedor = null;
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('appSection').classList.add('hidden');
+                document.getElementById('passwordInput').value = '';
+                clearSelection();
+                // Resetear el QR
+                document.getElementById('qrContainer').style.display = 'none';
+                qrActual = null;
+                qrActivo = false;
+            }
+        }
+
         async function cargarTrabajadores() {
             try {
                 const response = await fetch('/api/trabajadores/activos');
@@ -1033,17 +1069,7 @@
             }
         }
 
-        function cerrarSesion() {
-            localStorage.removeItem('token_vendedor');
-            localStorage.removeItem('vendedor');
-            token = null;
-            vendedor = null;
-            document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('appSection').classList.add('hidden');
-            document.getElementById('passwordInput').value = '';
-            clearSelection();
-        }
-
+        // Inicializar
         cargarTrabajadores();
         const tokenGuardado = localStorage.getItem('token_vendedor');
         const vendedorGuardado = localStorage.getItem('vendedor');
