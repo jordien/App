@@ -222,60 +222,6 @@
             color: #4a1d6d;
         }
 
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 24px 0 20px;
-            gap: 16px;
-        }
-
-        .divider-line {
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(to right, transparent, #e0dce8, transparent);
-        }
-
-        .divider-text {
-            font-size: 12px;
-            color: #999;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .btn-rol {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn-rol-link {
-            flex: 1;
-            padding: 12px;
-            border-radius: 30px;
-            border: 2px solid #e8e8f0;
-            background: white;
-            color: #666;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: 'Poppins', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            text-align: center;
-        }
-
-        .btn-rol-link:hover {
-            border-color: #A63C89;
-            color: #A63C89;
-            transform: translateY(-2px);
-        }
-
-        .btn-rol-link.active {
-            border-color: #A63C89;
-            background: linear-gradient(135deg, #A63C89, #4a1d6d);
-            color: white;
-            box-shadow: 0 4px 15px rgba(166, 60, 137, 0.3);
-        }
-
         .footer {
             margin-top: 28px;
             font-size: 12px;
@@ -375,12 +321,34 @@
             color: #4a1d6d;
         }
 
+        .rol-indicador {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .rol-admin {
+            background: #f3e5f5;
+            color: #4a1d6d;
+        }
+
+        .rol-vendedor {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .rol-detectando {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
         @media (max-width: 480px) {
             .portal-card { padding: 32px 20px; }
             .login-header h1 { font-size: 36px; }
             .login-header h2 { font-size: 20px; }
-            .btn-rol { flex-direction: column; }
-            .btn-rol-link { padding: 14px; }
         }
     </style>
 </head>
@@ -409,24 +377,14 @@
                 </div>
             </div>
 
-            <!-- Botones de selección de rol -->
-            <div class="btn-rol">
-                <button class="btn-rol-link active" onclick="seleccionarRol('admin')" id="btnRolAdmin">
-                    👑 Administrador
-                </button>
-                <button class="btn-rol-link" onclick="seleccionarRol('vendedor')" id="btnRolVendedor">
-                    👤 Vendedor
-                </button>
-            </div>
-
             <div style="margin-top: 20px;">
                 <div class="error-message" id="errorMessage"></div>
                 <div class="success-message" id="successMessage"></div>
 
                 <form id="loginForm" onsubmit="event.preventDefault(); iniciarSesion();">
                     <div class="input-group">
-                        <label>Usuario o Correo</label>
-                        <input type="text" id="usuarioInput" placeholder="Ingresa tu usuario o correo" required>
+                        <label>Usuario</label>
+                        <input type="text" id="usuarioInput" placeholder="Ingresa tu usuario" required autofocus>
                     </div>
                     <div class="input-group">
                         <label>Contraseña</label>
@@ -466,8 +424,6 @@
     </div>
 
     <script>
-        let rolSeleccionado = 'admin';
-
         function togglePassword() {
             const passwordInput = document.getElementById('passwordInput');
             const icon = document.querySelector('.password-toggle i');
@@ -478,14 +434,6 @@
                 passwordInput.type = 'password';
                 icon.className = 'fa-regular fa-eye';
             }
-        }
-
-        function seleccionarRol(rol) {
-            rolSeleccionado = rol;
-            document.getElementById('btnRolAdmin').classList.toggle('active', rol === 'admin');
-            document.getElementById('btnRolVendedor').classList.toggle('active', rol === 'vendedor');
-            document.getElementById('errorMessage').classList.remove('show');
-            document.getElementById('successMessage').classList.remove('show');
         }
 
         function mostrarError(mensaje) {
@@ -524,46 +472,46 @@
             btn.disabled = true;
 
             try {
-                if (rolSeleccionado === 'admin') {
-                    // Login de Administrador
-                    const response = await fetch('/api/admin/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ usuario, password })
-                    });
-                    const data = await response.json();
+                // 1. PRIMERO: Intentar login como Administrador
+                let response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, password })
+                });
+                let data = await response.json();
 
-                    if (data.success) {
-                        localStorage.setItem('token_admin', data.token);
-                        mostrarExito('¡Bienvenido Administrador! Redirigiendo...');
-                        setTimeout(() => {
-                            window.location.href = '/admin_App.html';
-                        }, 800);
-                    } else {
-                        mostrarError(data.message || 'Usuario o contraseña incorrectos');
-                    }
+                if (data.success) {
+                    localStorage.setItem('token_admin', data.token);
+                    mostrarExito('✅ ¡Bienvenido Administrador! Redirigiendo...');
+                    setTimeout(() => {
+                        window.location.href = '/admin_App.html';
+                    }, 800);
+                    btn.innerHTML = textoOriginal;
+                    btn.disabled = false;
+                    return;
+                }
+
+                // 2. SI NO ES ADMIN: Intentar login como Vendedor
+                response = await fetch('/api/trabajadores/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre_usuario: usuario, password })
+                });
+                data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token_vendedor', data.token);
+                    localStorage.setItem('vendedor', JSON.stringify(data.trabajador));
+                    mostrarExito('✅ ¡Bienvenido Vendedor! Redirigiendo...');
+                    setTimeout(() => {
+                        window.location.href = '/vendedor_app.html';
+                    }, 800);
                 } else {
-                    // Login de Vendedor
-                    const response = await fetch('/api/trabajadores/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ nombre_usuario: usuario, password })
-                    });
-                    const data = await response.json();
-
-                    if (data.success) {
-                        localStorage.setItem('token_vendedor', data.token);
-                        localStorage.setItem('vendedor', JSON.stringify(data.trabajador));
-                        mostrarExito('¡Bienvenido Vendedor! Redirigiendo...');
-                        setTimeout(() => {
-                            window.location.href = '/vendedor_app.html';
-                        }, 800);
-                    } else {
-                        mostrarError(data.message || 'Usuario o contraseña incorrectos');
-                    }
+                    // Si ambos fallaron
+                    mostrarError('❌ Usuario o contraseña incorrectos. Verifica tus datos.');
                 }
             } catch (error) {
-                mostrarError('Error de conexión: ' + error.message);
+                mostrarError('❌ Error de conexión: ' + error.message);
             } finally {
                 btn.innerHTML = textoOriginal;
                 btn.disabled = false;
@@ -639,6 +587,11 @@
                     iniciarSesion();
                 }
             }
+        });
+
+        // Auto-focus en el campo de usuario
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('usuarioInput').focus();
         });
     </script>
 </body>
