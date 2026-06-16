@@ -16,32 +16,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
-// ================= CONFIGURACIÓN DE GMAIL (MEJORADA) =================
+// ================= CONFIGURACIÓN DE GMAIL =================
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
-    secure: true, // true para puerto 465
+    secure: true,
     auth: {
         user: 'isabelchepita678@gmail.com',
         pass: 'cazx kvss xagg zepm'
     },
     tls: {
         rejectUnauthorized: false
-    },
-    debug: true,
-    logger: true
+    }
 });
 
-// Verificar conexión al iniciar
 transporter.verify(function(error, success) {
     if (error) {
         console.log('❌ Error de conexión con Gmail:', error);
     } else {
-        console.log('✅ Servidor de correo Gmail listo para enviar emails');
+        console.log('✅ Servidor de correo Gmail listo');
     }
 });
 
-// ================= FUNCIÓN PARA ENVIAR CORREOS =================
 function enviarCorreo(destinatario, asunto, html, callback) {
     const mailOptions = {
         from: 'Tienda Chepita <isabelchepita678@gmail.com>',
@@ -264,7 +260,7 @@ app.post('/api/admin/login', async (req, res) => {
     });
 });
 
-// ================= RECUPERACION ADMIN POR EMAIL (CON GMAIL) =================
+// ================= RECUPERACION ADMIN POR EMAIL =================
 app.post('/api/admin/recuperar-email', (req, res) => {
     const { email } = req.body;
     
@@ -451,7 +447,7 @@ app.post('/api/trabajadores/login', async (req, res) => {
     });
 });
 
-// ================= RECUPERACION TRABAJADOR POR EMAIL (CON GMAIL) =================
+// ================= RECUPERACION TRABAJADOR POR EMAIL =================
 app.post('/api/trabajadores/recuperar-password', (req, res) => {
     const { email } = req.body;
     
@@ -588,7 +584,7 @@ app.post('/api/trabajadores/restablecer-password', async (req, res) => {
     });
 });
 
-// ================= RECUPERACIÓN UNIFICADA (DETECTA AUTOMÁTICAMENTE SI ES ADMIN O VENDEDOR) =================
+// ================= RECUPERACIÓN UNIFICADA =================
 app.post('/api/recuperar-password-unificado', (req, res) => {
     const { email } = req.body;
     
@@ -596,7 +592,6 @@ app.post('/api/recuperar-password-unificado', (req, res) => {
         return res.status(400).json({ success: false, message: 'Por favor, ingrese su correo electrónico' });
     }
     
-    // Primero verificar si es ADMIN
     db.query(`SELECT id, usuario, email FROM usuarios_admin WHERE email = ?`, [email], (err, adminResults) => {
         if (err) {
             console.error('Error en recuperación admin:', err);
@@ -641,7 +636,6 @@ app.post('/api/recuperar-password-unificado', (req, res) => {
                 });
             });
         } else {
-            // Si no es ADMIN, verificar si es TRABAJADOR
             db.query(`SELECT Id_Trabajador, NombreCompleto, email FROM trabajadores WHERE email = ? AND Activo = 1`, [email], (err, trabajadorResults) => {
                 if (err) {
                     console.error('Error en recuperación trabajador:', err);
