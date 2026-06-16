@@ -397,6 +397,97 @@
         #appSection {
             display: block !important;
         }
+
+        /* Modal de confirmación personalizado */
+        .modal-confirm {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-confirm.active {
+            display: flex;
+        }
+
+        .modal-confirm-content {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-confirm-content .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .modal-confirm-content h3 {
+            color: #4a1d6d;
+            margin-bottom: 8px;
+        }
+
+        .modal-confirm-content p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .modal-confirm-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-confirm-buttons .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-confirmar {
+            background: linear-gradient(135deg, #c62828, #b71c1c);
+            color: white;
+        }
+
+        .btn-confirmar:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-cancelar {
+            background: #f0f0f0;
+            color: #4a1d6d;
+        }
+
+        .btn-cancelar:hover {
+            background: #e0e0e0;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
@@ -416,7 +507,7 @@
                         <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
                         <div class="vendedor-id" id="vendedorId"></div>
                     </div>
-                    <button class="btn-cerrar-sesion-vendedor" onclick="cerrarSesion()">Cerrar Sesión</button>
+                    <button class="btn-cerrar-sesion-vendedor" onclick="mostrarModalCerrarSesion()">Cerrar Sesión</button>
                 </div>
             </div>
 
@@ -471,6 +562,19 @@
                 <button class="btn btn-secondary" onclick="cargarMisPuntos()" style="margin-top: 15px;">
                     Actualizar datos
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para cerrar sesión -->
+    <div id="modalConfirmCerrar" class="modal-confirm">
+        <div class="modal-confirm-content">
+            <div class="icon">👋</div>
+            <h3>Cerrar Sesión</h3>
+            <p>¿Estás seguro de que quieres cerrar sesión?</p>
+            <div class="modal-confirm-buttons">
+                <button class="btn btn-cancelar" onclick="cerrarModalCerrarSesion()">Cancelar</button>
+                <button class="btn btn-confirmar" onclick="confirmarCerrarSesion()">Cerrar Sesión</button>
             </div>
         </div>
     </div>
@@ -674,15 +778,22 @@
             setTimeout(() => modal.remove(), 3000);
         }
 
-        // ===== CERRAR SESIÓN =====
-        function cerrarSesion() {
-            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                localStorage.removeItem('token_vendedor');
-                localStorage.removeItem('vendedor');
-                token = null;
-                vendedor = null;
-                window.location.href = '/';
-            }
+        // ===== MODAL CERRAR SESIÓN =====
+        function mostrarModalCerrarSesion() {
+            document.getElementById('modalConfirmCerrar').classList.add('active');
+        }
+
+        function cerrarModalCerrarSesion() {
+            document.getElementById('modalConfirmCerrar').classList.remove('active');
+        }
+
+        function confirmarCerrarSesion() {
+            cerrarModalCerrarSesion();
+            localStorage.removeItem('token_vendedor');
+            localStorage.removeItem('vendedor');
+            token = null;
+            vendedor = null;
+            window.location.href = '/';
         }
 
         async function verificarQR() {
