@@ -186,11 +186,6 @@
             color: #4a1d6d;
         }
 
-        .sugerencia-item .email {
-            font-size: 12px;
-            color: #999;
-        }
-
         .sugerencia-item .badge-rol {
             font-size: 10px;
             padding: 2px 10px;
@@ -437,7 +432,7 @@
                 <form id="loginForm" onsubmit="event.preventDefault(); iniciarSesion();">
                     <div class="input-group">
                         <label>Usuario</label>
-                        <input type="text" id="usuarioInput" placeholder="Escribe tu usuario o nombre..." autocomplete="off" required autofocus>
+                        <input type="text" id="usuarioInput" placeholder="Escribe tu nombre..." autocomplete="off" required autofocus>
                         <div id="sugerenciasLista" class="sugerencias-usuario"></div>
                     </div>
                     <div class="input-group">
@@ -523,7 +518,7 @@
             }
         }
 
-        // Buscador de vendedores con sugerencias
+        // Buscador de vendedores con sugerencias - SOLO NOMBRE
         const usuarioInput = document.getElementById('usuarioInput');
         const sugerenciasDiv = document.getElementById('sugerenciasLista');
 
@@ -535,10 +530,7 @@
                 if (query === 'admin') {
                     sugerenciasDiv.innerHTML = `
                         <div class="sugerencia-item" onclick="seleccionarAdmin()">
-                            <div>
-                                <div class="nombre">admin</div>
-                                <div class="email">Administrador del sistema</div>
-                            </div>
+                            <div class="nombre">admin</div>
                             <span class="badge-rol badge-admin">Admin</span>
                         </div>
                     `;
@@ -552,18 +544,13 @@
                 }
 
                 const filtered = trabajadores.filter(v => 
-                    v.NombreCompleto.toLowerCase().includes(query) ||
-                    (v.nombre_usuario && v.nombre_usuario.toLowerCase().includes(query)) ||
-                    (v.email && v.email.toLowerCase().includes(query))
+                    v.NombreCompleto.toLowerCase().includes(query)
                 );
 
                 if (filtered.length > 0) {
                     sugerenciasDiv.innerHTML = filtered.map(v => `
-                        <div class="sugerencia-item" onclick="seleccionarVendedor(${v.Id_Trabajador}, '${v.NombreCompleto.replace(/'/g, "\\'")}', '${v.nombre_usuario || ''}', '${v.email || ''}')">
-                            <div>
-                                <div class="nombre">${v.NombreCompleto}</div>
-                                <div class="email">${v.email || 'Sin email'} | Usuario: ${v.nombre_usuario || 'Sin usuario'}</div>
-                            </div>
+                        <div class="sugerencia-item" onclick="seleccionarVendedor(${v.Id_Trabajador}, '${v.NombreCompleto.replace(/'/g, "\\'")}')">
+                            <div class="nombre">${v.NombreCompleto}</div>
                             <span class="badge-rol badge-vendedor">Vendedor</span>
                         </div>
                     `).join('');
@@ -589,8 +576,8 @@
             document.getElementById('passwordInput').focus();
         }
 
-        function seleccionarVendedor(id, nombre, usuario, email) {
-            usuarioSeleccionado = { id, nombre, usuario, email, esAdmin: false };
+        function seleccionarVendedor(id, nombre) {
+            usuarioSeleccionado = { id, nombre, esAdmin: false };
             esAdmin = false;
             usuarioInput.value = nombre;
             sugerenciasDiv.style.display = 'none';
@@ -643,7 +630,7 @@
                 } else {
                     // Login como Vendedor
                     const nombreUsuario = usuarioSeleccionado ? 
-                        (usuarioSeleccionado.usuario || usuarioSeleccionado.nombre) : 
+                        (usuarioSeleccionado.nombre) : 
                         usuario;
 
                     const response = await fetch('/api/trabajadores/login', {
