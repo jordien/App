@@ -144,34 +144,6 @@
             }
         }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #4a1d6d;
-            margin-bottom: 8px;
-        }
-
-        input {
-            width: 100%;
-            padding: 16px 18px;
-            border: 2px solid #e8e8f0;
-            border-radius: 24px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #A63C89;
-            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
-        }
-
         .btn {
             padding: 16px 24px;
             border: none;
@@ -205,40 +177,6 @@
         .btn-danger {
             background: #c62828;
             color: white;
-        }
-
-        .btn-link {
-            background: none;
-            color: #A63C89;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .suggestions {
-            background: white;
-            border: 2px solid #e8e8f0;
-            border-radius: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 5px;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .suggestion-item {
-            padding: 12px 18px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            transition: background 0.2s;
-        }
-
-        .suggestion-item:hover {
-            background: #f5f0ff;
-        }
-
-        .suggestion-item .nombre {
-            font-weight: 600;
-            color: #4a1d6d;
         }
 
         .qr-card {
@@ -314,10 +252,6 @@
             font-weight: bold;
         }
 
-        .hidden {
-            display: none !important;
-        }
-
         .badge-usado {
             background: #ffebee;
             color: #c62828;
@@ -363,32 +297,6 @@
             border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 32px;
-            padding: 24px;
-            max-width: 350px;
-            width: 90%;
-        }
-
-        .modal-content h3 {
-            color: #4a1d6d;
-            margin-bottom: 20px;
         }
 
         .stats-grid {
@@ -481,13 +389,13 @@
         .estado-completo { background: #e8f5e9; color: #2e7d32; }
         .estado-ausente { background: #ffebee; color: #c62828; }
 
-        /* Login Section */
+        /* Ocultar login */
         #loginSection {
-            display: block;
+            display: none !important;
         }
 
-        #appSection.hidden {
-            display: none !important;
+        #appSection {
+            display: block !important;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -499,29 +407,8 @@
             <p>Sistema de Ventas</p>
         </div>
 
-        <!-- Pantalla de Login -->
-        <div id="loginSection">
-            <div class="input-group">
-                <label>Busca tu nombre</label>
-                <input type="text" id="searchInput" placeholder="Escribe tu nombre..." autocomplete="off">
-                <div id="suggestions" class="suggestions"></div>
-            </div>
-            <div id="passwordSection" class="hidden">
-                <div class="input-group">
-                    <label>Contraseña</label>
-                    <input type="password" id="passwordInput" placeholder="Ingresa tu contraseña">
-                </div>
-                <button class="btn btn-primary" onclick="iniciarSesion()">Iniciar Sesion</button>
-                <button class="btn btn-link" onclick="mostrarRecuperacion()">Olvidaste tu contraseña?</button>
-            </div>
-            <div id="selectedUserInfo" class="hidden" style="background:#f5f0ff; padding:12px; border-radius:20px; margin-top:10px; text-align:center;">
-                <span id="selectedUserName"></span>
-                <button onclick="clearSelection()" style="background:none; border:none; color:#A63C89; margin-left:10px;">X</button>
-            </div>
-        </div>
-
         <!-- Pantalla Principal -->
-        <div id="appSection" class="hidden">
+        <div id="appSection">
             <!-- Info Vendedor -->
             <div class="vendedor-card">
                 <div class="vendedor-header">
@@ -596,8 +483,6 @@
         let vendedor = null;
         let qrActual = null;
         let qrActivo = false;
-        let trabajadores = [];
-        let vendedorSeleccionado = null;
 
         function obtenerPremio(puntaje) {
             if (puntaje >= 50) return { texto: "C$ 1,000 + Diploma", clase: "premio-oro" };
@@ -792,189 +677,15 @@
             setTimeout(() => modal.remove(), 3000);
         }
 
-        function mostrarRecuperacion() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.id = 'recuperacionModal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3>Recuperar Contraseña</h3>
-                    <div class="input-group">
-                        <label>Correo electronico</label>
-                        <input type="email" id="recEmail" placeholder="ejemplo@correo.com">
-                    </div>
-                    <div class="footer-buttons" style="margin-top:15px;">
-                        <button class="btn btn-primary" onclick="enviarRecuperacion()">Enviar</button>
-                        <button class="btn btn-secondary" onclick="cerrarModalRecuperacion()">Cancelar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function cerrarModalRecuperacion() {
-            const modal = document.getElementById('recuperacionModal');
-            if (modal) modal.remove();
-        }
-
-        async function enviarRecuperacion() {
-            const email = document.getElementById('recEmail').value;
-            if (!email) {
-                mostrarMensaje('Ingresa tu correo electronico', true);
-                return;
-            }
-            try {
-                const response = await fetch('/api/trabajadores/recuperar-password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    mostrarMensaje(`Nueva contraseña temporal: ${data.nuevaPassword}`, false);
-                    cerrarModalRecuperacion();
-                } else {
-                    mostrarMensaje('Error: ' + data.message, true);
-                }
-            } catch (error) {
-                mostrarMensaje('Error de conexion: ' + error.message, true);
-            }
-        }
-
-        // ===== FUNCIÓN CERRAR SESIÓN VENDEDOR (CORREGIDA) =====
+        // ===== CERRAR SESIÓN =====
         function cerrarSesion() {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                // Limpiar localStorage
                 localStorage.removeItem('token_vendedor');
                 localStorage.removeItem('vendedor');
-                
-                // Limpiar variables
                 token = null;
                 vendedor = null;
-                qrActual = null;
-                qrActivo = false;
-                
-                // Limpiar campos del login
-                document.getElementById('searchInput').value = '';
-                document.getElementById('passwordInput').value = '';
-                document.getElementById('passwordSection').classList.add('hidden');
-                document.getElementById('selectedUserInfo').classList.add('hidden');
-                vendedorSeleccionado = null;
-                
-                // Mostrar login y ocultar app
-                document.getElementById('loginSection').style.display = 'block';
-                document.getElementById('appSection').classList.add('hidden');
-                
-                // Resetear QR
-                document.getElementById('qrContainer').style.display = 'none';
-                
-                // Recargar lista de trabajadores
-                cargarTrabajadores();
+                window.location.href = '/';
             }
-        }
-
-        async function cargarTrabajadores() {
-            try {
-                const response = await fetch('/api/trabajadores/activos');
-                const data = await response.json();
-                trabajadores = data;
-            } catch (error) {
-                console.error('Error cargando trabajadores:', error);
-            }
-        }
-
-        const searchInput = document.getElementById('searchInput');
-        const suggestionsDiv = document.getElementById('suggestions');
-        const passwordSection = document.getElementById('passwordSection');
-        const selectedUserInfo = document.getElementById('selectedUserInfo');
-        const selectedUserName = document.getElementById('selectedUserName');
-
-        // SOLO MUESTRA EL NOMBRE - SIN EMAIL NI USUARIO
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            if (query.length < 1) {
-                suggestionsDiv.style.display = 'none';
-                return;
-            }
-            const filtered = trabajadores.filter(t => 
-                t.NombreCompleto.toLowerCase().includes(query)
-            );
-            if (filtered.length > 0) {
-                suggestionsDiv.innerHTML = filtered.map(t => `
-                    <div class="suggestion-item" onclick="seleccionarVendedor(${t.Id_Trabajador}, '${t.NombreCompleto.replace(/'/g, "\\'")}')">
-                        <div class="nombre">${t.NombreCompleto}</div>
-                    </div>
-                `).join('');
-                suggestionsDiv.style.display = 'block';
-            } else {
-                suggestionsDiv.style.display = 'none';
-            }
-        });
-
-        function seleccionarVendedor(id, nombre) {
-            vendedorSeleccionado = { id, nombre };
-            searchInput.value = nombre;
-            suggestionsDiv.style.display = 'none';
-            selectedUserInfo.classList.remove('hidden');
-            selectedUserName.innerHTML = 'Seleccionado: ' + nombre;
-            passwordSection.classList.remove('hidden');
-        }
-
-        function clearSelection() {
-            vendedorSeleccionado = null;
-            searchInput.value = '';
-            selectedUserInfo.classList.add('hidden');
-            passwordSection.classList.add('hidden');
-            document.getElementById('passwordInput').value = '';
-        }
-
-        async function iniciarSesion() {
-            if (!vendedorSeleccionado) {
-                mostrarMensaje('Primero selecciona tu nombre de la lista', true);
-                return;
-            }
-            const password = document.getElementById('passwordInput').value;
-            if (!password) {
-                mostrarMensaje('Ingresa tu contraseña', true);
-                return;
-            }
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Verificando...';
-            btn.disabled = true;
-            try {
-                const response = await fetch('/api/trabajadores/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        nombre_usuario: vendedorSeleccionado.nombre, 
-                        password: password 
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    token = data.token;
-                    vendedor = data.trabajador;
-                    localStorage.setItem('token_vendedor', token);
-                    localStorage.setItem('vendedor', JSON.stringify(vendedor));
-                    mostrarApp();
-                    verificarQR();
-                } else {
-                    mostrarMensaje('Error: ' + data.message, true);
-                }
-            } catch (error) {
-                mostrarMensaje('Error de conexion: ' + error.message, true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        function mostrarApp() {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('appSection').classList.remove('hidden');
-            document.getElementById('vendedorNombre').innerHTML = vendedor.nombre;
-            document.getElementById('vendedorId').innerHTML = 'ID: ' + vendedor.id;
         }
 
         async function verificarQR() {
@@ -1086,12 +797,21 @@
             }
         }
 
-        // Inicializar - NO GUARDA SESIÓN AUTOMÁTICAMENTE
-        cargarTrabajadores();
-        
-        // Limpiar cualquier sesión guardada
-        localStorage.removeItem('token_vendedor');
-        localStorage.removeItem('vendedor');
+        // ===== INICIALIZAR =====
+        const tokenGuardado = localStorage.getItem('token_vendedor');
+        const vendedorGuardado = localStorage.getItem('vendedor');
+
+        if (tokenGuardado && vendedorGuardado) {
+            token = tokenGuardado;
+            vendedor = JSON.parse(vendedorGuardado);
+            document.getElementById('vendedorNombre').innerHTML = vendedor.nombre;
+            document.getElementById('vendedorId').innerHTML = 'ID: ' + vendedor.id;
+            verificarQR();
+            cargarAsistencia();
+            cargarMisPuntos();
+        } else {
+            window.location.href = '/';
+        }
     </script>
 </body>
 </html>
