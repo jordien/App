@@ -59,7 +59,7 @@
         .vendedor-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             width: 100%;
         }
 
@@ -76,6 +76,16 @@
             font-size: 12px;
             opacity: 0.9;
             margin-top: 5px;
+        }
+
+        .puntos-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-top: 8px;
+            font-weight: 600;
         }
 
         .btn-cerrar-sesion-vendedor {
@@ -102,20 +112,22 @@
             background: #f0f0f0;
             border-radius: 30px;
             padding: 5px;
+            overflow-x: auto;
         }
 
         .tab {
             flex: 1;
-            padding: 12px;
+            padding: 12px 8px;
             text-align: center;
             border: none;
             background: transparent;
             border-radius: 25px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             color: #666;
+            white-space: nowrap;
         }
 
         .tab.active {
@@ -155,6 +167,11 @@
             transition: all 0.3s ease;
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .btn-primary {
             background: linear-gradient(135deg, #A63C89, #4a1d6d);
             color: white;
@@ -177,6 +194,12 @@
         .btn-danger {
             background: #c62828;
             color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            width: auto;
         }
 
         .qr-card {
@@ -250,6 +273,7 @@
             justify-content: center;
             font-size: 12px;
             font-weight: bold;
+            flex-shrink: 0;
         }
 
         .badge-usado {
@@ -274,29 +298,47 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            animation: fadeIn 0.3s ease;
         }
 
         .modal-message-content {
             background: white;
             border-radius: 32px;
-            padding: 24px;
-            max-width: 300px;
+            padding: 32px 24px;
+            max-width: 320px;
+            width: 90%;
             text-align: center;
+        }
+
+        .modal-message-content .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
         }
 
         .modal-message-content p {
             margin-bottom: 20px;
             color: #333;
+            font-size: 15px;
         }
 
         .modal-message-content button {
             background: linear-gradient(135deg, #A63C89, #4a1d6d);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 32px;
             border-radius: 30px;
             font-weight: 600;
+            font-size: 16px;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-message-content button:hover {
+            transform: scale(1.02);
+        }
+
+        .modal-message-content button.btn-error {
+            background: #c62828;
         }
 
         .stats-grid {
@@ -389,16 +431,145 @@
         .estado-completo { background: #e8f5e9; color: #2e7d32; }
         .estado-ausente { background: #ffebee; color: #c62828; }
 
-        /* Ocultar login */
-        #loginSection {
-            display: none !important;
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
         }
 
-        #appSection {
-            display: block !important;
+        .badge-warning { background: #fff3e0; color: #e65100; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+        .badge-danger { background: #ffebee; color: #c62828; }
+        .badge-info { background: #e3f2fd; color: #1565c0; }
+
+        .ticket-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
         }
 
-        /* Modal de confirmación personalizado */
+        .ticket-item:last-child {
+            border-bottom: none;
+        }
+
+        .ticket-codigo {
+            font-family: monospace;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .ticket-tiempo {
+            font-size: 11px;
+        }
+
+        .ticket-tiempo.expirado {
+            color: #c62828;
+        }
+
+        .ticket-tiempo.valido {
+            color: #2e7d32;
+        }
+
+        .ticket-total {
+            font-weight: 800;
+            color: #A63C89;
+        }
+
+        .btn-cancelar-ticket {
+            background: #ffebee;
+            color: #c62828;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-cancelar-ticket:hover {
+            background: #ffcdd2;
+            transform: scale(1.1);
+        }
+
+        .producto-ticket-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .producto-ticket-item:last-child {
+            border-bottom: none;
+        }
+
+        .ticket-productos-container {
+            background: #f5f5f5;
+            border-radius: 16px;
+            padding: 12px;
+            min-height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .ticket-productos-container .vacio {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .ticket-total-display {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 2px solid #eee;
+            font-weight: 700;
+        }
+
+        .ticket-total-display .total {
+            color: #A63C89;
+            font-size: 18px;
+        }
+
+        .ticket-generado-card {
+            display: none;
+            background: #e8f5e9;
+            border-radius: 28px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .ticket-generado-card .icon-grande {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .ticket-generado-card h4 {
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+
+        .ticket-generado-card .codigo {
+            font-family: monospace;
+            font-size: 14px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .ticket-generado-card .sub {
+            color: #666;
+            font-size: 13px;
+        }
+
+        /* Modal de confirmación */
         .modal-confirm {
             display: none;
             position: fixed;
@@ -488,14 +659,135 @@
         .btn-cancelar:hover {
             background: #e0e0e0;
         }
+
+        /* Historial de tickets */
+        .tickets-historial {
+            margin-top: 20px;
+        }
+
+        .tickets-historial h4 {
+            color: #4a1d6d;
+            margin-bottom: 10px;
+        }
+
+        .tickets-historial .lista {
+            background: #f5f5f5;
+            border-radius: 16px;
+            padding: 10px;
+            min-height: 60px;
+        }
+
+        .tickets-historial .lista .vacio {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .btn-actualizar {
+            background: #A63C89;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .btn-actualizar:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-actualizar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Historial de puntos */
+        .historial-puntos {
+            margin-top: 16px;
+        }
+
+        .historial-puntos h4 {
+            color: #4a1d6d;
+            margin-bottom: 10px;
+        }
+
+        .historial-puntos .lista {
+            background: #f5f5f5;
+            border-radius: 16px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .historial-puntos .lista .vacio {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .punto-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .punto-item:last-child {
+            border-bottom: none;
+        }
+
+        .punto-item .puntos {
+            font-weight: 700;
+        }
+
+        .punto-item .puntos.positivo {
+            color: #2e7d32;
+        }
+
+        .punto-item .puntos.negativo {
+            color: #c62828;
+        }
+
+        .punto-item .motivo {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .punto-item .fecha {
+            font-size: 11px;
+            color: #999;
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 20px 16px; }
+            .vendedor-nombre { font-size: 18px; }
+            .tabs { gap: 4px; }
+            .tab { font-size: 11px; padding: 10px 6px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .stat-number { font-size: 22px; }
+            .puntaje-valor { font-size: 36px; }
+            .footer-buttons { flex-direction: column; gap: 8px; }
+            .ticket-item { flex-wrap: wrap; gap: 8px; }
+            .modal-confirm-content { padding: 24px; }
+        }
+
+        #loginSection {
+            display: none !important;
+        }
+
+        #appSection {
+            display: block !important;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Chepita Vendedor</h1>
-            <p>Sistema de Ventas</p>
+            <h1>🏪 Chepita</h1>
+            <p>Panel del Vendedor</p>
         </div>
 
         <!-- Pantalla Principal -->
@@ -506,6 +798,7 @@
                     <div class="vendedor-info">
                         <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
                         <div class="vendedor-id" id="vendedorId"></div>
+                        <div class="puntos-badge" id="puntosBadge">⭐ 0 pts</div>
                     </div>
                     <button class="btn-cerrar-sesion-vendedor" onclick="mostrarModalCerrarSesion()">Cerrar Sesión</button>
                 </div>
@@ -513,54 +806,132 @@
 
             <!-- Tabs -->
             <div class="tabs">
-                <button class="tab active" data-tab="qr" onclick="cambiarTab('qr')">Venta QR</button>
-                <button class="tab" data-tab="asistencia" onclick="cambiarTab('asistencia')">Asistencia</button>
-                <button class="tab" data-tab="puntos" onclick="cambiarTab('puntos')">Mis Puntos</button>
+                <button class="tab active" data-tab="ticket" onclick="cambiarTab('ticket')">🎫 Ticket</button>
+                <button class="tab" data-tab="qr" onclick="cambiarTab('qr')">📱 QR</button>
+                <button class="tab" data-tab="asistencia" onclick="cambiarTab('asistencia')">⏰ Asistencia</button>
+                <button class="tab" data-tab="puntos" onclick="cambiarTab('puntos')">⭐ Puntos</button>
             </div>
 
-            <!-- Panel QR Ventas -->
-            <div id="panelQR" class="panel active-panel">
+            <!-- ================= PANEL TICKET ================= -->
+            <div id="panelTicket" class="panel active-panel">
+                <div id="ticketForm">
+                    <div class="qr-card" style="margin-bottom: 20px;">
+                        <h4 style="color: #4a1d6d; margin-bottom: 15px;">🛒 Generar Ticket de Venta</h4>
+                        
+                        <div id="ticketProductos" style="margin-bottom: 15px;">
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                                <select id="ticketProductoSelect" style="flex:2; padding: 10px 14px; border-radius: 20px; border: 2px solid #e8e8f0; font-size: 14px; min-width: 150px;">
+                                    <option value="">Seleccionar producto...</option>
+                                </select>
+                                <input type="number" id="ticketCantidad" placeholder="Cant" style="flex:1; width:80px; padding: 10px 14px; border-radius: 20px; border: 2px solid #e8e8f0; font-size: 14px; min-width: 70px;">
+                                <button onclick="agregarProductoTicket()" style="background:#A63C89; color:white; border:none; border-radius:20px; padding:10px 20px; font-weight:700; cursor:pointer; transition:all 0.3s; flex-shrink:0;">
+                                    ➕ Agregar
+                                </button>
+                            </div>
+                            <div id="ticketListaProductos" class="ticket-productos-container">
+                                <span class="vacio">No hay productos agregados</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-total-display">
+                            <span>Total:</span>
+                            <span class="total" id="ticketTotal">C$0.00</span>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="generarTicketVenta()" id="btnGenerarTicket" style="margin-top:15px;">
+                            📨 Generar Ticket y Enviar a Caja
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ticket generado -->
+                <div id="ticketGenerado" class="ticket-generado-card">
+                    <div class="icon-grande">✅</div>
+                    <h4>Ticket Enviado a Caja</h4>
+                    <p class="sub">El cajero recibirá tu pedido automáticamente</p>
+                    <div class="codigo" id="ticketCodigoGenerado"></div>
+                    <div id="ticketTiempoRestante" style="font-size:13px; color:#2e7d32; margin:8px 0;"></div>
+                    <button onclick="limpiarTicket()" style="background:#A63C89; color:white; border:none; border-radius:20px; padding:10px 24px; font-weight:700; cursor:pointer; margin-top:10px;">
+                        📝 Nuevo Ticket
+                    </button>
+                </div>
+
+                <!-- Historial de tickets -->
+                <div class="tickets-historial">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h4>📋 Mis Tickets</h4>
+                        <button class="btn-actualizar" onclick="cargarMisTickets()" id="btnActualizarTickets">Actualizar</button>
+                    </div>
+                    <div id="listaTickets" class="lista">
+                        <span class="vacio">Cargando...</span>
+                    </div>
+                </div>
+
+                <div class="instrucciones">
+                    <h4>📖 Cómo funciona</h4>
+                    <p><span class="step-number">1</span> Selecciona los productos y cantidades</p>
+                    <p><span class="step-number">2</span> Genera el ticket (válido por 15 min)</p>
+                    <p><span class="step-number">3</span> La caja lo recibe automáticamente</p>
+                    <p><span class="step-number">4</span> El cajero confirma la venta</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">🔒 El vendedor se asigna automáticamente</p>
+                </div>
+            </div>
+
+            <!-- ================= PANEL QR ================= -->
+            <div id="panelQR" class="panel">
                 <div class="qr-card" id="qrContainer" style="display: none;">
                     <div class="qr-wrapper"><div id="qrcode"></div></div>
                     <div class="codigo-texto" id="codigoTexto"></div>
+                    <div id="qrTiempoRestante" style="font-size:13px; color:#2e7d32; margin:8px 0;"></div>
                     <div class="badge-usado" id="qrUsadoBadge" style="display: none;">QR ya usado</div>
                 </div>
-                <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerar">Generar QR para venta</button>
+                <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerarQR">📱 Generar QR para venta</button>
                 <div class="instrucciones">
-                    <h4>Como usar este QR</h4>
+                    <h4>📖 Cómo usar el QR</h4>
                     <p><span class="step-number">1</span> Genera un nuevo QR para cada venta</p>
                     <p><span class="step-number">2</span> Muestra el QR al cajero</p>
                     <p><span class="step-number">3</span> El QR se usa una sola vez</p>
-                    <p><span class="step-number">4</span> Despues de usado, genera uno nuevo</p>
-                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">Cada QR es valido para una sola venta</p>
+                    <p><span class="step-number">4</span> Después de usado, genera uno nuevo</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">⏱️ Cada QR es válido por 15 minutos</p>
                 </div>
             </div>
 
-            <!-- Panel Asistencia -->
+            <!-- ================= PANEL ASISTENCIA ================= -->
             <div id="panelAsistencia" class="panel">
                 <div id="asistenciaContent">
-                    <div class="loading-puntos">Cargando tu estado...</div>
+                    <div class="loading-puntos">⏳ Cargando tu estado...</div>
                 </div>
                 <div class="footer-buttons" style="margin-top: 15px; gap: 10px;">
-                    <button class="btn btn-success" onclick="marcarEntrada()" id="btnEntrada" style="background: #2e7d32;">Marcar Entrada</button>
-                    <button class="btn btn-danger" onclick="marcarSalida()" id="btnSalida" style="background: #c62828;">Marcar Salida</button>
+                    <button class="btn btn-success" onclick="marcarEntrada()" id="btnEntrada">✅ Marcar Entrada</button>
+                    <button class="btn btn-danger" onclick="marcarSalida()" id="btnSalida">❌ Marcar Salida</button>
                 </div>
                 <div class="instrucciones">
-                    <h4>Sistema de Asistencia</h4>
+                    <h4>📖 Sistema de Asistencia</h4>
                     <p><span class="step-number">1</span> Al llegar, presiona "Marcar Entrada"</p>
                     <p><span class="step-number">2</span> Al retirarte, presiona "Marcar Salida"</p>
-                    <p><span class="step-number">3</span> Tu registro quedara guardado automaticamente</p>
-                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">El horario se registra automaticamente</p>
+                    <p><span class="step-number">3</span> Tu registro quedará guardado automáticamente</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">⏰ El horario se registra automáticamente</p>
                 </div>
             </div>
 
-            <!-- Panel Puntos -->
+            <!-- ================= PANEL PUNTOS ================= -->
             <div id="panelPuntos" class="panel">
                 <div id="puntosContent">
-                    <div class="loading-puntos">Cargando tus estadisticas...</div>
+                    <div class="loading-puntos">⭐ Cargando tus estadísticas...</div>
                 </div>
+                
+                <div class="historial-puntos">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h4>📜 Historial de Puntos</h4>
+                        <button class="btn-actualizar" onclick="cargarHistorialPuntos()" id="btnActualizarHistorial">Actualizar</button>
+                    </div>
+                    <div id="historialPuntos" class="lista">
+                        <span class="vacio">Cargando...</span>
+                    </div>
+                </div>
+
                 <button class="btn btn-secondary" onclick="cargarMisPuntos()" style="margin-top: 15px;">
-                    Actualizar datos
+                    🔄 Actualizar datos
                 </button>
             </div>
         </div>
@@ -580,205 +951,77 @@
     </div>
 
     <script>
+        // ================= VARIABLES GLOBALES =================
         let token = null;
         let vendedor = null;
         let qrActual = null;
         let qrActivo = false;
+        let ticketProductos = [];
+        let productosDisponibles = [];
+        let temporizadorTicket = null;
+        let temporizadorQR = null;
 
+        // ================= FUNCIONES DE PREMIOS =================
         function obtenerPremio(puntaje) {
-            if (puntaje >= 50) return { texto: "C$ 1,000 + Diploma", clase: "premio-oro" };
-            if (puntaje >= 40) return { texto: "C$ 750", clase: "premio-plata" };
-            if (puntaje >= 30) return { texto: "C$ 500", clase: "premio-bronce" };
-            if (puntaje >= 20) return { texto: "C$ 250", clase: "premio-cobre" };
-            if (puntaje >= 10) return { texto: "Vale C$ 100", clase: "premio-vale" };
+            if (puntaje >= 50) return { texto: "🏆 C$ 1,000 + Diploma", clase: "premio-oro" };
+            if (puntaje >= 40) return { texto: "🥈 C$ 750", clase: "premio-plata" };
+            if (puntaje >= 30) return { texto: "🥉 C$ 500", clase: "premio-bronce" };
+            if (puntaje >= 20) return { texto: "🪙 C$ 250", clase: "premio-cobre" };
+            if (puntaje >= 10) return { texto: "🎫 Vale C$ 100", clase: "premio-vale" };
             return { texto: "Sin premio", clase: "premio-nada" };
         }
 
+        // ================= CAMBIAR TAB =================
         function cambiarTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
             
+            document.getElementById('panelTicket').classList.remove('active-panel');
             document.getElementById('panelQR').classList.remove('active-panel');
             document.getElementById('panelAsistencia').classList.remove('active-panel');
             document.getElementById('panelPuntos').classList.remove('active-panel');
             
-            if (tab === 'qr') {
+            if (tab === 'ticket') {
+                document.getElementById('panelTicket').classList.add('active-panel');
+                cargarProductosParaTicket();
+                cargarMisTickets();
+            } else if (tab === 'qr') {
                 document.getElementById('panelQR').classList.add('active-panel');
+                verificarQR();
             } else if (tab === 'asistencia') {
                 document.getElementById('panelAsistencia').classList.add('active-panel');
                 cargarAsistencia();
             } else {
                 document.getElementById('panelPuntos').classList.add('active-panel');
                 cargarMisPuntos();
+                cargarHistorialPuntos();
             }
         }
 
-        async function cargarAsistencia() {
-            const content = document.getElementById('asistenciaContent');
-            content.innerHTML = '<div class="loading-puntos">Cargando tu estado...</div>';
+        // ================= MODAL DE MENSAJES =================
+        function mostrarMensaje(texto, esError = false, tiempo = 3000) {
+            // Remover modales existentes
+            document.querySelectorAll('.modal-message').forEach(el => el.remove());
             
-            try {
-                const response = await fetch(`/api/asistencia/estado/${vendedor.id}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    let estadoTexto = '';
-                    let estadoClase = '';
-                    
-                    if (data.estado === 'pendiente') {
-                        estadoTexto = 'No has marcado asistencia hoy';
-                        estadoClase = 'estado-pendiente';
-                    } else if (data.estado === 'en_jornada') {
-                        estadoTexto = `En jornada - Entrada: ${data.entrada}`;
-                        estadoClase = 'estado-en_jornada';
-                    } else if (data.estado === 'completo') {
-                        estadoTexto = `Jornada completada - Entrada: ${data.entrada} | Salida: ${data.salida}`;
-                        estadoClase = 'estado-completo';
-                    } else {
-                        estadoTexto = data.mensaje || 'Estado desconocido';
-                        estadoClase = 'estado-ausente';
-                    }
-                    
-                    let html = `
-                        <div class="asistencia-card">
-                            <div class="asistencia-fecha">${new Date().toLocaleDateString()}</div>
-                            <div class="asistencia-estado ${estadoClase}">
-                                ${estadoTexto}
-                            </div>
-                        </div>
-                    `;
-                    content.innerHTML = html;
-                } else {
-                    content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
-                }
-            } catch (error) {
-                console.error('Error cargando asistencia:', error);
-                content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
-            }
-        }
-
-        async function marcarEntrada() {
-            const btn = document.getElementById('btnEntrada');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Procesando...';
-            btn.disabled = true;
-            
-            try {
-                const response = await fetch('/api/asistencia/marcar-entrada', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ id_vendedor: vendedor.id })
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    mostrarMensaje(data.message, false);
-                    cargarAsistencia();
-                } else {
-                    mostrarMensaje(data.message, true);
-                }
-            } catch (error) {
-                mostrarMensaje('Error: ' + error.message, true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        async function marcarSalida() {
-            const btn = document.getElementById('btnSalida');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Procesando...';
-            btn.disabled = true;
-            
-            try {
-                const response = await fetch('/api/asistencia/marcar-salida', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ id_vendedor: vendedor.id })
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    mostrarMensaje(data.message, false);
-                    cargarAsistencia();
-                } else {
-                    mostrarMensaje(data.message, true);
-                }
-            } catch (error) {
-                mostrarMensaje('Error: ' + error.message, true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        async function cargarMisPuntos() {
-            const puntosContent = document.getElementById('puntosContent');
-            puntosContent.innerHTML = '<div class="loading-puntos">Cargando tus estadisticas...</div>';
-            
-            try {
-                const response = await fetch(`/api/puntos-vendedor/${vendedor.id}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const premio = obtenerPremio(data.puntaje_total);
-                    
-                    let html = `
-                        <div class="puntaje-card">
-                            <div class="puntaje-valor">${data.puntaje_total} pts</div>
-                            <div>Puntaje Total</div>
-                            <div class="premio-badge ${premio.clase}">${premio.texto}</div>
-                        </div>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-number">${data.total_ventas}</div>
-                                <div class="stat-label">Ventas Realizadas</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">${data.dias_activos}</div>
-                                <div class="stat-label">Dias Activos</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">${data.promedio_diario}</div>
-                                <div class="stat-label">Promedio Diario</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">C$${data.total_ventas_cordobas || 0}</div>
-                                <div class="stat-label">Total Ventas</div>
-                            </div>
-                        </div>
-                    `;
-                    puntosContent.innerHTML = html;
-                } else {
-                    puntosContent.innerHTML = `<div class="loading-puntos" style="color:#c62828;">Error: ${data.message}</div>`;
-                }
-            } catch (error) {
-                console.error('Error cargando puntos:', error);
-                puntosContent.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
-            }
-        }
-
-        function mostrarMensaje(texto, esError) {
             const modal = document.createElement('div');
             modal.className = 'modal-message';
             modal.innerHTML = `
                 <div class="modal-message-content">
+                    <div class="icon">${esError ? '❌' : '✅'}</div>
                     <p style="color: ${esError ? '#c62828' : '#2e7d32'}">${texto}</p>
-                    <button onclick="this.parentElement.parentElement.remove()">Aceptar</button>
+                    <button class="${esError ? 'btn-error' : ''}" onclick="this.parentElement.parentElement.remove()">Aceptar</button>
                 </div>
             `;
             document.body.appendChild(modal);
-            setTimeout(() => modal.remove(), 3000);
+            
+            if (tiempo > 0) {
+                setTimeout(() => {
+                    if (modal.parentElement) modal.remove();
+                }, tiempo);
+            }
         }
 
-        // ===== MODAL CERRAR SESIÓN =====
+        // ================= MODAL CERRAR SESIÓN =================
         function mostrarModalCerrarSesion() {
             document.getElementById('modalConfirmCerrar').classList.add('active');
         }
@@ -796,6 +1039,265 @@
             window.location.href = '/';
         }
 
+        // ================= TICKETS =================
+        async function cargarProductosParaTicket() {
+            try {
+                const response = await fetch('/api/productos');
+                productosDisponibles = await response.json();
+                const select = document.getElementById('ticketProductoSelect');
+                select.innerHTML = '<option value="">Seleccionar producto...</option>' + 
+                    productosDisponibles.map(p => 
+                        `<option value="${p.Id_Producto}" data-precio="${p.Precio}" data-stock="${p.Stock}">${p.Nombre} - C$${p.Precio} (${p.Stock} disp.)</option>`
+                    ).join('');
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+            }
+        }
+
+        function agregarProductoTicket() {
+            const select = document.getElementById('ticketProductoSelect');
+            const cantidad = parseInt(document.getElementById('ticketCantidad').value);
+            
+            if (!select.value || !cantidad || cantidad < 1) {
+                mostrarMensaje('Selecciona un producto y una cantidad válida', true);
+                return;
+            }
+            
+            const producto = productosDisponibles.find(p => p.Id_Producto == select.value);
+            if (!producto) return;
+            
+            const productoExistente = ticketProductos.find(p => p.Id_Producto == producto.Id_Producto);
+            const totalCantidad = productoExistente ? productoExistente.cantidad + cantidad : cantidad;
+            
+            if (totalCantidad > producto.Stock) {
+                mostrarMensaje(`Stock insuficiente. Disponible: ${producto.Stock}`, true);
+                return;
+            }
+            
+            if (productoExistente) {
+                productoExistente.cantidad += cantidad;
+                productoExistente.subtotal = productoExistente.cantidad * producto.Precio;
+            } else {
+                ticketProductos.push({
+                    Id_Producto: producto.Id_Producto,
+                    Nombre: producto.Nombre,
+                    Precio: producto.Precio,
+                    cantidad: cantidad,
+                    subtotal: cantidad * producto.Precio
+                });
+            }
+            
+            document.getElementById('ticketCantidad').value = '';
+            document.getElementById('ticketProductoSelect').value = '';
+            renderizarTicketProductos();
+        }
+
+        function renderizarTicketProductos() {
+            const container = document.getElementById('ticketListaProductos');
+            const totalSpan = document.getElementById('ticketTotal');
+            let total = 0;
+            
+            if (ticketProductos.length === 0) {
+                container.innerHTML = '<span class="vacio">No hay productos agregados</span>';
+                totalSpan.textContent = 'C$0.00';
+                return;
+            }
+            
+            container.innerHTML = ticketProductos.map((p, i) => {
+                total += p.subtotal;
+                return `
+                    <div class="producto-ticket-item">
+                        <span>${p.Nombre} x${p.cantidad}</span>
+                        <span>C$${p.subtotal.toFixed(2)} 
+                            <button onclick="eliminarProductoTicket(${i})" style="background:#ffebee; color:#c62828; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px;">✕</button>
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            totalSpan.textContent = `C$${total.toFixed(2)}`;
+        }
+
+        function eliminarProductoTicket(index) {
+            ticketProductos.splice(index, 1);
+            renderizarTicketProductos();
+        }
+
+        async function generarTicketVenta() {
+            if (ticketProductos.length === 0) {
+                mostrarMensaje('Agrega al menos un producto', true);
+                return;
+            }
+            
+            const total = ticketProductos.reduce((sum, p) => sum + p.subtotal, 0);
+            const productos = ticketProductos.map(p => ({
+                Id_Producto: p.Id_Producto,
+                Nombre: p.Nombre,
+                cantidad: p.cantidad,
+                precio_unitario: p.Precio,
+                subtotal: p.subtotal
+            }));
+            
+            const btn = document.getElementById('btnGenerarTicket');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Generando...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/tickets/generar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ productos, total })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('ticketCodigoGenerado').textContent = data.ticket.codigo;
+                    document.getElementById('ticketGenerado').style.display = 'block';
+                    document.getElementById('ticketForm').style.display = 'none';
+                    
+                    // Iniciar temporizador de expiración
+                    iniciarTemporizadorTicket(data.ticket.expira_en);
+                    
+                    mostrarMensaje(`✅ Ticket enviado: ${data.ticket.codigo}`, false, 4000);
+                    cargarMisTickets();
+                    ticketProductos = [];
+                    renderizarTicketProductos();
+                } else {
+                    mostrarMensaje('Error: ' + data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function iniciarTemporizadorTicket(fechaExpiracion) {
+            if (temporizadorTicket) clearInterval(temporizadorTicket);
+            
+            const expira = new Date(fechaExpiracion);
+            const el = document.getElementById('ticketTiempoRestante');
+            
+            temporizadorTicket = setInterval(() => {
+                const ahora = new Date();
+                const diff = expira - ahora;
+                
+                if (diff <= 0) {
+                    el.textContent = '⏰ Ticket expirado';
+                    el.style.color = '#c62828';
+                    clearInterval(temporizadorTicket);
+                    return;
+                }
+                
+                const minutos = Math.floor(diff / 60000);
+                const segundos = Math.floor((diff % 60000) / 1000);
+                el.textContent = `⏳ Válido por ${minutos}m ${segundos}s`;
+                el.style.color = '#2e7d32';
+            }, 1000);
+        }
+
+        function limpiarTicket() {
+            if (temporizadorTicket) {
+                clearInterval(temporizadorTicket);
+                temporizadorTicket = null;
+            }
+            ticketProductos = [];
+            renderizarTicketProductos();
+            document.getElementById('ticketGenerado').style.display = 'none';
+            document.getElementById('ticketForm').style.display = 'block';
+            document.getElementById('ticketTiempoRestante').textContent = '';
+        }
+
+        async function cargarMisTickets() {
+            const container = document.getElementById('listaTickets');
+            const btn = document.getElementById('btnActualizarTickets');
+            btn.disabled = true;
+            btn.textContent = '⏳...';
+            
+            try {
+                const response = await fetch('/api/tickets/pendientes');
+                const data = await response.json();
+                
+                if (data.success && data.tickets.length > 0) {
+                    const misTickets = data.tickets.filter(t => t.id_vendedor == vendedor.id);
+                    if (misTickets.length === 0) {
+                        container.innerHTML = '<span class="vacio">No tienes tickets pendientes</span>';
+                        return;
+                    }
+                    
+                    container.innerHTML = misTickets.map(t => {
+                        const expirado = new Date(t.fecha_expiracion) < new Date();
+                        const tiempoRestante = mostrarTiempoRestante(t.fecha_expiracion);
+                        
+                        return `
+                            <div class="ticket-item">
+                                <div>
+                                    <div class="ticket-codigo">${t.codigo}</div>
+                                    <div class="ticket-tiempo ${expirado ? 'expirado' : 'valido'}">${tiempoRestante}</div>
+                                </div>
+                                <div class="ticket-total">C$${t.total}</div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span class="badge ${t.estado === 'pendiente' ? 'badge-warning' : 'badge-success'}">${t.estado}</span>
+                                    ${t.estado === 'pendiente' ? 
+                                        `<button class="btn-cancelar-ticket" onclick="cancelarTicket('${t.codigo}')" title="Cancelar ticket">✕</button>` : 
+                                        ''
+                                    }
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<span class="vacio">No hay tickets pendientes</span>';
+                }
+            } catch (error) {
+                console.error('Error cargando tickets:', error);
+                container.innerHTML = '<span class="vacio" style="color:#c62828;">Error al cargar tickets</span>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Actualizar';
+            }
+        }
+
+        function mostrarTiempoRestante(fechaExpiracion) {
+            const ahora = new Date();
+            const expira = new Date(fechaExpiracion);
+            const diff = expira - ahora;
+            
+            if (diff <= 0) return '⏰ Expirado';
+            
+            const minutos = Math.floor(diff / 60000);
+            const segundos = Math.floor((diff % 60000) / 1000);
+            return `⏳ ${minutos}m ${segundos}s`;
+        }
+
+        async function cancelarTicket(codigo) {
+            if (!confirm(`¿Cancelar el ticket ${codigo}?`)) return;
+            
+            try {
+                const response = await fetch(`/api/tickets/${codigo}/cancelar`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    mostrarMensaje('Ticket cancelado', false);
+                    cargarMisTickets();
+                } else {
+                    mostrarMensaje('Error: ' + data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message, true);
+            }
+        }
+
+        // ================= QR =================
         async function verificarQR() {
             try {
                 const response = await fetch('/api/vendedor/qr-activo/' + vendedor.id);
@@ -803,7 +1305,7 @@
                 if (data.tiene_qr_activo && !data.usado) {
                     qrActual = data.codigo;
                     qrActivo = true;
-                    mostrarQR(data.codigo, data.usado);
+                    mostrarQR(data.codigo, data.usado, data.expira);
                 } else {
                     document.getElementById('qrContainer').style.display = 'none';
                     qrActivo = false;
@@ -814,10 +1316,11 @@
         }
 
         async function generarNuevoQR() {
-            const btn = document.getElementById('btnGenerar');
+            const btn = document.getElementById('btnGenerarQR');
             const originalText = btn.innerHTML;
-            btn.innerHTML = 'Generando...';
+            btn.innerHTML = '⏳ Generando...';
             btn.disabled = true;
+            
             try {
                 const response = await fetch('/api/vendedor/generar-qr', {
                     method: 'POST',
@@ -831,8 +1334,8 @@
                 if (data.success) {
                     qrActual = data.codigo;
                     qrActivo = true;
-                    mostrarQR(data.codigo, false);
-                    mostrarMensaje('QR generado correctamente', false);
+                    mostrarQR(data.codigo, false, data.expira);
+                    mostrarMensaje('✅ QR generado correctamente', false, 3000);
                 } else {
                     mostrarMensaje('Error: ' + data.message, true);
                 }
@@ -844,45 +1347,274 @@
             }
         }
 
-        function mostrarQR(codigo, usado) {
+        function mostrarQR(codigo, usado, expira) {
             document.getElementById('qrContainer').style.display = 'block';
             document.getElementById('codigoTexto').textContent = codigo;
             const qrDiv = document.getElementById('qrcode');
             qrDiv.innerHTML = '';
-            new QRCode(qrDiv, {
-                text: codigo,
-                width: 220,
-                height: 220,
-                colorDark: "#A63C89",
-                colorLight: "#ffffff"
-            });
+            
+            try {
+                new QRCode(qrDiv, {
+                    text: codigo,
+                    width: 220,
+                    height: 220,
+                    colorDark: "#A63C89",
+                    colorLight: "#ffffff"
+                });
+            } catch (e) {
+                qrDiv.innerHTML = '<div style="padding:40px; color:#999;">Error generando QR</div>';
+            }
             
             if (usado) {
                 document.getElementById('qrUsadoBadge').style.display = 'block';
                 document.getElementById('qrContainer').style.opacity = '0.5';
                 qrActivo = false;
+                document.getElementById('qrTiempoRestante').textContent = '⏰ QR ya usado';
+                document.getElementById('qrTiempoRestante').style.color = '#c62828';
             } else {
                 document.getElementById('qrUsadoBadge').style.display = 'none';
                 document.getElementById('qrContainer').style.opacity = '1';
                 qrActivo = true;
+                
+                // Temporizador de expiración
+                if (temporizadorQR) clearInterval(temporizadorQR);
+                const expiraDate = new Date(expira);
+                const el = document.getElementById('qrTiempoRestante');
+                
+                temporizadorQR = setInterval(() => {
+                    const ahora = new Date();
+                    const diff = expiraDate - ahora;
+                    
+                    if (diff <= 0) {
+                        el.textContent = '⏰ QR expirado';
+                        el.style.color = '#c62828';
+                        clearInterval(temporizadorQR);
+                        return;
+                    }
+                    
+                    const minutos = Math.floor(diff / 60000);
+                    const segundos = Math.floor((diff % 60000) / 1000);
+                    el.textContent = `⏳ Válido por ${minutos}m ${segundos}s`;
+                    el.style.color = '#2e7d32';
+                }, 1000);
             }
         }
 
-        // ===== INICIALIZAR =====
+        // ================= ASISTENCIA =================
+        async function cargarAsistencia() {
+            const content = document.getElementById('asistenciaContent');
+            content.innerHTML = '<div class="loading-puntos">⏳ Cargando tu estado...</div>';
+            
+            try {
+                const response = await fetch(`/api/asistencia/estado/${vendedor.id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let estadoTexto = '';
+                    let estadoClase = '';
+                    
+                    if (data.estado === 'pendiente') {
+                        estadoTexto = '📋 No has marcado asistencia hoy';
+                        estadoClase = 'estado-pendiente';
+                    } else if (data.estado === 'en_jornada') {
+                        estadoTexto = `🟢 En jornada - Entrada: ${data.entrada}`;
+                        estadoClase = 'estado-en_jornada';
+                    } else if (data.estado === 'completo') {
+                        estadoTexto = `✅ Jornada completada - Entrada: ${data.entrada} | Salida: ${data.salida}`;
+                        estadoClase = 'estado-completo';
+                    } else {
+                        estadoTexto = data.mensaje || 'Estado desconocido';
+                        estadoClase = 'estado-ausente';
+                    }
+                    
+                    let html = `
+                        <div class="asistencia-card">
+                            <div class="asistencia-fecha">📅 ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                            <div class="asistencia-estado ${estadoClase}">
+                                ${estadoTexto}
+                            </div>
+                        </div>
+                    `;
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">❌ Error al cargar los datos</div>';
+                }
+            } catch (error) {
+                console.error('Error cargando asistencia:', error);
+                content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">❌ Error al cargar los datos</div>';
+            }
+        }
+
+        async function marcarEntrada() {
+            const btn = document.getElementById('btnEntrada');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Procesando...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/asistencia/marcar-entrada', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ id_vendedor: vendedor.id })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarMensaje(data.message, false, 3000);
+                    cargarAsistencia();
+                } else {
+                    mostrarMensaje(data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function marcarSalida() {
+            const btn = document.getElementById('btnSalida');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Procesando...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/asistencia/marcar-salida', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ id_vendedor: vendedor.id })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarMensaje(data.message, false, 3000);
+                    cargarAsistencia();
+                } else {
+                    mostrarMensaje(data.message, true);
+                }
+            } catch (error) {
+                mostrarMensaje('Error: ' + error.message, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ================= PUNTOS =================
+        async function cargarMisPuntos() {
+            const puntosContent = document.getElementById('puntosContent');
+            puntosContent.innerHTML = '<div class="loading-puntos">⭐ Cargando tus estadísticas...</div>';
+            
+            try {
+                const response = await fetch(`/api/vendedor/puntos/${vendedor.id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const premio = obtenerPremio(data.total_puntos);
+                    
+                    let html = `
+                        <div class="puntaje-card">
+                            <div class="puntaje-valor">${data.total_puntos}</div>
+                            <div>Puntaje Total</div>
+                            <div class="premio-badge ${premio.clase}">${premio.texto}</div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">${data.total_transacciones || 0}</div>
+                                <div class="stat-label">Ventas Realizadas</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${vendedor.id}</div>
+                                <div class="stat-label">ID Vendedor</div>
+                            </div>
+                        </div>
+                    `;
+                    puntosContent.innerHTML = html;
+                    
+                    // Actualizar badge en header
+                    document.getElementById('puntosBadge').textContent = `⭐ ${data.total_puntos} pts`;
+                } else {
+                    puntosContent.innerHTML = `<div class="loading-puntos" style="color:#c62828;">❌ Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                console.error('Error cargando puntos:', error);
+                puntosContent.innerHTML = '<div class="loading-puntos" style="color:#c62828;">❌ Error al cargar los datos</div>';
+            }
+        }
+
+        async function cargarHistorialPuntos() {
+            const container = document.getElementById('historialPuntos');
+            const btn = document.getElementById('btnActualizarHistorial');
+            btn.disabled = true;
+            btn.textContent = '⏳...';
+            
+            try {
+                const response = await fetch(`/api/vendedor/historial-puntos/${vendedor.id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.historial.length === 0) {
+                        container.innerHTML = '<span class="vacio">Aún no tienes historial de puntos</span>';
+                        return;
+                    }
+                    
+                    container.innerHTML = data.historial.map(h => `
+                        <div class="punto-item">
+                            <div>
+                                <span class="puntos ${h.puntos > 0 ? 'positivo' : 'negativo'}">${h.puntos > 0 ? '+' : ''}${h.puntos} pts</span>
+                                <div class="motivo">${h.motivo || 'Venta'}</div>
+                            </div>
+                            <div class="fecha">
+                                ${new Date(h.fecha).toLocaleDateString('es-ES')}
+                                ${h.ticket_codigo ? `<br><span style="font-family:monospace; font-size:10px;">${h.ticket_codigo}</span>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<span class="vacio" style="color:#c62828;">Error al cargar historial</span>';
+                }
+            } catch (error) {
+                console.error('Error cargando historial:', error);
+                container.innerHTML = '<span class="vacio" style="color:#c62828;">Error al cargar historial</span>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Actualizar';
+            }
+        }
+
+        // ================= INICIALIZAR =================
         const tokenGuardado = localStorage.getItem('token_vendedor');
         const vendedorGuardado = localStorage.getItem('vendedor');
 
         if (tokenGuardado && vendedorGuardado) {
             token = tokenGuardado;
             vendedor = JSON.parse(vendedorGuardado);
-            document.getElementById('vendedorNombre').innerHTML = vendedor.nombre;
-            document.getElementById('vendedorId').innerHTML = 'ID: ' + vendedor.id;
+            document.getElementById('vendedorNombre').textContent = vendedor.nombre || vendedor.NombreCompleto;
+            document.getElementById('vendedorId').textContent = 'ID: ' + vendedor.id;
+            
+            // Cargar datos iniciales
+            cargarProductosParaTicket();
+            cargarMisTickets();
             verificarQR();
             cargarAsistencia();
             cargarMisPuntos();
+            cargarHistorialPuntos();
         } else {
             window.location.href = '/';
         }
+
+        // ================= LIMPIEZA DE TEMPORIZADORES AL SALIR =================
+        window.addEventListener('beforeunload', function() {
+            if (temporizadorTicket) clearInterval(temporizadorTicket);
+            if (temporizadorQR) clearInterval(temporizadorQR);
+        });
     </script>
 </body>
 </html>

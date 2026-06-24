@@ -63,7 +63,8 @@ const db = mysql.createConnection({
     user: process.env.MYSQLUSER || 'root',
     password: process.env.MYSQLPASSWORD || 'MFaPbrOIWcBNrrvrxBNcfClvNNtFIoSt',
     database: process.env.MYSQLDATABASE || 'railway',
-    port: process.env.MYSQLPORT || 49485
+    port: process.env.MYSQLPORT || 49485,
+    multipleStatements: true
 });
 
 db.connect(err => {
@@ -76,11 +77,11 @@ db.connect(err => {
     crearTablaAsistencia();
     crearTablaQRVendedores();
     crearTablaRecuperacionTokens();
+    crearTablaPuntos();
     verificarAdmin();
 });
 
 const SECRET_KEY = 'chepita_secret_key_2025';
-const resetTokens = {};
 
 // ================= CREAR TABLAS =================
 function crearTablas() {
@@ -103,9 +104,7 @@ function crearTablas() {
             usado TINYINT DEFAULT 0
         )
     `);
-}
-
-function crearTablaRecuperacionTokens() {
+    
     db.query(`
         CREATE TABLE IF NOT EXISTS admin_recuperacion_tokens (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -114,9 +113,24 @@ function crearTablaRecuperacionTokens() {
             expira_en DATETIME NOT NULL,
             usado TINYINT DEFAULT 0
         )
+    `);
+    
+    db.query(`
+        CREATE TABLE IF NOT EXISTS pedidos_pendientes (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            codigo VARCHAR(50) NOT NULL UNIQUE,
+            id_vendedor INT NOT NULL,
+            nombre_vendedor VARCHAR(100),
+            productos JSON NOT NULL,
+            total DECIMAL(10,2) NOT NULL,
+            estado ENUM('pendiente', 'en_proceso', 'completado', 'cancelado', 'expirado') DEFAULT 'pendiente',
+            fecha_creacion DATETIME DEFAULT NOW(),
+            fecha_procesado DATETIME,
+            fecha_expiracion DATETIME
+        )
     `, (err) => {
-        if (err) console.error('Error creando admin_recuperacion_tokens:', err);
-        else console.log('✅ Tabla admin_recuperacion_tokens lista');
+        if (err) console.error('Error creando pedidos_pendientes:', err);
+        else console.log('✅ Tabla pedidos_pendientes lista');
     });
 }
 
@@ -128,8 +142,7 @@ function crearTablaAsistencia() {
             fecha DATE NOT NULL,
             hora_entrada TIME,
             hora_salida TIME,
-            estado VARCHAR(20) DEFAULT 'pendiente',
-            FOREIGN KEY (id_vendedor) REFERENCES trabajadores(Id_Trabajador)
+            estado VARCHAR(20) DEFAULT 'pendiente'
         )
     `, (err) => {
         if (err) console.error('Error creando asistencia_registros:', err);
@@ -147,12 +160,55 @@ function crearTablaQRVendedores() {
             generado_en DATETIME DEFAULT NOW(),
             expira_en DATETIME NOT NULL,
             usado TINYINT DEFAULT 0,
-            generado_desde_app TINYINT DEFAULT 0,
-            FOREIGN KEY (id_vendedor) REFERENCES trabajadores(Id_Trabajador)
+            generado_desde_app TINYINT DEFAULT 0
         )
     `, (err) => {
         if (err) console.error('Error creando qr_vendedores:', err);
         else console.log('✅ Tabla qr_vendedores lista');
+    });
+}
+
+function crearTablaRecuperacionTokens() {
+    db.query(`
+        CREATE TABLE IF NOT EXISTS admin_recuperacion_tokens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            id_admin INT NOT NULL,
+            token VARCHAR(255) NOT NULL,
+            expira_en DATETIME NOT NULL,
+            usado TINYINT DEFAULT 0
+        )
+    `, (err) => {
+        if (err) console.error('Error creando admin_recuperacion_tokens:', err);
+        else console.log('✅ Tabla admin_recuperacion_tokens lista');
+    });
+}
+
+function crearTablaPuntos() {
+    db.query(`
+        CREATE TABLE IF NOT EXISTS puntos_vendedores (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            id_vendedor INT NOT NULL UNIQUE,
+            total_puntos INT DEFAULT 0,
+            fecha_actualizacion DATETIME DEFAULT NOW()
+        )
+    `, (err) => {
+        if (err) console.error('Error creando puntos_vendedores:', err);
+        else console.log('✅ Tabla puntos_vendedores lista');
+    });
+
+    db.query(`
+        CREATE TABLE IF NOT EXISTS puntos_detalle (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            id_vendedor INT NOT NULL,
+            puntos INT NOT NULL,
+            motivo VARCHAR(255),
+            fecha DATETIME DEFAULT NOW(),
+            num_factura VARCHAR(50),
+            ticket_codigo VARCHAR(50)
+        )
+    `, (err) => {
+        if (err) console.error('Error creando puntos_detalle:', err);
+        else console.log('✅ Tabla puntos_detalle lista');
     });
 }
 
@@ -397,11 +453,10 @@ app.post('/api/admin/restablecer-password', async (req, res) => {
     });
 });
 
-// ================= LOGIN TRABAJADOR (CORREGIDO) =================
+// ================= LOGIN TRABAJADOR =================
 app.post('/api/trabajadores/login', async (req, res) => {
     const { nombre_usuario, password } = req.body;
     
-    // ✅ CORREGIDO: Ahora busca también por NombreCompleto
     db.query(`SELECT * FROM trabajadores WHERE (nombre_usuario = ? OR email = ? OR NombreCompleto = ?) AND Activo = 1`, 
         [nombre_usuario, nombre_usuario, nombre_usuario], async (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -775,7 +830,7 @@ app.get('/api/vendedor/qr-activo/:id', (req, res) => {
 });
 
 app.post('/api/vendedor/generar-qr', verificarTokenTrabajador, (req, res) => {
-    const { id_vendedor, duracion_minutos = 60 } = req.body;
+    const { id_vendedor, duracion_minutos = 15 } = req.body;
     
     if (!id_vendedor) {
         return res.status(400).json({ success: false, message: 'ID de vendedor requerido' });
@@ -820,6 +875,282 @@ app.post('/api/vendedor/enviar-qr-email', (req, res) => {
         
         const qrBase64 = qrBuffer.toString('base64');
         res.json({ success: true, message: 'QR generado correctamente', qrImage: qrBase64 });
+    });
+});
+
+// ================= TICKETS / PEDIDOS PENDIENTES =================
+
+// Generar un nuevo ticket (vendedor desde APP)
+app.post('/api/tickets/generar', verificarTokenTrabajador, (req, res) => {
+    const { productos, total } = req.body;
+    const id_vendedor = req.usuario.id;
+    
+    if (!productos || !Array.isArray(productos) || productos.length === 0) {
+        return res.status(400).json({ success: false, message: 'Debe incluir al menos un producto' });
+    }
+    if (!total || total <= 0) {
+        return res.status(400).json({ success: false, message: 'Total inválido' });
+    }
+    
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const hash = crypto.createHash('md5').update(`${id_vendedor}${timestamp}${random}`).digest('hex').substring(0, 6);
+    const codigo = `TKT-${id_vendedor}-${timestamp}-${hash}`;
+    
+    const fechaExpiracion = new Date();
+    fechaExpiracion.setMinutes(fechaExpiracion.getMinutes() + 15);
+    
+    db.query(`SELECT NombreCompleto FROM trabajadores WHERE Id_Trabajador = ?`, [id_vendedor], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        if (results.length === 0) return res.status(404).json({ success: false, message: 'Vendedor no encontrado' });
+        
+        const nombreVendedor = results[0].NombreCompleto;
+        
+        db.query(`
+            INSERT INTO pedidos_pendientes (codigo, id_vendedor, nombre_vendedor, productos, total, estado, fecha_creacion, fecha_expiracion)
+            VALUES (?, ?, ?, ?, ?, 'pendiente', NOW(), ?)
+        `, [codigo, id_vendedor, nombreVendedor, JSON.stringify(productos), total, fechaExpiracion], (err, result) => {
+            if (err) {
+                console.error('Error guardando ticket:', err);
+                return res.status(500).json({ success: false, message: 'Error guardando ticket: ' + err.message });
+            }
+            
+            res.json({
+                success: true,
+                message: 'Ticket generado correctamente',
+                ticket: {
+                    codigo: codigo,
+                    id_vendedor: id_vendedor,
+                    nombre_vendedor: nombreVendedor,
+                    productos: productos,
+                    total: total,
+                    estado: 'pendiente',
+                    expira_en: fechaExpiracion
+                }
+            });
+        });
+    });
+});
+
+// Obtener tickets pendientes (para la caja local)
+app.get('/api/tickets/pendientes', (req, res) => {
+    db.query(`
+        UPDATE pedidos_pendientes 
+        SET estado = 'expirado' 
+        WHERE estado = 'pendiente' AND fecha_expiracion < NOW()
+    `, (err) => {
+        if (err) console.error('Error actualizando tickets expirados:', err);
+        
+        db.query(`
+            SELECT pp.*, t.NombreCompleto as vendedor_nombre
+            FROM pedidos_pendientes pp
+            JOIN trabajadores t ON pp.id_vendedor = t.Id_Trabajador
+            WHERE pp.estado = 'pendiente' AND pp.fecha_expiracion > NOW()
+            ORDER BY pp.fecha_creacion ASC
+        `, (err, results) => {
+            if (err) {
+                console.error('Error obteniendo tickets pendientes:', err);
+                return res.status(500).json({ success: false, message: 'Error en servidor' });
+            }
+            res.json({ success: true, tickets: results });
+        });
+    });
+});
+
+// Marcar ticket como "en_proceso"
+app.put('/api/tickets/:codigo/procesar', (req, res) => {
+    const { codigo } = req.params;
+    
+    db.query(`
+        UPDATE pedidos_pendientes 
+        SET estado = 'en_proceso', fecha_procesado = NOW()
+        WHERE codigo = ? AND estado = 'pendiente' AND fecha_expiracion > NOW()
+    `, [codigo], (err, result) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        if (result.affectedRows === 0) {
+            db.query(`SELECT estado, fecha_expiracion FROM pedidos_pendientes WHERE codigo = ?`, [codigo], (err, check) => {
+                if (check && check.length > 0) {
+                    if (check[0].estado === 'expirado' || new Date(check[0].fecha_expiracion) < new Date()) {
+                        return res.status(410).json({ success: false, message: 'El ticket ha expirado' });
+                    }
+                    if (check[0].estado === 'completado') {
+                        return res.status(410).json({ success: false, message: 'El ticket ya fue completado' });
+                    }
+                    if (check[0].estado === 'cancelado') {
+                        return res.status(410).json({ success: false, message: 'El ticket fue cancelado' });
+                    }
+                }
+                return res.status(404).json({ success: false, message: 'Ticket no encontrado' });
+            });
+            return;
+        }
+        res.json({ success: true, message: 'Ticket marcado como en proceso' });
+    });
+});
+
+// COMPLETAR TICKET Y ASIGNAR PUNTOS AL VENDEDOR
+app.post('/api/tickets/:codigo/completar', (req, res) => {
+    const { codigo } = req.params;
+    const { num_factura } = req.body;
+    
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error('Error iniciando transacción:', err);
+            return res.status(500).json({ success: false, message: 'Error en servidor' });
+        }
+        
+        db.query(`
+            SELECT * FROM pedidos_pendientes 
+            WHERE codigo = ? AND estado IN ('pendiente', 'en_proceso') AND fecha_expiracion > NOW()
+        `, [codigo], (err, results) => {
+            if (err) {
+                console.error('Error obteniendo ticket:', err);
+                return db.rollback(() => res.status(500).json({ success: false, message: 'Error en servidor' }));
+            }
+            
+            if (results.length === 0) {
+                return db.rollback(() => res.status(404).json({ success: false, message: 'Ticket no válido o expirado' }));
+            }
+            
+            const ticket = results[0];
+            const id_vendedor = ticket.id_vendedor;
+            const totalVenta = ticket.total;
+            
+            db.query(`
+                UPDATE pedidos_pendientes 
+                SET estado = 'completado', fecha_procesado = NOW()
+                WHERE codigo = ?
+            `, [codigo], (err) => {
+                if (err) {
+                    console.error('Error actualizando ticket:', err);
+                    return db.rollback(() => res.status(500).json({ success: false, message: 'Error actualizando ticket' }));
+                }
+                
+                const puntosGanados = Math.floor(totalVenta / 100);
+                
+                db.query(`
+                    INSERT INTO puntos_vendedores (id_vendedor, total_puntos, fecha_actualizacion)
+                    VALUES (?, ?, NOW())
+                    ON DUPLICATE KEY UPDATE 
+                        total_puntos = total_puntos + ?,
+                        fecha_actualizacion = NOW()
+                `, [id_vendedor, puntosGanados, puntosGanados], (err) => {
+                    if (err) {
+                        console.error('Error asignando puntos:', err);
+                        return db.rollback(() => res.status(500).json({ success: false, message: 'Error asignando puntos' }));
+                    }
+                    
+                    db.query(`
+                        INSERT INTO puntos_detalle (id_vendedor, puntos, motivo, fecha, num_factura, ticket_codigo)
+                        VALUES (?, ?, ?, NOW(), ?, ?)
+                    `, [id_vendedor, puntosGanados, `Venta #${num_factura || 'N/A'} - Ticket ${codigo}`, num_factura || null, codigo], (err) => {
+                        if (err) {
+                            console.error('Error registrando detalle de puntos:', err);
+                        }
+                        
+                        db.commit((err) => {
+                            if (err) {
+                                console.error('Error commit:', err);
+                                return res.status(500).json({ success: false, message: 'Error completando operación' });
+                            }
+                            
+                            console.log(`✅ Ticket ${codigo} completado - Vendedor: ${ticket.nombre_vendedor} - Puntos: ${puntosGanados}`);
+                            
+                            res.json({
+                                success: true,
+                                message: 'Venta completada y puntos asignados',
+                                puntos_asignados: puntosGanados,
+                                vendedor: {
+                                    id: id_vendedor,
+                                    nombre: ticket.nombre_vendedor
+                                }
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+// Cancelar ticket
+app.put('/api/tickets/:codigo/cancelar', verificarTokenTrabajador, (req, res) => {
+    const { codigo } = req.params;
+    const id_vendedor = req.usuario.id;
+    
+    db.query(`
+        UPDATE pedidos_pendientes 
+        SET estado = 'cancelado'
+        WHERE codigo = ? AND id_vendedor = ? AND estado = 'pendiente'
+    `, [codigo, id_vendedor], (err, result) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Ticket no encontrado o no se puede cancelar' });
+        }
+        res.json({ success: true, message: 'Ticket cancelado' });
+    });
+});
+
+// Obtener un ticket específico por código
+app.get('/api/tickets/:codigo', (req, res) => {
+    const { codigo } = req.params;
+    
+    db.query(`
+        SELECT pp.*, t.NombreCompleto as vendedor_nombre
+        FROM pedidos_pendientes pp
+        JOIN trabajadores t ON pp.id_vendedor = t.Id_Trabajador
+        WHERE pp.codigo = ?
+    `, [codigo], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Ticket no encontrado' });
+        }
+        
+        const ticket = results[0];
+        
+        if (ticket.estado === 'pendiente' && new Date(ticket.fecha_expiracion) < new Date()) {
+            db.query(`UPDATE pedidos_pendientes SET estado = 'expirado' WHERE codigo = ?`, [codigo]);
+            return res.status(410).json({ success: false, message: 'El ticket ha expirado' });
+        }
+        
+        res.json({ success: true, ticket: results[0] });
+    });
+});
+
+// OBTENER PUNTOS DE UN VENDEDOR
+app.get('/api/vendedor/puntos/:id', (req, res) => {
+    const { id } = req.params;
+    
+    db.query(`
+        SELECT 
+            COALESCE(pv.total_puntos, 0) as total_puntos,
+            COUNT(pd.id) as total_transacciones
+        FROM trabajadores t
+        LEFT JOIN puntos_vendedores pv ON t.Id_Trabajador = pv.id_vendedor
+        LEFT JOIN puntos_detalle pd ON t.Id_Trabajador = pd.id_vendedor
+        WHERE t.Id_Trabajador = ?
+        GROUP BY t.Id_Trabajador
+    `, [id], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        if (results.length === 0) {
+            return res.json({ success: true, total_puntos: 0, total_transacciones: 0 });
+        }
+        res.json({ success: true, ...results[0] });
+    });
+});
+
+// HISTORIAL DE PUNTOS DE UN VENDEDOR
+app.get('/api/vendedor/historial-puntos/:id', (req, res) => {
+    const { id } = req.params;
+    
+    db.query(`
+        SELECT * FROM puntos_detalle 
+        WHERE id_vendedor = ?
+        ORDER BY fecha DESC
+        LIMIT 50
+    `, [id], (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error en servidor' });
+        res.json({ success: true, historial: results });
     });
 });
 
@@ -1200,18 +1531,15 @@ app.get('/api/top-productos', (req, res) => {
 
 app.get('/api/puntos-vendedores', (req, res) => {
     db.query(`
-        SELECT t.NombreCompleto as nombre_completo, COUNT(c.Num_Factura) as total_ventas,
+        SELECT t.NombreCompleto as nombre_completo, 
+               COALESCE(pv.total_puntos, 0) as puntaje_total,
+               COUNT(c.Num_Factura) as total_ventas,
                COUNT(DISTINCT DATE(c.Fecha)) as dias_activos,
                ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) as promedio_diario,
-               ROUND(
-                   (COUNT(c.Num_Factura) * 0.4) + 
-                   (COUNT(DISTINCT DATE(c.Fecha)) * 0.3) + 
-                   (ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) * 0.3), 
-                   2
-               ) as puntaje_total,
                COALESCE(SUM(c.Monto), 0) as total_ventas_cordobas
-        FROM compra c
-        JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
+        FROM trabajadores t
+        LEFT JOIN compra c ON t.Id_Trabajador = c.Id_Vendedor
+        LEFT JOIN puntos_vendedores pv ON t.Id_Trabajador = pv.id_vendedor
         GROUP BY t.Id_Trabajador
         ORDER BY puntaje_total DESC
     `, (err, results) => {
@@ -1227,20 +1555,16 @@ app.get('/api/puntos-vendedor/:id', (req, res) => {
         SELECT 
             t.Id_Trabajador as id_trabajador,
             t.NombreCompleto as nombre_completo,
+            COALESCE(pv.total_puntos, 0) as puntaje_total,
             COUNT(c.Num_Factura) as total_ventas,
             COUNT(DISTINCT DATE(c.Fecha)) as dias_activos,
             ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) as promedio_diario,
-            ROUND(
-                (COUNT(c.Num_Factura) * 0.4) + 
-                (COUNT(DISTINCT DATE(c.Fecha)) * 0.3) + 
-                (ROUND(COUNT(c.Num_Factura) / NULLIF(COUNT(DISTINCT DATE(c.Fecha)), 0), 2) * 0.3), 
-                2
-            ) as puntaje_total,
             COALESCE(SUM(c.Monto), 0) as total_ventas_cordobas
-        FROM compra c
-        INNER JOIN trabajadores t ON c.Id_Vendedor = t.Id_Trabajador
+        FROM trabajadores t
+        LEFT JOIN compra c ON t.Id_Trabajador = c.Id_Vendedor
+        LEFT JOIN puntos_vendedores pv ON t.Id_Trabajador = pv.id_vendedor
         WHERE t.Id_Trabajador = ?
-        GROUP BY t.Id_Trabajador, t.NombreCompleto
+        GROUP BY t.Id_Trabajador
     `, [id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) {
@@ -1496,6 +1820,19 @@ app.get('/inventario.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'inventario.html'));
 });
 
+// ================= LIMPIEZA AUTOMÁTICA DE TICKETS EXPIRADOS =================
+function limpiarTicketsExpirados() {
+    db.query(`
+        UPDATE pedidos_pendientes 
+        SET estado = 'expirado' 
+        WHERE estado = 'pendiente' AND fecha_expiracion < NOW()
+    `, (err) => {
+        if (err) console.error('Error limpiando tickets expirados:', err);
+    });
+}
+
+setInterval(limpiarTicketsExpirados, 5 * 60 * 1000);
+
 // ================= INICIAR SERVIDOR =================
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`
@@ -1504,6 +1841,8 @@ app.listen(PORT, '0.0.0.0', () => {
     ╠══════════════════════════════════════════════════════════╣
     ║  📡 Puerto: ${PORT}                                          ║
     ║  🔐 Login Admin: admin / admin                            ║
+    ║  📱 Tickets: ACTIVADO (códigos únicos por vendedor)       ║
+    ║  ⭐ Puntos: ACTIVADO (automáticos por venta)              ║
     ║  📱 QR Ventas: ACTIVADO                                   ║
     ║  ⏰ Asistencia: ACTIVADO                                  ║
     ║  📧 Recuperación por Gmail: ACTIVADO                      ║
