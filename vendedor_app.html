@@ -311,25 +311,11 @@
             background: white;
             border-radius: 32px;
             padding: 32px 28px;
-            max-width: 420px;
+            max-width: 380px;
             width: 100%;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: modalFadeIn 0.3s ease;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-box::-webkit-scrollbar {
-            width: 4px;
-        }
-        .modal-box::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .modal-box::-webkit-scrollbar-thumb {
-            background: #caa0d8;
-            border-radius: 10px;
         }
 
         @keyframes modalFadeIn {
@@ -360,54 +346,6 @@
             color: #666;
             margin-bottom: 20px;
             line-height: 1.5;
-        }
-
-        .modal-box .modal-resumen {
-            background: #f8f6ff;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .modal-box .modal-resumen .resumen-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 14px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .modal-box .modal-resumen .resumen-item:last-child {
-            border-bottom: none;
-        }
-
-        .modal-box .modal-resumen .resumen-total {
-            font-weight: 700;
-            color: #A63C89;
-            font-size: 18px;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 2px solid #eee;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .modal-box .modal-resumen .resumen-fecha {
-            font-size: 12px;
-            color: #999;
-            text-align: center;
-            margin-top: 8px;
-        }
-
-        .modal-box .modal-resumen .resumen-puntos {
-            background: #e8f5e9;
-            border-radius: 12px;
-            padding: 10px;
-            text-align: center;
-            margin-top: 10px;
-            font-weight: 700;
-            color: #2e7d32;
         }
 
         .modal-box .modal-btn {
@@ -693,6 +631,7 @@
             font-size: 13px;
         }
 
+        /* Modal de confirmacion */
         .modal-confirm {
             display: none;
             position: fixed;
@@ -969,7 +908,6 @@
             .modal-confirm-content { padding: 24px; }
             .modal-box { padding: 24px 20px; }
             .producto-search-wrapper { min-width: 100px; }
-            .modal-box .modal-resumen .resumen-item { font-size: 12px; }
         }
 
         #loginSection {
@@ -1207,53 +1145,6 @@
                 if (e.target === overlay) {
                     overlay.remove();
                     if (callback) callback();
-                }
-            });
-        }
-
-        function mostrarModalResumen(titulo, productos, total, fecha, puntos) {
-            const overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            
-            let productosHtml = '';
-            productos.forEach(p => {
-                productosHtml += `
-                    <div class="resumen-item">
-                        <span>${p.Nombre} x${p.cantidad}</span>
-                        <span>C$${p.subtotal.toFixed(2)}</span>
-                    </div>
-                `;
-            });
-            
-            overlay.innerHTML = `
-                <div class="modal-box">
-                    <div class="modal-icon">📋</div>
-                    <div class="modal-title">${titulo}</div>
-                    <div class="modal-subtitle">Resumen de la venta realizada</div>
-                    <div class="modal-resumen">
-                        ${productosHtml}
-                        <div class="resumen-total">
-                            <span>Total</span>
-                            <span>C$${total.toFixed(2)}</span>
-                        </div>
-                        <div class="resumen-fecha">📅 ${fecha}</div>
-                        ${puntos ? `<div class="resumen-puntos">⭐ +${puntos} punto por esta venta</div>` : ''}
-                    </div>
-                    <div class="modal-buttons">
-                        <button class="modal-btn modal-btn-primary" id="modalBtnAceptar">Aceptar</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(overlay);
-            
-            document.getElementById('modalBtnAceptar').addEventListener('click', function() {
-                overlay.remove();
-            });
-            
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    overlay.remove();
                 }
             });
         }
@@ -1513,34 +1404,8 @@
                     
                     iniciarTemporizadorTicket(data.ticket.expira_en);
                     
-                    // Mostrar resumen de la venta
-                    const fecha = new Date().toLocaleString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    
-                    // Calcular puntos (1 punto por venta)
-                    const puntos = 1;
-                    
-                    mostrarModalResumen(
-                        'Venta Realizada',
-                        ticketProductos,
-                        total,
-                        fecha,
-                        puntos
-                    );
-                    
+                    mostrarModal('Ticket Enviado', `Ticket #${data.ticket.codigo} enviado a caja`, 'success');
                     cargarMisTickets();
-                    // Actualizar puntos después de la venta
-                    setTimeout(() => {
-                        cargarMisPuntos();
-                        cargarHistorialPuntos();
-                    }, 1000);
-                    
                     ticketProductos = [];
                     renderizarTicketProductos();
                 } else {
@@ -1988,6 +1853,19 @@
             if (temporizadorTicket) clearInterval(temporizadorTicket);
             if (temporizadorQR) clearInterval(temporizadorQR);
         });
+
+        // ================= ACTUALIZAR PUNTOS DESPUES DE VENTA =================
+        function actualizarPuntosDespuesVenta() {
+            cargarMisPuntos();
+            cargarHistorialPuntos();
+        }
+
+        // Sobrescribir la función de generar ticket para actualizar puntos
+        const generarTicketOriginal = generarTicketVenta;
+        generarTicketVenta = async function() {
+            await generarTicketOriginal();
+            setTimeout(actualizarPuntosDespuesVenta, 1000);
+        };
     </script>
 </body>
 </html>
