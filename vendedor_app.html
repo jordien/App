@@ -569,7 +569,6 @@
             font-size: 13px;
         }
 
-        /* Modal de confirmación */
         .modal-confirm {
             display: none;
             position: fixed;
@@ -660,7 +659,6 @@
             background: #e0e0e0;
         }
 
-        /* Historial de tickets */
         .tickets-historial {
             margin-top: 20px;
         }
@@ -703,7 +701,6 @@
             cursor: not-allowed;
         }
 
-        /* Historial de puntos */
         .historial-puntos {
             margin-top: 16px;
         }
@@ -760,6 +757,94 @@
             color: #999;
         }
 
+        /* ESTILOS PARA EL AUTOCOMPLETADO */
+        .producto-search-wrapper {
+            position: relative;
+            flex: 2;
+            min-width: 150px;
+        }
+
+        .producto-search-wrapper input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 20px;
+            border: 2px solid #e8e8f0;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .producto-search-wrapper input:focus {
+            border-color: #A63C89;
+            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
+        }
+
+        .producto-sugerencias {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e8e8f0;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .producto-sugerencia-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .producto-sugerencia-item:hover {
+            background: #f5f0ff;
+        }
+
+        .producto-sugerencia-item .prod-nombre {
+            font-weight: 600;
+            color: #4a1d6d;
+        }
+
+        .producto-sugerencia-item .prod-info {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .quantity-input {
+            width: 80px;
+            padding: 10px 14px;
+            border-radius: 20px;
+            border: 2px solid #e8e8f0;
+            font-size: 14px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .quantity-input:focus {
+            border-color: #A63C89;
+            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
+        }
+
+        /* Quitar flechas de number input */
+        .quantity-input::-webkit-inner-spin-button,
+        .quantity-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .quantity-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         @media (max-width: 480px) {
             .container { padding: 20px 16px; }
             .vendedor-nombre { font-size: 18px; }
@@ -771,6 +856,7 @@
             .footer-buttons { flex-direction: column; gap: 8px; }
             .ticket-item { flex-wrap: wrap; gap: 8px; }
             .modal-confirm-content { padding: 24px; }
+            .producto-search-wrapper { min-width: 100px; }
         }
 
         #loginSection {
@@ -786,46 +872,44 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏪 Chepita</h1>
+            <h1>Chepita</h1>
             <p>Panel del Vendedor</p>
         </div>
 
-        <!-- Pantalla Principal -->
         <div id="appSection">
-            <!-- Info Vendedor -->
             <div class="vendedor-card">
                 <div class="vendedor-header">
                     <div class="vendedor-info">
                         <div class="vendedor-nombre" id="vendedorNombre">Cargando...</div>
                         <div class="vendedor-id" id="vendedorId"></div>
-                        <div class="puntos-badge" id="puntosBadge">⭐ 0 pts</div>
+                        <div class="puntos-badge" id="puntosBadge">0 pts</div>
                     </div>
-                    <button class="btn-cerrar-sesion-vendedor" onclick="mostrarModalCerrarSesion()">Cerrar Sesión</button>
+                    <button class="btn-cerrar-sesion-vendedor" onclick="mostrarModalCerrarSesion()">Cerrar Sesion</button>
                 </div>
             </div>
 
-            <!-- Tabs -->
             <div class="tabs">
-                <button class="tab active" data-tab="ticket" onclick="cambiarTab('ticket')">🎫 Ticket</button>
-                <button class="tab" data-tab="qr" onclick="cambiarTab('qr')">📱 QR</button>
-                <button class="tab" data-tab="asistencia" onclick="cambiarTab('asistencia')">⏰ Asistencia</button>
-                <button class="tab" data-tab="puntos" onclick="cambiarTab('puntos')">⭐ Puntos</button>
+                <button class="tab active" data-tab="ticket" onclick="cambiarTab('ticket')">Ticket</button>
+                <button class="tab" data-tab="qr" onclick="cambiarTab('qr')">QR</button>
+                <button class="tab" data-tab="asistencia" onclick="cambiarTab('asistencia')">Asistencia</button>
+                <button class="tab" data-tab="puntos" onclick="cambiarTab('puntos')">Puntos</button>
             </div>
 
             <!-- ================= PANEL TICKET ================= -->
             <div id="panelTicket" class="panel active-panel">
                 <div id="ticketForm">
                     <div class="qr-card" style="margin-bottom: 20px;">
-                        <h4 style="color: #4a1d6d; margin-bottom: 15px;">🛒 Generar Ticket de Venta</h4>
+                        <h4 style="color: #4a1d6d; margin-bottom: 15px;">Generar Ticket de Venta</h4>
                         
                         <div id="ticketProductos" style="margin-bottom: 15px;">
-                            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
-                                <select id="ticketProductoSelect" style="flex:2; padding: 10px 14px; border-radius: 20px; border: 2px solid #e8e8f0; font-size: 14px; min-width: 150px;">
-                                    <option value="">Seleccionar producto...</option>
-                                </select>
-                                <input type="number" id="ticketCantidad" placeholder="Cant" style="flex:1; width:80px; padding: 10px 14px; border-radius: 20px; border: 2px solid #e8e8f0; font-size: 14px; min-width: 70px;">
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; align-items: center;">
+                                <div class="producto-search-wrapper">
+                                    <input type="text" id="ticketProductoInput" placeholder="Escriba el producto..." autocomplete="off">
+                                    <div id="ticketSugerencias" class="producto-sugerencias"></div>
+                                </div>
+                                <input type="number" id="ticketCantidad" class="quantity-input" placeholder="Cant" min="1" value="1">
                                 <button onclick="agregarProductoTicket()" style="background:#A63C89; color:white; border:none; border-radius:20px; padding:10px 20px; font-weight:700; cursor:pointer; transition:all 0.3s; flex-shrink:0;">
-                                    ➕ Agregar
+                                    Agregar
                                 </button>
                             </div>
                             <div id="ticketListaProductos" class="ticket-productos-container">
@@ -839,27 +923,25 @@
                         </div>
                         
                         <button class="btn btn-primary" onclick="generarTicketVenta()" id="btnGenerarTicket" style="margin-top:15px;">
-                            📨 Generar Ticket y Enviar a Caja
+                            Generar Ticket y Enviar a Caja
                         </button>
                     </div>
                 </div>
 
-                <!-- Ticket generado -->
                 <div id="ticketGenerado" class="ticket-generado-card">
-                    <div class="icon-grande">✅</div>
+                    <div class="icon-grande">✔</div>
                     <h4>Ticket Enviado a Caja</h4>
-                    <p class="sub">El cajero recibirá tu pedido automáticamente</p>
+                    <p class="sub">El cajero recibira tu pedido automaticamente</p>
                     <div class="codigo" id="ticketCodigoGenerado"></div>
                     <div id="ticketTiempoRestante" style="font-size:13px; color:#2e7d32; margin:8px 0;"></div>
                     <button onclick="limpiarTicket()" style="background:#A63C89; color:white; border:none; border-radius:20px; padding:10px 24px; font-weight:700; cursor:pointer; margin-top:10px;">
-                        📝 Nuevo Ticket
+                        Nuevo Ticket
                     </button>
                 </div>
 
-                <!-- Historial de tickets -->
                 <div class="tickets-historial">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <h4>📋 Mis Tickets</h4>
+                        <h4>Mis Tickets</h4>
                         <button class="btn-actualizar" onclick="cargarMisTickets()" id="btnActualizarTickets">Actualizar</button>
                     </div>
                     <div id="listaTickets" class="lista">
@@ -868,12 +950,12 @@
                 </div>
 
                 <div class="instrucciones">
-                    <h4>📖 Cómo funciona</h4>
+                    <h4>Como funciona</h4>
                     <p><span class="step-number">1</span> Selecciona los productos y cantidades</p>
-                    <p><span class="step-number">2</span> Genera el ticket (válido por 15 min)</p>
-                    <p><span class="step-number">3</span> La caja lo recibe automáticamente</p>
+                    <p><span class="step-number">2</span> Genera el ticket (valido por 15 min)</p>
+                    <p><span class="step-number">3</span> La caja lo recibe automaticamente</p>
                     <p><span class="step-number">4</span> El cajero confirma la venta</p>
-                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">🔒 El vendedor se asigna automáticamente</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">El vendedor se asigna automaticamente</p>
                 </div>
             </div>
 
@@ -885,44 +967,44 @@
                     <div id="qrTiempoRestante" style="font-size:13px; color:#2e7d32; margin:8px 0;"></div>
                     <div class="badge-usado" id="qrUsadoBadge" style="display: none;">QR ya usado</div>
                 </div>
-                <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerarQR">📱 Generar QR para venta</button>
+                <button class="btn btn-primary" onclick="generarNuevoQR()" id="btnGenerarQR">Generar QR para venta</button>
                 <div class="instrucciones">
-                    <h4>📖 Cómo usar el QR</h4>
+                    <h4>Como usar el QR</h4>
                     <p><span class="step-number">1</span> Genera un nuevo QR para cada venta</p>
                     <p><span class="step-number">2</span> Muestra el QR al cajero</p>
                     <p><span class="step-number">3</span> El QR se usa una sola vez</p>
-                    <p><span class="step-number">4</span> Después de usado, genera uno nuevo</p>
-                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">⏱️ Cada QR es válido por 15 minutos</p>
+                    <p><span class="step-number">4</span> Despues de usado, genera uno nuevo</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">Cada QR es valido por 15 minutos</p>
                 </div>
             </div>
 
             <!-- ================= PANEL ASISTENCIA ================= -->
             <div id="panelAsistencia" class="panel">
                 <div id="asistenciaContent">
-                    <div class="loading-puntos">⏳ Cargando tu estado...</div>
+                    <div class="loading-puntos">Cargando tu estado...</div>
                 </div>
                 <div class="footer-buttons" style="margin-top: 15px; gap: 10px;">
-                    <button class="btn btn-success" onclick="marcarEntrada()" id="btnEntrada">✅ Marcar Entrada</button>
-                    <button class="btn btn-danger" onclick="marcarSalida()" id="btnSalida">❌ Marcar Salida</button>
+                    <button class="btn btn-success" onclick="marcarEntrada()" id="btnEntrada">Marcar Entrada</button>
+                    <button class="btn btn-danger" onclick="marcarSalida()" id="btnSalida">Marcar Salida</button>
                 </div>
                 <div class="instrucciones">
-                    <h4>📖 Sistema de Asistencia</h4>
+                    <h4>Sistema de Asistencia</h4>
                     <p><span class="step-number">1</span> Al llegar, presiona "Marcar Entrada"</p>
                     <p><span class="step-number">2</span> Al retirarte, presiona "Marcar Salida"</p>
-                    <p><span class="step-number">3</span> Tu registro quedará guardado automáticamente</p>
-                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">⏰ El horario se registra automáticamente</p>
+                    <p><span class="step-number">3</span> Tu registro quedara guardado automaticamente</p>
+                    <p style="margin-top:12px; font-size:12px; color:#A63C89;">El horario se registra automaticamente</p>
                 </div>
             </div>
 
             <!-- ================= PANEL PUNTOS ================= -->
             <div id="panelPuntos" class="panel">
                 <div id="puntosContent">
-                    <div class="loading-puntos">⭐ Cargando tus estadísticas...</div>
+                    <div class="loading-puntos">Cargando tus estadisticas...</div>
                 </div>
                 
                 <div class="historial-puntos">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <h4>📜 Historial de Puntos</h4>
+                        <h4>Historial de Puntos</h4>
                         <button class="btn-actualizar" onclick="cargarHistorialPuntos()" id="btnActualizarHistorial">Actualizar</button>
                     </div>
                     <div id="historialPuntos" class="lista">
@@ -931,21 +1013,21 @@
                 </div>
 
                 <button class="btn btn-secondary" onclick="cargarMisPuntos()" style="margin-top: 15px;">
-                    🔄 Actualizar datos
+                    Actualizar datos
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de confirmación para cerrar sesión -->
+    <!-- Modal de confirmacion para cerrar sesion -->
     <div id="modalConfirmCerrar" class="modal-confirm">
         <div class="modal-confirm-content">
             <div class="icon">👋</div>
-            <h3>Cerrar Sesión</h3>
-            <p>¿Estás seguro de que quieres cerrar sesión?</p>
+            <h3>Cerrar Sesion</h3>
+            <p>¿Estas seguro de que quieres cerrar sesion?</p>
             <div class="modal-confirm-buttons">
                 <button class="btn btn-cancelar" onclick="cerrarModalCerrarSesion()">Cancelar</button>
-                <button class="btn btn-confirmar" onclick="confirmarCerrarSesion()">Cerrar Sesión</button>
+                <button class="btn btn-confirmar" onclick="confirmarCerrarSesion()">Cerrar Sesion</button>
             </div>
         </div>
     </div>
@@ -963,11 +1045,11 @@
 
         // ================= FUNCIONES DE PREMIOS =================
         function obtenerPremio(puntaje) {
-            if (puntaje >= 50) return { texto: "🏆 C$ 1,000 + Diploma", clase: "premio-oro" };
-            if (puntaje >= 40) return { texto: "🥈 C$ 750", clase: "premio-plata" };
-            if (puntaje >= 30) return { texto: "🥉 C$ 500", clase: "premio-bronce" };
-            if (puntaje >= 20) return { texto: "🪙 C$ 250", clase: "premio-cobre" };
-            if (puntaje >= 10) return { texto: "🎫 Vale C$ 100", clase: "premio-vale" };
+            if (puntaje >= 50) return { texto: "C$ 1,000 + Diploma", clase: "premio-oro" };
+            if (puntaje >= 40) return { texto: "C$ 750", clase: "premio-plata" };
+            if (puntaje >= 30) return { texto: "C$ 500", clase: "premio-bronce" };
+            if (puntaje >= 20) return { texto: "C$ 250", clase: "premio-cobre" };
+            if (puntaje >= 10) return { texto: "Vale C$ 100", clase: "premio-vale" };
             return { texto: "Sin premio", clase: "premio-nada" };
         }
 
@@ -1000,14 +1082,13 @@
 
         // ================= MODAL DE MENSAJES =================
         function mostrarMensaje(texto, esError = false, tiempo = 3000) {
-            // Remover modales existentes
             document.querySelectorAll('.modal-message').forEach(el => el.remove());
             
             const modal = document.createElement('div');
             modal.className = 'modal-message';
             modal.innerHTML = `
                 <div class="modal-message-content">
-                    <div class="icon">${esError ? '❌' : '✅'}</div>
+                    <div class="icon">${esError ? '❌' : '✔'}</div>
                     <p style="color: ${esError ? '#c62828' : '#2e7d32'}">${texto}</p>
                     <button class="${esError ? 'btn-error' : ''}" onclick="this.parentElement.parentElement.remove()">Aceptar</button>
                 </div>
@@ -1021,7 +1102,7 @@
             }
         }
 
-        // ================= MODAL CERRAR SESIÓN =================
+        // ================= MODAL CERRAR SESION =================
         function mostrarModalCerrarSesion() {
             document.getElementById('modalConfirmCerrar').classList.add('active');
         }
@@ -1044,51 +1125,104 @@
             try {
                 const response = await fetch('/api/productos');
                 productosDisponibles = await response.json();
-                const select = document.getElementById('ticketProductoSelect');
-                select.innerHTML = '<option value="">Seleccionar producto...</option>' + 
-                    productosDisponibles.map(p => 
-                        `<option value="${p.Id_Producto}" data-precio="${p.Precio}" data-stock="${p.Stock}">${p.Nombre} - C$${p.Precio} (${p.Stock} disp.)</option>`
-                    ).join('');
+                
+                // Configurar autocompletado
+                const input = document.getElementById('ticketProductoInput');
+                const sugerencias = document.getElementById('ticketSugerencias');
+                
+                input.addEventListener('input', function() {
+                    const query = this.value.toLowerCase().trim();
+                    
+                    if (query.length < 1) {
+                        sugerencias.style.display = 'none';
+                        return;
+                    }
+                    
+                    const filtered = productosDisponibles.filter(p => 
+                        p.Nombre.toLowerCase().includes(query)
+                    );
+                    
+                    if (filtered.length > 0) {
+                        sugerencias.innerHTML = filtered.map(p => `
+                            <div class="producto-sugerencia-item" onclick="seleccionarProductoSugerencia(${p.Id_Producto}, '${p.Nombre.replace(/'/g, "\\'")}', ${p.Precio}, ${p.Stock})">
+                                <span class="prod-nombre">${p.Nombre}</span>
+                                <span class="prod-info">C$${p.Precio} | Stock: ${p.Stock}</span>
+                            </div>
+                        `).join('');
+                        sugerencias.style.display = 'block';
+                    } else {
+                        sugerencias.style.display = 'none';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.producto-search-wrapper')) {
+                        sugerencias.style.display = 'none';
+                    }
+                });
+                
             } catch (error) {
                 console.error('Error cargando productos:', error);
             }
         }
 
+        function seleccionarProductoSugerencia(id, nombre, precio, stock) {
+            const input = document.getElementById('ticketProductoInput');
+            const sugerencias = document.getElementById('ticketSugerencias');
+            
+            input.value = nombre;
+            input.dataset.id = id;
+            input.dataset.precio = precio;
+            input.dataset.stock = stock;
+            sugerencias.style.display = 'none';
+            document.getElementById('ticketCantidad').focus();
+        }
+
         function agregarProductoTicket() {
-            const select = document.getElementById('ticketProductoSelect');
+            const input = document.getElementById('ticketProductoInput');
             const cantidad = parseInt(document.getElementById('ticketCantidad').value);
             
-            if (!select.value || !cantidad || cantidad < 1) {
-                mostrarMensaje('Selecciona un producto y una cantidad válida', true);
+            const id = parseInt(input.dataset.id);
+            const nombre = input.value.trim();
+            const precio = parseFloat(input.dataset.precio);
+            const stock = parseInt(input.dataset.stock);
+            
+            if (!id || !nombre || !precio) {
+                mostrarMensaje('Selecciona un producto de la lista', true);
                 return;
             }
             
-            const producto = productosDisponibles.find(p => p.Id_Producto == select.value);
-            if (!producto) return;
+            if (!cantidad || cantidad < 1) {
+                mostrarMensaje('Ingresa una cantidad valida (mayor a 0)', true);
+                return;
+            }
             
-            const productoExistente = ticketProductos.find(p => p.Id_Producto == producto.Id_Producto);
+            const productoExistente = ticketProductos.find(p => p.Id_Producto == id);
             const totalCantidad = productoExistente ? productoExistente.cantidad + cantidad : cantidad;
             
-            if (totalCantidad > producto.Stock) {
-                mostrarMensaje(`Stock insuficiente. Disponible: ${producto.Stock}`, true);
+            if (totalCantidad > stock) {
+                mostrarMensaje(`Stock insuficiente. Disponible: ${stock}`, true);
                 return;
             }
             
             if (productoExistente) {
                 productoExistente.cantidad += cantidad;
-                productoExistente.subtotal = productoExistente.cantidad * producto.Precio;
+                productoExistente.subtotal = productoExistente.cantidad * precio;
             } else {
                 ticketProductos.push({
-                    Id_Producto: producto.Id_Producto,
-                    Nombre: producto.Nombre,
-                    Precio: producto.Precio,
+                    Id_Producto: id,
+                    Nombre: nombre,
+                    Precio: precio,
                     cantidad: cantidad,
-                    subtotal: cantidad * producto.Precio
+                    subtotal: cantidad * precio
                 });
             }
             
-            document.getElementById('ticketCantidad').value = '';
-            document.getElementById('ticketProductoSelect').value = '';
+            input.value = '';
+            input.dataset.id = '';
+            input.dataset.precio = '';
+            input.dataset.stock = '';
+            document.getElementById('ticketCantidad').value = 1;
             renderizarTicketProductos();
         }
 
@@ -1140,7 +1274,7 @@
             
             const btn = document.getElementById('btnGenerarTicket');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Generando...';
+            btn.innerHTML = 'Generando...';
             btn.disabled = true;
             
             try {
@@ -1159,10 +1293,9 @@
                     document.getElementById('ticketGenerado').style.display = 'block';
                     document.getElementById('ticketForm').style.display = 'none';
                     
-                    // Iniciar temporizador de expiración
                     iniciarTemporizadorTicket(data.ticket.expira_en);
                     
-                    mostrarMensaje(`✅ Ticket enviado: ${data.ticket.codigo}`, false, 4000);
+                    mostrarMensaje(`Ticket enviado: ${data.ticket.codigo}`, false, 4000);
                     cargarMisTickets();
                     ticketProductos = [];
                     renderizarTicketProductos();
@@ -1188,7 +1321,7 @@
                 const diff = expira - ahora;
                 
                 if (diff <= 0) {
-                    el.textContent = '⏰ Ticket expirado';
+                    el.textContent = 'Ticket expirado';
                     el.style.color = '#c62828';
                     clearInterval(temporizadorTicket);
                     return;
@@ -1196,7 +1329,7 @@
                 
                 const minutos = Math.floor(diff / 60000);
                 const segundos = Math.floor((diff % 60000) / 1000);
-                el.textContent = `⏳ Válido por ${minutos}m ${segundos}s`;
+                el.textContent = `Valido por ${minutos}m ${segundos}s`;
                 el.style.color = '#2e7d32';
             }, 1000);
         }
@@ -1217,7 +1350,7 @@
             const container = document.getElementById('listaTickets');
             const btn = document.getElementById('btnActualizarTickets');
             btn.disabled = true;
-            btn.textContent = '⏳...';
+            btn.textContent = '...';
             
             try {
                 const response = await fetch('/api/tickets/pendientes');
@@ -1268,11 +1401,11 @@
             const expira = new Date(fechaExpiracion);
             const diff = expira - ahora;
             
-            if (diff <= 0) return '⏰ Expirado';
+            if (diff <= 0) return 'Expirado';
             
             const minutos = Math.floor(diff / 60000);
             const segundos = Math.floor((diff % 60000) / 1000);
-            return `⏳ ${minutos}m ${segundos}s`;
+            return `${minutos}m ${segundos}s`;
         }
 
         async function cancelarTicket(codigo) {
@@ -1318,7 +1451,7 @@
         async function generarNuevoQR() {
             const btn = document.getElementById('btnGenerarQR');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Generando...';
+            btn.innerHTML = 'Generando...';
             btn.disabled = true;
             
             try {
@@ -1335,7 +1468,7 @@
                     qrActual = data.codigo;
                     qrActivo = true;
                     mostrarQR(data.codigo, false, data.expira);
-                    mostrarMensaje('✅ QR generado correctamente', false, 3000);
+                    mostrarMensaje('QR generado correctamente', false, 3000);
                 } else {
                     mostrarMensaje('Error: ' + data.message, true);
                 }
@@ -1369,14 +1502,13 @@
                 document.getElementById('qrUsadoBadge').style.display = 'block';
                 document.getElementById('qrContainer').style.opacity = '0.5';
                 qrActivo = false;
-                document.getElementById('qrTiempoRestante').textContent = '⏰ QR ya usado';
+                document.getElementById('qrTiempoRestante').textContent = 'QR ya usado';
                 document.getElementById('qrTiempoRestante').style.color = '#c62828';
             } else {
                 document.getElementById('qrUsadoBadge').style.display = 'none';
                 document.getElementById('qrContainer').style.opacity = '1';
                 qrActivo = true;
                 
-                // Temporizador de expiración
                 if (temporizadorQR) clearInterval(temporizadorQR);
                 const expiraDate = new Date(expira);
                 const el = document.getElementById('qrTiempoRestante');
@@ -1386,7 +1518,7 @@
                     const diff = expiraDate - ahora;
                     
                     if (diff <= 0) {
-                        el.textContent = '⏰ QR expirado';
+                        el.textContent = 'QR expirado';
                         el.style.color = '#c62828';
                         clearInterval(temporizadorQR);
                         return;
@@ -1394,7 +1526,7 @@
                     
                     const minutos = Math.floor(diff / 60000);
                     const segundos = Math.floor((diff % 60000) / 1000);
-                    el.textContent = `⏳ Válido por ${minutos}m ${segundos}s`;
+                    el.textContent = `Valido por ${minutos}m ${segundos}s`;
                     el.style.color = '#2e7d32';
                 }, 1000);
             }
@@ -1403,7 +1535,7 @@
         // ================= ASISTENCIA =================
         async function cargarAsistencia() {
             const content = document.getElementById('asistenciaContent');
-            content.innerHTML = '<div class="loading-puntos">⏳ Cargando tu estado...</div>';
+            content.innerHTML = '<div class="loading-puntos">Cargando tu estado...</div>';
             
             try {
                 const response = await fetch(`/api/asistencia/estado/${vendedor.id}`);
@@ -1414,13 +1546,13 @@
                     let estadoClase = '';
                     
                     if (data.estado === 'pendiente') {
-                        estadoTexto = '📋 No has marcado asistencia hoy';
+                        estadoTexto = 'No has marcado asistencia hoy';
                         estadoClase = 'estado-pendiente';
                     } else if (data.estado === 'en_jornada') {
-                        estadoTexto = `🟢 En jornada - Entrada: ${data.entrada}`;
+                        estadoTexto = `En jornada - Entrada: ${data.entrada}`;
                         estadoClase = 'estado-en_jornada';
                     } else if (data.estado === 'completo') {
-                        estadoTexto = `✅ Jornada completada - Entrada: ${data.entrada} | Salida: ${data.salida}`;
+                        estadoTexto = `Jornada completada - Entrada: ${data.entrada} | Salida: ${data.salida}`;
                         estadoClase = 'estado-completo';
                     } else {
                         estadoTexto = data.mensaje || 'Estado desconocido';
@@ -1437,18 +1569,18 @@
                     `;
                     content.innerHTML = html;
                 } else {
-                    content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">❌ Error al cargar los datos</div>';
+                    content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
                 }
             } catch (error) {
                 console.error('Error cargando asistencia:', error);
-                content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">❌ Error al cargar los datos</div>';
+                content.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
             }
         }
 
         async function marcarEntrada() {
             const btn = document.getElementById('btnEntrada');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Procesando...';
+            btn.innerHTML = 'Procesando...';
             btn.disabled = true;
             
             try {
@@ -1479,7 +1611,7 @@
         async function marcarSalida() {
             const btn = document.getElementById('btnSalida');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Procesando...';
+            btn.innerHTML = 'Procesando...';
             btn.disabled = true;
             
             try {
@@ -1510,7 +1642,7 @@
         // ================= PUNTOS =================
         async function cargarMisPuntos() {
             const puntosContent = document.getElementById('puntosContent');
-            puntosContent.innerHTML = '<div class="loading-puntos">⭐ Cargando tus estadísticas...</div>';
+            puntosContent.innerHTML = '<div class="loading-puntos">Cargando tus estadisticas...</div>';
             
             try {
                 const response = await fetch(`/api/vendedor/puntos/${vendedor.id}`);
@@ -1538,14 +1670,13 @@
                     `;
                     puntosContent.innerHTML = html;
                     
-                    // Actualizar badge en header
-                    document.getElementById('puntosBadge').textContent = `⭐ ${data.total_puntos} pts`;
+                    document.getElementById('puntosBadge').textContent = `${data.total_puntos} pts`;
                 } else {
-                    puntosContent.innerHTML = `<div class="loading-puntos" style="color:#c62828;">❌ Error: ${data.message}</div>`;
+                    puntosContent.innerHTML = `<div class="loading-puntos" style="color:#c62828;">Error: ${data.message}</div>`;
                 }
             } catch (error) {
                 console.error('Error cargando puntos:', error);
-                puntosContent.innerHTML = '<div class="loading-puntos" style="color:#c62828;">❌ Error al cargar los datos</div>';
+                puntosContent.innerHTML = '<div class="loading-puntos" style="color:#c62828;">Error al cargar los datos</div>';
             }
         }
 
@@ -1553,7 +1684,7 @@
             const container = document.getElementById('historialPuntos');
             const btn = document.getElementById('btnActualizarHistorial');
             btn.disabled = true;
-            btn.textContent = '⏳...';
+            btn.textContent = '...';
             
             try {
                 const response = await fetch(`/api/vendedor/historial-puntos/${vendedor.id}`);
@@ -1561,7 +1692,7 @@
                 
                 if (data.success) {
                     if (data.historial.length === 0) {
-                        container.innerHTML = '<span class="vacio">Aún no tienes historial de puntos</span>';
+                        container.innerHTML = '<span class="vacio">Aun no tienes historial de puntos</span>';
                         return;
                     }
                     
@@ -1599,7 +1730,6 @@
             document.getElementById('vendedorNombre').textContent = vendedor.nombre || vendedor.NombreCompleto;
             document.getElementById('vendedorId').textContent = 'ID: ' + vendedor.id;
             
-            // Cargar datos iniciales
             cargarProductosParaTicket();
             cargarMisTickets();
             verificarQR();
@@ -1610,7 +1740,6 @@
             window.location.href = '/';
         }
 
-        // ================= LIMPIEZA DE TEMPORIZADORES AL SALIR =================
         window.addEventListener('beforeunload', function() {
             if (temporizadorTicket) clearInterval(temporizadorTicket);
             if (temporizadorQR) clearInterval(temporizadorQR);
