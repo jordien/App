@@ -27,7 +27,6 @@
             overflow-x: hidden;
         }
 
-        /* Círculos decorativos */
         .bg-circle {
             position: fixed;
             border-radius: 50%;
@@ -41,7 +40,6 @@
         .c3 { width: 250px; height: 250px; top: 50%; left: 20%; }
         .c4 { width: 300px; height: 300px; bottom: 10%; right: 10%; }
 
-        /* Destellos */
         .sparkle {
             position: fixed;
             color: rgba(255, 255, 255, 0.6);
@@ -60,7 +58,6 @@
             50% { transform: translateY(-20px) rotate(180deg); }
         }
 
-        /* Partículas */
         .particle {
             position: fixed;
             width: 6px;
@@ -149,7 +146,6 @@
             color: #A63C89;
         }
 
-        /* Usuario seleccionado */
         .selected-user {
             display: none;
             align-items: center;
@@ -201,7 +197,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Inputs */
         .input-group {
             margin-bottom: 18px;
             text-align: left;
@@ -292,7 +287,6 @@
             color: #b5a6c4;
         }
 
-        /* Sugerencias */
         .sugerencias-container {
             display: none;
             position: absolute;
@@ -378,7 +372,6 @@
             font-weight: 500;
         }
 
-        /* Botón */
         .btn-submit {
             width: 100%;
             padding: 16px;
@@ -427,7 +420,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Mensajes */
         .error-message,
         .warning-message {
             display: none;
@@ -449,7 +441,6 @@
             color: #e65100;
         }
 
-        /* Enlace olvidé contraseña */
         .forgot-link {
             margin-top: 16px;
             text-align: center;
@@ -468,7 +459,6 @@
             color: #4a1d6d;
         }
 
-        /* Modal Recuperación */
         .modal {
             display: none;
             position: fixed;
@@ -570,7 +560,6 @@
             background: #e0e0e0;
         }
 
-        /* Responsive */
         @media (max-width: 480px) {
             .container { padding: 28px 20px 25px; border-radius: 32px; }
             .login-header img { width: 80px; }
@@ -650,6 +639,7 @@
                     <input type="hidden" id="usuarioId" />
                     <input type="hidden" id="usuarioNombre" />
                     <input type="hidden" id="usuarioTipo" />
+                    <input type="hidden" id="usuarioEsCajero" />
                 </div>
 
                 <div class="input-group">
@@ -716,6 +706,7 @@
             NombreCompleto: "Administrador",
             tipo: "admin",
             usuario: "admin",
+            es_cajero: 0,
         };
 
         async function cargarUsuarios() {
@@ -742,7 +733,7 @@
             }
         }
 
-        // Solo muestra CAJEROS (es_cajero = 1)
+        // ===== MUESTRA TODOS LOS TRABAJADORES ACTIVOS =====
         function mostrarSugerencias(texto) {
             const container = document.getElementById("sugerenciasContainer");
             const busqueda = texto.toLowerCase().trim();
@@ -760,9 +751,9 @@
                 coincidencias.push(ADMIN_VIRTUAL);
             }
 
-            // Solo filtrar trabajadores que son CAJEROS (es_cajero = 1)
+            // MOSTRAR TODOS LOS TRABAJADORES ACTIVOS
             const trabajadoresCoincidentes = trabajadoresData.filter((t) =>
-                t.es_cajero === 1 && t.NombreCompleto.toLowerCase().includes(busqueda)
+                t.NombreCompleto.toLowerCase().includes(busqueda)
             );
             coincidencias.push(...trabajadoresCoincidentes);
 
@@ -770,7 +761,7 @@
                 container.innerHTML = `
                     <div class="sugerencia-item" style="color:#999; justify-content:center; flex-direction: column; padding: 15px;">
                         <i class="fa-solid fa-user-slash" style="font-size: 20px; margin-bottom: 8px; color: #dc3545;"></i>
-                        <span>No hay cajeros disponibles</span>
+                        <span>No hay usuarios disponibles</span>
                         <small style="color: #999; font-size: 11px;">Contacte al administrador</small>
                     </div>
                 `;
@@ -782,23 +773,33 @@
             let html = "";
             coincidencias.forEach((user) => {
                 const esAdmin = user.tipo === "admin" || user.Id_Trabajador === 0;
-                const icono = esAdmin
-                    ? '<i class="fa-solid fa-crown"></i>'
-                    : '<i class="fa-solid fa-cash-register"></i>';
-                const rol = esAdmin ? "Administrador" : "Cajero";
+                const esCajero = user.es_cajero === 1;
+                
+                let icono = '<i class="fa-solid fa-user"></i>';
+                let rol = "Vendedor";
+                let badge = '';
 
-                const badgeCajero = !esAdmin
-                    ? '<span style="background: #dbeafe; color: #1e40af; padding: 1px 8px; border-radius: 999px; font-size: 9px; margin-left: 5px; border: 1px solid #93c5fd;">Caja</span>'
-                    : '';
+                if (esAdmin) {
+                    icono = '<i class="fa-solid fa-crown"></i>';
+                    rol = "Administrador";
+                } else if (esCajero) {
+                    icono = '<i class="fa-solid fa-cash-register"></i>';
+                    rol = "Cajero";
+                    badge = '<span style="background: #dbeafe; color: #1e40af; padding: 1px 8px; border-radius: 999px; font-size: 9px; margin-left: 5px; border: 1px solid #93c5fd;">Caja</span>';
+                } else {
+                    icono = '<i class="fa-solid fa-store"></i>';
+                    rol = "Vendedor";
+                    badge = '<span style="background: #d1fae5; color: #065f46; padding: 1px 8px; border-radius: 999px; font-size: 9px; margin-left: 5px; border: 1px solid #6ee7b7;">Venta</span>';
+                }
 
                 html += `
-                    <div class="sugerencia-item" data-id="${user.Id_Trabajador || 0}" data-nombre="${user.NombreCompleto}" data-tipo="${esAdmin ? "admin" : "trabajador"}">
+                    <div class="sugerencia-item" data-id="${user.Id_Trabajador || 0}" data-nombre="${user.NombreCompleto}" data-tipo="${esAdmin ? "admin" : "trabajador"}" data-es-cajero="${user.es_cajero || 0}">
                         <div class="sugerencia-icono">${icono}</div>
                         <div class="sugerencia-info">
                             <div class="sugerencia-nombre">${user.NombreCompleto}</div>
                             <div class="sugerencia-rol">
                                 ${rol}
-                                ${badgeCajero}
+                                ${badge}
                             </div>
                         </div>
                     </div>
@@ -855,11 +856,21 @@
             const id = parseInt(elemento.getAttribute("data-id"));
             const nombre = elemento.getAttribute("data-nombre");
             const tipo = elemento.getAttribute("data-tipo");
+            const esCajero = parseInt(elemento.getAttribute("data-es-cajero")) === 1;
 
-            usuarioSeleccionado = { id, nombre, tipo };
+            usuarioSeleccionado = { id, nombre, tipo, esCajero };
+
+            let rolTexto = "";
+            if (tipo === "admin") {
+                rolTexto = "Administrador";
+            } else if (esCajero) {
+                rolTexto = "Cajero";
+            } else {
+                rolTexto = "Vendedor";
+            }
 
             document.getElementById("selectedNombre").textContent = nombre;
-            document.getElementById("selectedRol").textContent = tipo === "admin" ? "Administrador" : "Cajero";
+            document.getElementById("selectedRol").textContent = rolTexto;
             document.getElementById("selectedUser").style.display = "flex";
 
             document.getElementById("sugerenciasContainer").classList.remove("mostrar");
@@ -870,6 +881,7 @@
             document.getElementById("usuarioId").value = id;
             document.getElementById("usuarioNombre").value = nombre;
             document.getElementById("usuarioTipo").value = tipo;
+            document.getElementById("usuarioEsCajero").value = esCajero ? 1 : 0;
 
             document.getElementById("password").focus();
             document.getElementById("errorMessage").style.display = "none";
@@ -883,6 +895,7 @@
             document.getElementById("usuarioId").value = "";
             document.getElementById("usuarioNombre").value = "";
             document.getElementById("usuarioTipo").value = "";
+            document.getElementById("usuarioEsCajero").value = "";
 
             const pwd = document.getElementById("password");
             pwd.type = "text";
@@ -900,6 +913,7 @@
             const password = document.getElementById("password").value;
             const tipo = document.getElementById("usuarioTipo").value;
             const usuarioNombre = document.getElementById("usuarioNombre").value;
+            const esCajero = parseInt(document.getElementById("usuarioEsCajero").value) === 1;
             const errorDiv = document.getElementById("errorMessage");
             const warningDiv = document.getElementById("warningMessage");
             const btn = document.getElementById("btnLogin");
@@ -916,6 +930,14 @@
             if (!password) {
                 errorDiv.textContent = "Ingrese su contraseña";
                 errorDiv.style.display = "block";
+                return false;
+            }
+
+            // ⭐ SI ES CAJERO, NO PUEDE INICIAR SESIÓN
+            if (esCajero) {
+                errorDiv.textContent = "❌ Los cajeros no tienen acceso al sistema. Contacte al administrador.";
+                errorDiv.style.display = "block";
+                document.getElementById("password").value = "";
                 return false;
             }
 
@@ -952,6 +974,7 @@
                         return false;
                     }
                 } else {
+                    // ⭐ VENDEDOR (NO CAJERO) - Redirige a vendedor_app.html
                     response = await fetch("/api/trabajadores/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -966,14 +989,11 @@
                     if (data.success) {
                         localStorage.setItem("token", data.token);
                         localStorage.setItem("trabajador", JSON.stringify(data.trabajador));
-                        localStorage.setItem("tipoUsuario", "caja");
+                        localStorage.setItem("tipoUsuario", "vendedor");
                         localStorage.setItem("sesionIniciada", "true");
 
-                        if (data.trabajador.debe_cambiar_password) {
-                            window.location.replace("cambiar-password-obligatorio.html");
-                        } else {
-                            window.location.replace("menu_caja.html");
-                        }
+                        // ⭐ REDIRIGIR A VENDEDOR_APP.HTML
+                        window.location.replace("vendedor_app.html");
                         return true;
                     } else {
                         const mensaje = data.message || "Contraseña incorrecta";
