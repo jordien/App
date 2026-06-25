@@ -287,58 +287,120 @@
             display: inline-block;
         }
 
-        .modal-message {
+        /* ===== MODALES ===== */
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.25s ease;
+            padding: 20px;
         }
 
-        .modal-message-content {
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        .modal-box {
             background: white;
             border-radius: 32px;
-            padding: 32px 24px;
-            max-width: 320px;
-            width: 90%;
+            padding: 32px 28px;
+            max-width: 380px;
+            width: 100%;
             text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.3s ease;
         }
 
-        .modal-message-content .icon {
-            font-size: 48px;
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.92) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-box .modal-icon {
+            font-size: 52px;
             margin-bottom: 12px;
         }
 
-        .modal-message-content p {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 15px;
+        .modal-box .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d1b3d;
+            margin-bottom: 8px;
         }
 
-        .modal-message-content button {
-            background: linear-gradient(135deg, #A63C89, #4a1d6d);
-            color: white;
+        .modal-box .modal-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-box .modal-btn {
+            padding: 14px 32px;
             border: none;
-            padding: 12px 32px;
             border-radius: 30px;
-            font-weight: 600;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: inherit;
+            min-width: 120px;
         }
 
-        .modal-message-content button:hover {
-            transform: scale(1.02);
+        .modal-box .modal-btn-primary {
+            background: linear-gradient(135deg, #A63C89, #4a1d6d);
+            color: white;
         }
 
-        .modal-message-content button.btn-error {
+        .modal-box .modal-btn-primary:hover {
+            transform: scale(1.03);
+        }
+
+        .modal-box .modal-btn-success {
+            background: #2e7d32;
+            color: white;
+        }
+
+        .modal-box .modal-btn-success:hover {
+            transform: scale(1.03);
+        }
+
+        .modal-box .modal-btn-danger {
             background: #c62828;
+            color: white;
+        }
+
+        .modal-box .modal-btn-danger:hover {
+            transform: scale(1.03);
+        }
+
+        .modal-box .modal-btn-secondary {
+            background: #f0f0f0;
+            color: #4a1d6d;
+        }
+
+        .modal-box .modal-btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .modal-box .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .stats-grid {
@@ -569,6 +631,7 @@
             font-size: 13px;
         }
 
+        /* Modal de confirmacion */
         .modal-confirm {
             display: none;
             position: fixed;
@@ -595,17 +658,6 @@
             width: 100%;
             text-align: center;
             animation: modalFadeIn 0.3s ease;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
         }
 
         .modal-confirm-content .icon {
@@ -757,7 +809,6 @@
             color: #999;
         }
 
-        /* ESTILOS PARA EL AUTOCOMPLETADO */
         .producto-search-wrapper {
             position: relative;
             flex: 2;
@@ -835,7 +886,6 @@
             box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
         }
 
-        /* Quitar flechas de number input */
         .quantity-input::-webkit-inner-spin-button,
         .quantity-input::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -856,6 +906,7 @@
             .footer-buttons { flex-direction: column; gap: 8px; }
             .ticket-item { flex-wrap: wrap; gap: 8px; }
             .modal-confirm-content { padding: 24px; }
+            .modal-box { padding: 24px 20px; }
             .producto-search-wrapper { min-width: 100px; }
         }
 
@@ -1053,6 +1104,87 @@
             return { texto: "Sin premio", clase: "premio-nada" };
         }
 
+        // ================= FUNCIONES DE MODALES =================
+        function mostrarModal(titulo, mensaje, tipo = 'info', botonTexto = 'Aceptar', callback = null) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            
+            let icono = 'ℹ️';
+            let btnClass = 'modal-btn-primary';
+            
+            if (tipo === 'success') {
+                icono = '✅';
+                btnClass = 'modal-btn-success';
+            } else if (tipo === 'error') {
+                icono = '❌';
+                btnClass = 'modal-btn-danger';
+            } else if (tipo === 'warning') {
+                icono = '⚠️';
+                btnClass = 'modal-btn-danger';
+            }
+            
+            overlay.innerHTML = `
+                <div class="modal-box">
+                    <div class="modal-icon">${icono}</div>
+                    <div class="modal-title">${titulo}</div>
+                    <div class="modal-subtitle">${mensaje}</div>
+                    <div class="modal-buttons">
+                        <button class="modal-btn ${btnClass}" id="modalBtnAceptar">${botonTexto}</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            document.getElementById('modalBtnAceptar').addEventListener('click', function() {
+                overlay.remove();
+                if (callback) callback();
+            });
+            
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.remove();
+                    if (callback) callback();
+                }
+            });
+        }
+
+        function mostrarModalConfirmacion(titulo, mensaje, onConfirm, onCancel = null) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            
+            overlay.innerHTML = `
+                <div class="modal-box">
+                    <div class="modal-icon">⚠️</div>
+                    <div class="modal-title">${titulo}</div>
+                    <div class="modal-subtitle">${mensaje}</div>
+                    <div class="modal-buttons">
+                        <button class="modal-btn modal-btn-secondary" id="modalBtnCancelar">Cancelar</button>
+                        <button class="modal-btn modal-btn-danger" id="modalBtnConfirmar">Confirmar</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            document.getElementById('modalBtnConfirmar').addEventListener('click', function() {
+                overlay.remove();
+                if (onConfirm) onConfirm();
+            });
+            
+            document.getElementById('modalBtnCancelar').addEventListener('click', function() {
+                overlay.remove();
+                if (onCancel) onCancel();
+            });
+            
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.remove();
+                    if (onCancel) onCancel();
+                }
+            });
+        }
+
         // ================= CAMBIAR TAB =================
         function cambiarTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1080,28 +1212,6 @@
             }
         }
 
-        // ================= MODAL DE MENSAJES =================
-        function mostrarMensaje(texto, esError = false, tiempo = 3000) {
-            document.querySelectorAll('.modal-message').forEach(el => el.remove());
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal-message';
-            modal.innerHTML = `
-                <div class="modal-message-content">
-                    <div class="icon">${esError ? '❌' : '✔'}</div>
-                    <p style="color: ${esError ? '#c62828' : '#2e7d32'}">${texto}</p>
-                    <button class="${esError ? 'btn-error' : ''}" onclick="this.parentElement.parentElement.remove()">Aceptar</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            if (tiempo > 0) {
-                setTimeout(() => {
-                    if (modal.parentElement) modal.remove();
-                }, tiempo);
-            }
-        }
-
         // ================= MODAL CERRAR SESION =================
         function mostrarModalCerrarSesion() {
             document.getElementById('modalConfirmCerrar').classList.add('active');
@@ -1126,7 +1236,6 @@
                 const response = await fetch('/api/productos');
                 productosDisponibles = await response.json();
                 
-                // Configurar autocompletado
                 const input = document.getElementById('ticketProductoInput');
                 const sugerencias = document.getElementById('ticketSugerencias');
                 
@@ -1188,12 +1297,12 @@
             const stock = parseInt(input.dataset.stock);
             
             if (!id || !nombre || !precio) {
-                mostrarMensaje('Selecciona un producto de la lista', true);
+                mostrarModal('Error', 'Selecciona un producto de la lista', 'error');
                 return;
             }
             
             if (!cantidad || cantidad < 1) {
-                mostrarMensaje('Ingresa una cantidad valida (mayor a 0)', true);
+                mostrarModal('Error', 'Ingresa una cantidad valida (mayor a 0)', 'error');
                 return;
             }
             
@@ -1201,7 +1310,7 @@
             const totalCantidad = productoExistente ? productoExistente.cantidad + cantidad : cantidad;
             
             if (totalCantidad > stock) {
-                mostrarMensaje(`Stock insuficiente. Disponible: ${stock}`, true);
+                mostrarModal('Stock Insuficiente', `Disponible: ${stock} unidades`, 'error');
                 return;
             }
             
@@ -1259,7 +1368,7 @@
 
         async function generarTicketVenta() {
             if (ticketProductos.length === 0) {
-                mostrarMensaje('Agrega al menos un producto', true);
+                mostrarModal('Error', 'Agrega al menos un producto', 'error');
                 return;
             }
             
@@ -1295,15 +1404,15 @@
                     
                     iniciarTemporizadorTicket(data.ticket.expira_en);
                     
-                    mostrarMensaje(`Ticket enviado: ${data.ticket.codigo}`, false, 4000);
+                    mostrarModal('Ticket Enviado', `Ticket #${data.ticket.codigo} enviado a caja`, 'success');
                     cargarMisTickets();
                     ticketProductos = [];
                     renderizarTicketProductos();
                 } else {
-                    mostrarMensaje('Error: ' + data.message, true);
+                    mostrarModal('Error', data.message || 'Error al generar ticket', 'error');
                 }
             } catch (error) {
-                mostrarMensaje('Error: ' + error.message, true);
+                mostrarModal('Error', 'Error de conexión: ' + error.message, 'error');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -1408,26 +1517,26 @@
             return `${minutos}m ${segundos}s`;
         }
 
-        async function cancelarTicket(codigo) {
-            if (!confirm(`¿Cancelar el ticket ${codigo}?`)) return;
-            
-            try {
-                const response = await fetch(`/api/tickets/${codigo}/cancelar`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': 'Bearer ' + token
+        function cancelarTicket(codigo) {
+            mostrarModalConfirmacion('Cancelar Ticket', `¿Cancelar el ticket ${codigo}?`, async function() {
+                try {
+                    const response = await fetch(`/api/tickets/${codigo}/cancelar`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        mostrarModal('Ticket Cancelado', 'El ticket ha sido cancelado', 'success');
+                        cargarMisTickets();
+                    } else {
+                        mostrarModal('Error', data.message || 'Error al cancelar', 'error');
                     }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    mostrarMensaje('Ticket cancelado', false);
-                    cargarMisTickets();
-                } else {
-                    mostrarMensaje('Error: ' + data.message, true);
+                } catch (error) {
+                    mostrarModal('Error', 'Error de conexión: ' + error.message, 'error');
                 }
-            } catch (error) {
-                mostrarMensaje('Error: ' + error.message, true);
-            }
+            });
         }
 
         // ================= QR =================
@@ -1468,12 +1577,12 @@
                     qrActual = data.codigo;
                     qrActivo = true;
                     mostrarQR(data.codigo, false, data.expira);
-                    mostrarMensaje('QR generado correctamente', false, 3000);
+                    mostrarModal('QR Generado', 'QR generado correctamente', 'success');
                 } else {
-                    mostrarMensaje('Error: ' + data.message, true);
+                    mostrarModal('Error', data.message || 'Error al generar QR', 'error');
                 }
             } catch (error) {
-                mostrarMensaje('Error generando QR: ' + error.message, true);
+                mostrarModal('Error', 'Error de conexión: ' + error.message, 'error');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -1595,13 +1704,13 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    mostrarMensaje(data.message, false, 3000);
+                    mostrarModal('Entrada Registrada', data.message, 'success');
                     cargarAsistencia();
                 } else {
-                    mostrarMensaje(data.message, true);
+                    mostrarModal('Error', data.message, 'error');
                 }
             } catch (error) {
-                mostrarMensaje('Error: ' + error.message, true);
+                mostrarModal('Error', 'Error de conexión: ' + error.message, 'error');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -1626,13 +1735,13 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    mostrarMensaje(data.message, false, 3000);
+                    mostrarModal('Salida Registrada', data.message, 'success');
                     cargarAsistencia();
                 } else {
-                    mostrarMensaje(data.message, true);
+                    mostrarModal('Error', data.message, 'error');
                 }
             } catch (error) {
-                mostrarMensaje('Error: ' + error.message, true);
+                mostrarModal('Error', 'Error de conexión: ' + error.message, 'error');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -1744,6 +1853,19 @@
             if (temporizadorTicket) clearInterval(temporizadorTicket);
             if (temporizadorQR) clearInterval(temporizadorQR);
         });
+
+        // ================= ACTUALIZAR PUNTOS DESPUES DE VENTA =================
+        function actualizarPuntosDespuesVenta() {
+            cargarMisPuntos();
+            cargarHistorialPuntos();
+        }
+
+        // Sobrescribir la función de generar ticket para actualizar puntos
+        const generarTicketOriginal = generarTicketVenta;
+        generarTicketVenta = async function() {
+            await generarTicketOriginal();
+            setTimeout(actualizarPuntosDespuesVenta, 1000);
+        };
     </script>
 </body>
 </html>
