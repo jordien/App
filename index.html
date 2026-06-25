@@ -7,7 +7,7 @@
     <link rel="manifest" href="/manifest.json">
     <title>Chepita - Portal de Acceso</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -17,17 +17,12 @@
 
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(145deg, #4a1d6d 0%, #7b2c8d 50%, #A63C89 100%);
+            background: linear-gradient(135deg, #4a1d6d 0%, #7b2c8d 50%, #A63C89 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
             position: relative;
             overflow-x: hidden;
         }
 
-        /* Círculos decorativos */
         .bg-circle {
             position: fixed;
             border-radius: 50%;
@@ -41,14 +36,12 @@
         .c3 { width: 250px; height: 250px; top: 50%; left: 20%; }
         .c4 { width: 300px; height: 300px; bottom: 10%; right: 10%; }
 
-        /* Destellos */
         .sparkle {
             position: fixed;
             color: rgba(255, 255, 255, 0.6);
             font-size: 20px;
             pointer-events: none;
             animation: float 6s ease-in-out infinite;
-            z-index: 0;
         }
         .sparkle1 { top: 15%; left: 10%; animation-delay: 0s; }
         .sparkle2 { top: 70%; right: 15%; animation-delay: 2s; }
@@ -60,68 +53,51 @@
             50% { transform: translateY(-20px) rotate(180deg); }
         }
 
-        /* Partículas */
-        .particle {
-            position: fixed;
-            width: 6px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: particleFloat 8s ease-in-out infinite;
-            z-index: 0;
-        }
-        .p1 { top: 20%; left: 5%; animation-delay: 0s; width: 8px; height: 8px; }
-        .p2 { top: 60%; left: 90%; animation-delay: 2s; width: 5px; height: 5px; }
-        .p3 { top: 80%; left: 15%; animation-delay: 4s; width: 10px; height: 10px; }
-        .p4 { top: 10%; left: 80%; animation-delay: 1s; width: 6px; height: 6px; }
-        .p5 { top: 45%; left: 50%; animation-delay: 3s; width: 7px; height: 7px; }
-        .p6 { top: 90%; left: 70%; animation-delay: 5s; width: 4px; height: 4px; }
-
-        @keyframes particleFloat {
-            0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.3; }
-            25% { transform: translateY(-30px) translateX(15px); opacity: 0.8; }
-            50% { transform: translateY(-10px) translateX(-10px); opacity: 0.5; }
-            75% { transform: translateY(-40px) translateX(20px); opacity: 0.7; }
-        }
-
         .main-layout {
-            width: 100%;
-            max-width: 450px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
             position: relative;
             z-index: 1;
         }
 
-        .container {
+        .portal-card {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
             border-radius: 48px;
-            padding: 40px 35px 35px;
+            padding: 48px 40px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .container:hover {
+        .portal-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
         }
 
         .login-header {
-            text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
 
-        .login-header img {
-            width: 100px;
-            height: auto;
-            margin-bottom: 15px;
-            filter: drop-shadow(0 4px 12px rgba(166, 60, 137, 0.3));
+        .login-header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #A63C89 0%, #4a1d6d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
         .login-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 24px;
+            font-weight: 600;
             color: #2d1b3d;
             margin-bottom: 4px;
         }
@@ -129,7 +105,6 @@
         .login-header p {
             color: #7a6b8a;
             font-size: 14px;
-            font-weight: 400;
             margin-bottom: 16px;
         }
 
@@ -145,246 +120,121 @@
             font-weight: 500;
         }
 
-        .fecha-login i {
-            color: #A63C89;
-        }
-
-        /* Usuario seleccionado */
-        .selected-user {
-            display: none;
-            align-items: center;
-            background: linear-gradient(135deg, #f3e8ff, #ede0f5);
-            border: 2px solid #caa0d8;
-            border-radius: 40px;
-            padding: 10px 16px;
-            margin-bottom: 20px;
-            animation: fadeIn 0.3s ease;
-            gap: 12px;
-        }
-
-        .selected-user i:first-child {
-            font-size: 28px;
-            color: #A63C89;
-        }
-
-        .selected-user-info {
-            flex: 1;
-        }
-
-        .selected-user-nombre {
-            font-size: 15px;
-            font-weight: 600;
-            color: #2d1b3d;
-        }
-
-        .selected-user-rol {
-            font-size: 12px;
-            color: #7a6b8a;
-            font-weight: 500;
-        }
-
-        .selected-user-clear {
-            color: #999;
-            cursor: pointer;
-            font-size: 18px;
-            transition: color 0.3s, transform 0.3s;
-            padding: 4px;
-        }
-
-        .selected-user-clear:hover {
-            color: #c62828;
-            transform: rotate(90deg);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Inputs */
         .input-group {
             margin-bottom: 18px;
             text-align: left;
+            position: relative;
         }
 
         .input-group label {
             display: block;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 600;
             color: #4a1d6d;
-            letter-spacing: 0.5px;
             margin-bottom: 6px;
         }
 
-        .search-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            background: white;
-            border: 2px solid #e8e8f0;
-            border-radius: 40px;
-            transition: all 0.3s ease;
-        }
-
-        .search-wrapper:focus-within {
-            border-color: #A63C89;
-            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
-        }
-
-        .search-wrapper.abierto {
-            border-color: #A63C89;
-            border-radius: 24px 24px 0 0;
-        }
-
-        .input-icon {
-            position: relative;
-            display: flex;
-            align-items: center;
-            background: white;
-            border: 2px solid #e8e8f0;
-            border-radius: 40px;
-            transition: all 0.3s ease;
-        }
-
-        .input-icon:focus-within {
-            border-color: #A63C89;
-            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
-        }
-
-        .input-icon-left {
-            position: absolute;
-            left: 16px;
-            color: #b5a6c4;
-            font-size: 16px;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        .search-wrapper input {
-            flex: 1;
-            padding: 14px 18px 14px 44px;
-            border: none;
-            background: transparent;
-            font-size: 15px;
-            font-family: 'Poppins', sans-serif;
-            outline: none;
-            border-radius: 40px;
-            min-height: 52px;
-        }
-
-        .search-wrapper input::placeholder {
-            color: #b5a6c4;
-        }
-
-        .input-icon input {
+        .input-group input {
             width: 100%;
-            padding: 14px 18px 14px 44px;
-            border: none;
-            background: transparent;
+            padding: 14px 18px;
+            border: 2px solid #e8e8f0;
+            border-radius: 24px;
             font-size: 15px;
             font-family: 'Poppins', sans-serif;
-            outline: none;
-            border-radius: 40px;
-            min-height: 52px;
-        }
-
-        .input-icon input::placeholder {
-            color: #b5a6c4;
-        }
-
-        /* Sugerencias */
-        .sugerencias-container {
-            display: none;
-            position: absolute;
-            top: calc(100% + 2px);
-            left: -2px;
-            right: -2px;
+            transition: all 0.3s ease;
             background: white;
-            border: 2px solid #A63C89;
-            border-top: none;
-            border-radius: 0 0 24px 24px;
-            max-height: 220px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #A63C89;
+            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
+        }
+
+        .sugerencias-usuario {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e8e8f0;
+            border-radius: 20px;
+            max-height: 200px;
             overflow-y: auto;
             z-index: 100;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            margin-top: 0;
-        }
-
-        .sugerencias-container.mostrar {
-            display: block;
-        }
-
-        .sugerencias-container::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .sugerencias-container::-webkit-scrollbar-track {
-            background: #f5f0ff;
-            border-radius: 0 0 24px 0;
-        }
-
-        .sugerencias-container::-webkit-scrollbar-thumb {
-            background: #caa0d8;
-            border-radius: 10px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 4px;
         }
 
         .sugerencia-item {
-            display: flex;
-            align-items: center;
             padding: 12px 18px;
             cursor: pointer;
-            transition: background 0.15s ease;
-            gap: 14px;
-            border-bottom: 1px solid #f0ebf5;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .sugerencia-item:last-child {
-            border-bottom: none;
-            border-radius: 0 0 24px 24px;
-        }
-
-        .sugerencia-item:hover,
-        .sugerencia-item.activo {
+        .sugerencia-item:hover {
             background: #f5f0ff;
         }
 
-        .sugerencia-item .sugerencia-icono {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #f3e8ff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #A63C89;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        .sugerencia-item .sugerencia-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .sugerencia-item .sugerencia-nombre {
-            font-size: 14px;
+        .sugerencia-item .nombre {
             font-weight: 600;
-            color: #2d1b3d;
+            color: #4a1d6d;
         }
 
-        .sugerencia-item .sugerencia-rol {
-            font-size: 11px;
+        .sugerencia-item .badge-rol {
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .badge-admin {
+            background: #f3e5f5;
+            color: #4a1d6d;
+        }
+
+        .badge-vendedor {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 50px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
             color: #999;
-            font-weight: 500;
+            font-size: 18px;
+            padding: 8px;
+            transition: color 0.2s;
         }
 
-        /* Botón */
-        .btn-submit {
+        .password-toggle:hover {
+            color: #A63C89;
+        }
+
+        .btn-login {
             width: 100%;
             padding: 16px;
             border: none;
             border-radius: 40px;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 700;
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #A63C89, #4a1d6d);
@@ -393,69 +243,26 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(166, 60, 137, 0.4);
             margin-top: 8px;
-            position: relative;
         }
 
-        .btn-submit:hover {
+        .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(166, 60, 137, 0.5);
         }
 
-        .btn-submit:active {
+        .btn-login:active {
             transform: scale(0.98);
         }
 
-        .btn-submit:disabled {
+        .btn-login:disabled {
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
         }
 
-        .btn-submit .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Mensajes */
-        .error-message,
-        .warning-message {
-            display: none;
-            padding: 12px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            margin-top: 12px;
-            text-align: left;
-        }
-
-        .error-message {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .warning-message {
-            background: #fff3e0;
-            color: #e65100;
-        }
-
-        /* Enlace olvidé contraseña */
-        .forgot-link {
+        .forgot-password {
             margin-top: 16px;
-            text-align: center;
-        }
-
-        .forgot-link a {
+            display: block;
             color: #A63C89;
             text-decoration: none;
             font-size: 14px;
@@ -464,8 +271,46 @@
             transition: color 0.2s;
         }
 
-        .forgot-link a:hover {
+        .forgot-password:hover {
             color: #4a1d6d;
+        }
+
+        .footer {
+            margin-top: 28px;
+            font-size: 12px;
+            color: #bbb;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            text-align: left;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            text-align: left;
+        }
+
+        .success-message.show {
+            display: block;
         }
 
         /* Modal Recuperación */
@@ -494,584 +339,403 @@
             max-width: 400px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: modalFadeIn 0.3s ease;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
         }
 
         .modal-content h3 {
             color: #4a1d6d;
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            margin-bottom: 12px;
-        }
-
-        .modal-content p {
-            color: #666;
-            font-size: 14px;
             margin-bottom: 20px;
-        }
-
-        .modal-content input {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e8e8f0;
-            border-radius: 40px;
-            font-size: 15px;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.3s ease;
-            margin-bottom: 12px;
-        }
-
-        .modal-content input:focus {
-            outline: none;
-            border-color: #A63C89;
-            box-shadow: 0 0 0 3px rgba(166, 60, 137, 0.1);
         }
 
         .modal-buttons {
             display: flex;
             gap: 12px;
-            margin-top: 8px;
+            margin-top: 20px;
         }
 
-        .modal-btn {
+        .modal-buttons .btn {
             flex: 1;
             padding: 14px;
             border: none;
-            border-radius: 40px;
-            font-size: 15px;
+            border-radius: 30px;
+            font-size: 16px;
             font-weight: 600;
             font-family: 'Poppins', sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .modal-btn.primary {
+        .btn-primary-modal {
             background: linear-gradient(135deg, #A63C89, #4a1d6d);
             color: white;
         }
 
-        .modal-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(166, 60, 137, 0.4);
-        }
-
-        .modal-btn.secondary {
+        .btn-secondary-modal {
             background: #f0f0f0;
             color: #4a1d6d;
         }
 
-        .modal-btn.secondary:hover {
-            background: #e0e0e0;
+        .rol-indicador {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
         }
 
-        /* Responsive */
+        .rol-admin {
+            background: #f3e5f5;
+            color: #4a1d6d;
+        }
+
+        .rol-vendedor {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
         @media (max-width: 480px) {
-            .container { padding: 28px 20px 25px; border-radius: 32px; }
-            .login-header img { width: 80px; }
-            .login-header h2 { font-size: 22px; }
-            .selected-user { padding: 8px 14px; }
-            .selected-user i:first-child { font-size: 22px; }
-            .search-wrapper input, .input-icon input { font-size: 14px; padding: 12px 14px 12px 38px; min-height: 46px; }
-            .input-icon-left { left: 14px; font-size: 14px; }
-            .btn-submit { font-size: 15px; padding: 14px; }
-            .modal-content { padding: 24px; }
-            .modal-content h3 { font-size: 20px; }
-            .modal-buttons { flex-direction: column; gap: 8px; }
+            .portal-card { padding: 32px 20px; }
+            .login-header h1 { font-size: 36px; }
+            .login-header h2 { font-size: 20px; }
         }
     </style>
 </head>
 <body>
-    <!-- Círculos decorativos -->
     <div class="bg-circle c1"></div>
     <div class="bg-circle c2"></div>
     <div class="bg-circle c3"></div>
     <div class="bg-circle c4"></div>
-
-    <!-- Destellos -->
     <div class="sparkle sparkle1">✦</div>
     <div class="sparkle sparkle2">✦</div>
     <div class="sparkle sparkle3">✦</div>
     <div class="sparkle sparkle4">✦</div>
 
-    <!-- Partículas -->
-    <div class="particle p1"></div>
-    <div class="particle p2"></div>
-    <div class="particle p3"></div>
-    <div class="particle p4"></div>
-    <div class="particle p5"></div>
-    <div class="particle p6"></div>
-
     <div class="main-layout">
-        <div class="container">
+        <div class="portal-card">
             <div class="login-header">
-                <img src="imagenes/LOGOCHEPITA.png" alt="Chepita">
-                <h2>Bienvenido</h2>
-                <p>Sistema de Gestión de Variedades Chepita</p>
+                <h1>🏪 Chepita</h1>
+                <h2>Iniciar Sesión</h2>
+                <p>Accede al sistema de gestión</p>
                 <div class="fecha-login">
                     <i class="fa-solid fa-calendar-days"></i>
                     <span id="fecha"></span>
-                    ·
+                    <span>·</span>
+                    <i class="fa-regular fa-clock"></i>
                     <span id="hora"></span>
                 </div>
             </div>
 
-            <!-- Usuario seleccionado -->
-            <div id="selectedUser" class="selected-user">
-                <i class="fa-solid fa-circle-user"></i>
-                <div class="selected-user-info">
-                    <div class="selected-user-nombre" id="selectedNombre"></div>
-                    <div class="selected-user-rol" id="selectedRol"></div>
-                </div>
-                <i class="fa-solid fa-xmark selected-user-clear" onclick="limpiarSeleccion()"></i>
+            <div style="margin-top: 20px;">
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <form id="loginForm" onsubmit="event.preventDefault(); iniciarSesion();">
+                    <div class="input-group">
+                        <label>Usuario</label>
+                        <input type="text" id="usuarioInput" placeholder="Escribe tu nombre..." autocomplete="off" required autofocus>
+                        <div id="sugerenciasLista" class="sugerencias-usuario"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Contraseña</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="passwordInput" placeholder="Ingresa tu contraseña" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-login" id="btnLogin">Ingresar</button>
+                </form>
+
+                <a class="forgot-password" onclick="mostrarRecuperacion()">¿Olvidaste tu contraseña?</a>
             </div>
 
-            <form id="loginForm" onsubmit="return handleLogin(event);" autocomplete="off">
-                <input type="text" style="display:none" tabindex="-1" aria-hidden="true">
-                <input type="password" style="display:none" tabindex="-1" aria-hidden="true">
-
-                <div class="input-group">
-                    <label>BUSCAR USUARIO</label>
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-user input-icon-left"></i>
-                        <input
-                            type="text"
-                            id="busquedaUsuario"
-                            placeholder="Escriba su nombre..."
-                            autocomplete="off"
-                        />
-                        <div class="sugerencias-container" id="sugerenciasContainer"></div>
-                    </div>
-                    <input type="hidden" id="usuarioId" />
-                    <input type="hidden" id="usuarioNombre" />
-                    <input type="hidden" id="usuarioTipo" />
-                </div>
-
-                <div class="input-group">
-                    <label>CONTRASEÑA</label>
-                    <div class="input-icon">
-                        <i class="fa-solid fa-lock input-icon-left"></i>
-                        <input
-                            type="password"
-                            id="password"
-                            placeholder="Ingrese su contraseña"
-                            autocomplete="off"
-                            readonly
-                            onfocus="this.removeAttribute('readonly'); this.type='password';"
-                            style="-webkit-text-security: disc;"
-                        />
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-submit" id="btnLogin">
-                    Iniciar Sesión
-                </button>
-
-                <div id="errorMessage" class="error-message"></div>
-                <div id="warningMessage" class="warning-message"></div>
-
-                <div class="forgot-link">
-                    <a onclick="abrirModalRecuperacion()">¿Olvidaste tu contraseña?</a>
-                </div>
-            </form>
+            <div class="footer">
+                <i class="fa-regular fa-copyright"></i> 2025 Chepita - Sistema de Gestión Comercial
+            </div>
         </div>
     </div>
 
-    <!-- Modal de Recuperación UNIFICADO -->
-    <div id="modalRecuperacion" class="modal">
+    <!-- Modal Recuperación -->
+    <div id="recuperacionModal" class="modal">
         <div class="modal-content">
-            <h3>Recuperar Contraseña</h3>
-            <div id="recuperacionPaso1">
-                <p>Ingresa tu correo electrónico registrado:</p>
-                <input type="email" id="recuperarEmail" placeholder="correo@ejemplo.com" />
-                <div class="modal-buttons">
-                    <button class="modal-btn primary" onclick="solicitarRecuperacion()">Enviar enlace</button>
-                    <button class="modal-btn secondary" onclick="cerrarModalRecuperacion()">Cancelar</button>
-                </div>
+            <h3>🔐 Recuperar Contraseña</h3>
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Ingresa tu correo electrónico para restablecer tu contraseña</p>
+            <div class="input-group" style="text-align: left;">
+                <label>Correo electrónico</label>
+                <input type="email" id="recEmail" placeholder="ejemplo@correo.com">
             </div>
-            <div id="recuperacionResultado" style="display: none">
-                <p id="resultadoTexto"></p>
-                <div class="modal-buttons">
-                    <button class="modal-btn primary" onclick="cerrarModalRecuperacion()">Cerrar</button>
-                </div>
+            <div class="modal-buttons">
+                <button class="btn-primary-modal" onclick="enviarRecuperacion()">Enviar</button>
+                <button class="btn-secondary-modal" onclick="cerrarModalRecuperacion()">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
-        let trabajadoresData = [];
-        let sugerenciaActiva = -1;
+        let trabajadores = [];
         let usuarioSeleccionado = null;
+        let esAdmin = false;
 
-        localStorage.clear();
-        sessionStorage.clear();
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.querySelector('.password-toggle i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'fa-regular fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'fa-regular fa-eye';
+            }
+        }
 
-        const ADMIN_VIRTUAL = {
-            Id_Trabajador: 0,
-            NombreCompleto: "Administrador",
-            tipo: "admin",
-            usuario: "admin",
-        };
+        function mostrarError(mensaje) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = mensaje;
+            errorDiv.classList.add('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
 
-        async function cargarUsuarios() {
+        function mostrarExito(mensaje) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = mensaje;
+            successDiv.classList.add('show');
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        function ocultarMensajes() {
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        // Cargar lista de vendedores
+        async function cargarVendedores() {
             try {
-                const response = await fetch("/api/trabajadores/activos");
-                trabajadoresData = await response.json();
-
-                const input = document.getElementById("busquedaUsuario");
-                input.addEventListener("input", () => mostrarSugerencias(input.value));
-                input.addEventListener("keydown", manejarTecladoSugerencias);
-
-                document.addEventListener("click", (e) => {
-                    const container = document.getElementById("sugerenciasContainer");
-                    const input = document.getElementById("busquedaUsuario");
-                    if (!container.contains(e.target) && e.target !== input) {
-                        container.classList.remove("mostrar");
-                        document.querySelector(".search-wrapper").classList.remove("abierto");
-                        sugerenciaActiva = -1;
-                    }
-                });
+                const response = await fetch('/api/trabajadores/activos');
+                trabajadores = await response.json();
             } catch (error) {
-                console.error("Error cargando usuarios:", error);
-                trabajadoresData = [];
+                console.error('Error cargando vendedores:', error);
             }
         }
 
-        // Solo muestra CAJEROS (es_cajero = 1)
-        function mostrarSugerencias(texto) {
-            const container = document.getElementById("sugerenciasContainer");
-            const busqueda = texto.toLowerCase().trim();
+        // Buscador de vendedores con sugerencias - SOLO NOMBRE
+        const usuarioInput = document.getElementById('usuarioInput');
+        const sugerenciasDiv = document.getElementById('sugerenciasLista');
 
-            if (busqueda === "") {
-                container.classList.remove("mostrar");
-                document.querySelector(".search-wrapper").classList.remove("abierto");
-                return;
-            }
-
-            let coincidencias = [];
-
-            // Administrador siempre aparece
-            if (busqueda === "admin" || busqueda === "administrador") {
-                coincidencias.push(ADMIN_VIRTUAL);
-            }
-
-            // Solo filtrar trabajadores que son CAJEROS (es_cajero = 1)
-            const trabajadoresCoincidentes = trabajadoresData.filter((t) =>
-                t.es_cajero === 1 && t.NombreCompleto.toLowerCase().includes(busqueda)
-            );
-            coincidencias.push(...trabajadoresCoincidentes);
-
-            if (coincidencias.length === 0) {
-                container.innerHTML = `
-                    <div class="sugerencia-item" style="color:#999; justify-content:center; flex-direction: column; padding: 15px;">
-                        <i class="fa-solid fa-user-slash" style="font-size: 20px; margin-bottom: 8px; color: #dc3545;"></i>
-                        <span>No hay cajeros disponibles</span>
-                        <small style="color: #999; font-size: 11px;">Contacte al administrador</small>
-                    </div>
-                `;
-                container.classList.add("mostrar");
-                document.querySelector(".search-wrapper").classList.add("abierto");
-                return;
-            }
-
-            let html = "";
-            coincidencias.forEach((user) => {
-                const esAdmin = user.tipo === "admin" || user.Id_Trabajador === 0;
-                const icono = esAdmin
-                    ? '<i class="fa-solid fa-crown"></i>'
-                    : '<i class="fa-solid fa-cash-register"></i>';
-                const rol = esAdmin ? "Administrador" : "Cajero";
-
-                const badgeCajero = !esAdmin
-                    ? '<span style="background: #dbeafe; color: #1e40af; padding: 1px 8px; border-radius: 999px; font-size: 9px; margin-left: 5px; border: 1px solid #93c5fd;">Caja</span>'
-                    : '';
-
-                html += `
-                    <div class="sugerencia-item" data-id="${user.Id_Trabajador || 0}" data-nombre="${user.NombreCompleto}" data-tipo="${esAdmin ? "admin" : "trabajador"}">
-                        <div class="sugerencia-icono">${icono}</div>
-                        <div class="sugerencia-info">
-                            <div class="sugerencia-nombre">${user.NombreCompleto}</div>
-                            <div class="sugerencia-rol">
-                                ${rol}
-                                ${badgeCajero}
-                            </div>
+        if (usuarioInput) {
+            usuarioInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                
+                // Si es "admin", mostrar sugerencia de admin
+                if (query === 'admin') {
+                    sugerenciasDiv.innerHTML = `
+                        <div class="sugerencia-item" onclick="seleccionarAdmin()">
+                            <div class="nombre">admin</div>
+                            <span class="badge-rol badge-admin">Admin</span>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+                    sugerenciasDiv.style.display = 'block';
+                    return;
+                }
 
-            container.innerHTML = html;
-            container.classList.add("mostrar");
-            document.querySelector(".search-wrapper").classList.add("abierto");
-            document.querySelectorAll(".sugerencia-item[data-id]").forEach((item) => {
-                item.addEventListener("click", () => seleccionarUsuario(item));
-            });
-        }
+                if (query.length < 1) {
+                    sugerenciasDiv.style.display = 'none';
+                    return;
+                }
 
-        function manejarTecladoSugerencias(e) {
-            const items = document.querySelectorAll(".sugerencia-item[data-id]");
-            if (items.length === 0) return;
+                const filtered = trabajadores.filter(v => 
+                    v.NombreCompleto.toLowerCase().includes(query)
+                );
 
-            switch (e.key) {
-                case "ArrowDown":
-                    e.preventDefault();
-                    sugerenciaActiva = Math.min(sugerenciaActiva + 1, items.length - 1);
-                    actualizarSugerenciaActiva(items);
-                    break;
-                case "ArrowUp":
-                    e.preventDefault();
-                    sugerenciaActiva = Math.max(sugerenciaActiva - 1, 0);
-                    actualizarSugerenciaActiva(items);
-                    break;
-                case "Enter":
-                    if (sugerenciaActiva >= 0 && sugerenciaActiva < items.length) {
-                        e.preventDefault();
-                        seleccionarUsuario(items[sugerenciaActiva]);
-                    }
-                    break;
-                case "Escape":
-                    document.getElementById("sugerenciasContainer").classList.remove("mostrar");
-                    sugerenciaActiva = -1;
-                    break;
-            }
-        }
-
-        function actualizarSugerenciaActiva(items) {
-            items.forEach((item, idx) => {
-                if (idx === sugerenciaActiva) {
-                    item.classList.add("activo");
+                if (filtered.length > 0) {
+                    sugerenciasDiv.innerHTML = filtered.map(v => `
+                        <div class="sugerencia-item" onclick="seleccionarVendedor(${v.Id_Trabajador}, '${v.NombreCompleto.replace(/'/g, "\\'")}')">
+                            <div class="nombre">${v.NombreCompleto}</div>
+                            <span class="badge-rol badge-vendedor">Vendedor</span>
+                        </div>
+                    `).join('');
+                    sugerenciasDiv.style.display = 'block';
                 } else {
-                    item.classList.remove("activo");
+                    sugerenciasDiv.style.display = 'none';
+                }
+            });
+
+            // Cerrar sugerencias al hacer click fuera
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.input-group')) {
+                    sugerenciasDiv.style.display = 'none';
                 }
             });
         }
 
-        function seleccionarUsuario(elemento) {
-            const id = parseInt(elemento.getAttribute("data-id"));
-            const nombre = elemento.getAttribute("data-nombre");
-            const tipo = elemento.getAttribute("data-tipo");
-
-            usuarioSeleccionado = { id, nombre, tipo };
-
-            document.getElementById("selectedNombre").textContent = nombre;
-            document.getElementById("selectedRol").textContent = tipo === "admin" ? "Administrador" : "Cajero";
-            document.getElementById("selectedUser").style.display = "flex";
-
-            document.getElementById("sugerenciasContainer").classList.remove("mostrar");
-            document.querySelector(".search-wrapper").classList.remove("abierto");
-            document.getElementById("busquedaUsuario").value = nombre;
-            sugerenciaActiva = -1;
-
-            document.getElementById("usuarioId").value = id;
-            document.getElementById("usuarioNombre").value = nombre;
-            document.getElementById("usuarioTipo").value = tipo;
-
-            document.getElementById("password").focus();
-            document.getElementById("errorMessage").style.display = "none";
-            document.getElementById("warningMessage").style.display = "none";
+        function seleccionarAdmin() {
+            usuarioSeleccionado = { id: null, nombre: 'admin', usuario: 'admin', esAdmin: true };
+            esAdmin = true;
+            usuarioInput.value = 'admin';
+            sugerenciasDiv.style.display = 'none';
+            document.getElementById('passwordInput').focus();
         }
 
-        function limpiarSeleccion() {
-            usuarioSeleccionado = null;
-            document.getElementById("selectedUser").style.display = "none";
-            document.getElementById("busquedaUsuario").value = "";
-            document.getElementById("usuarioId").value = "";
-            document.getElementById("usuarioNombre").value = "";
-            document.getElementById("usuarioTipo").value = "";
-
-            const pwd = document.getElementById("password");
-            pwd.type = "text";
-            pwd.value = "";
-            pwd.setAttribute("readonly", true);
-
-            document.getElementById("busquedaUsuario").focus();
-            document.getElementById("errorMessage").style.display = "none";
-            document.getElementById("warningMessage").style.display = "none";
+        function seleccionarVendedor(id, nombre) {
+            usuarioSeleccionado = { id, nombre, esAdmin: false };
+            esAdmin = false;
+            usuarioInput.value = nombre;
+            sugerenciasDiv.style.display = 'none';
+            document.getElementById('passwordInput').focus();
         }
 
-        async function handleLogin(event) {
-            event.preventDefault();
+        async function iniciarSesion() {
+            const usuario = document.getElementById('usuarioInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const btn = document.getElementById('btnLogin');
+            const textoOriginal = btn.innerHTML;
 
-            const password = document.getElementById("password").value;
-            const tipo = document.getElementById("usuarioTipo").value;
-            const usuarioNombre = document.getElementById("usuarioNombre").value;
-            const errorDiv = document.getElementById("errorMessage");
-            const warningDiv = document.getElementById("warningMessage");
-            const btn = document.getElementById("btnLogin");
+            ocultarMensajes();
 
-            errorDiv.style.display = "none";
-            warningDiv.style.display = "none";
-
-            if (!usuarioSeleccionado) {
-                errorDiv.textContent = "Seleccione un usuario de la lista";
-                errorDiv.style.display = "block";
-                return false;
+            if (!usuario || !password) {
+                mostrarError('Por favor, ingresa tu usuario y contraseña');
+                return;
             }
 
-            if (!password) {
-                errorDiv.textContent = "Ingrese su contraseña";
-                errorDiv.style.display = "block";
-                return false;
-            }
-
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner"></span> Verificando...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
             btn.disabled = true;
 
             try {
-                let response;
+                // Determinar si es admin o vendedor basado en la selección o el texto
+                let esAdmin = usuario === 'admin' || 
+                              (usuarioSeleccionado && usuarioSeleccionado.esAdmin) ||
+                              usuario.toLowerCase() === 'admin';
 
-                if (tipo === "admin") {
-                    response = await fetch("/api/admin/login", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ usuario: "admin", password: password }),
+                if (esAdmin) {
+                    // Login como Administrador
+                    const response = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usuario, password })
                     });
-
                     const data = await response.json();
 
                     if (data.success) {
-                        localStorage.setItem("token", data.token);
-                        localStorage.setItem("tipoUsuario", "admin");
-                        localStorage.setItem("adminUser", data.user);
-                        localStorage.setItem("sesionIniciada", "true");
-                        window.location.replace("menu_admin.html");
-                        return true;
-                    } else {
-                        errorDiv.textContent = data.message || "Contraseña incorrecta";
-                        errorDiv.style.display = "block";
-                        document.getElementById("password").value = "";
-                        document.getElementById("password").focus();
-                        btn.innerHTML = originalText;
+                        localStorage.setItem('token_admin', data.token);
+                        mostrarExito('✅ ¡Bienvenido Administrador! Redirigiendo...');
+                        setTimeout(() => {
+                            window.location.href = '/admin_App.html';
+                        }, 800);
+                        btn.innerHTML = textoOriginal;
                         btn.disabled = false;
-                        return false;
+                        return;
+                    } else {
+                        mostrarError(data.message || 'Usuario o contraseña incorrectos');
                     }
                 } else {
-                    response = await fetch("/api/trabajadores/login", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            nombre_usuario: usuarioNombre,
-                            password: password,
-                        }),
-                    });
+                    // Login como Vendedor
+                    const nombreUsuario = usuarioSeleccionado ? 
+                        (usuarioSeleccionado.nombre) : 
+                        usuario;
 
+                    const response = await fetch('/api/trabajadores/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre_usuario: nombreUsuario, password })
+                    });
                     const data = await response.json();
 
                     if (data.success) {
-                        localStorage.setItem("token", data.token);
-                        localStorage.setItem("trabajador", JSON.stringify(data.trabajador));
-                        localStorage.setItem("tipoUsuario", "caja");
-                        localStorage.setItem("sesionIniciada", "true");
-
-                        if (data.trabajador.debe_cambiar_password) {
-                            window.location.replace("cambiar-password-obligatorio.html");
-                        } else {
-                            window.location.replace("menu_caja.html");
-                        }
-                        return true;
+                        localStorage.setItem('token_vendedor', data.token);
+                        localStorage.setItem('vendedor', JSON.stringify(data.trabajador));
+                        mostrarExito('✅ ¡Bienvenido Vendedor! Redirigiendo...');
+                        setTimeout(() => {
+                            window.location.href = '/vendedor_app.html';
+                        }, 800);
                     } else {
-                        const mensaje = data.message || "Contraseña incorrecta";
-                        if (mensaje.includes("bloqueada") || mensaje.includes("intento")) {
-                            warningDiv.textContent = mensaje;
-                            warningDiv.style.display = "block";
-                        } else {
-                            errorDiv.textContent = mensaje;
-                            errorDiv.style.display = "block";
-                        }
-                        document.getElementById("password").value = "";
-                        document.getElementById("password").focus();
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                        return false;
+                        mostrarError(data.message || 'Usuario o contraseña incorrectos');
                     }
                 }
             } catch (error) {
-                console.error("Error:", error);
-                errorDiv.textContent = "Error de conexión";
-                errorDiv.style.display = "block";
-                btn.innerHTML = originalText;
+                mostrarError('❌ Error de conexión: ' + error.message);
+            } finally {
+                btn.innerHTML = textoOriginal;
                 btn.disabled = false;
-                return false;
             }
         }
 
-        // ========== RECUPERACIÓN UNIFICADA ==========
-        function abrirModalRecuperacion() {
-            document.getElementById("recuperacionPaso1").style.display = "block";
-            document.getElementById("recuperacionResultado").style.display = "none";
-            document.getElementById("recuperarEmail").value = "";
-            document.getElementById("modalRecuperacion").style.display = "flex";
+        // Recuperación de contraseña
+        function mostrarRecuperacion() {
+            document.getElementById('recuperacionModal').classList.add('active');
         }
 
         function cerrarModalRecuperacion() {
-            document.getElementById("modalRecuperacion").style.display = "none";
+            document.getElementById('recuperacionModal').classList.remove('active');
+            document.getElementById('recEmail').value = '';
         }
 
-        async function solicitarRecuperacion() {
-            const email = document.getElementById("recuperarEmail").value.trim();
-            const resultadoDiv = document.getElementById("recuperacionResultado");
-            const resultadoTexto = document.getElementById("resultadoTexto");
-
+        async function enviarRecuperacion() {
+            const email = document.getElementById('recEmail').value.trim();
             if (!email) {
-                resultadoTexto.innerHTML = "Ingrese su correo electrónico";
-                resultadoDiv.style.display = "block";
-                document.getElementById("recuperacionPaso1").style.display = "none";
+                mostrarError('Ingresa tu correo electrónico');
                 return;
             }
 
-            const btn = document.querySelector("#modalRecuperacion .modal-btn.primary");
-            const originalText = btn.textContent;
-            btn.textContent = "Enviando...";
-            btn.disabled = true;
-
             try {
-                const response = await fetch("/api/recuperar-password-unificado", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: email }),
+                // Intentar recuperar como admin primero
+                let response = await fetch('/api/admin/recuperar-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
                 });
+                let data = await response.json();
 
-                const data = await response.json();
-                resultadoTexto.innerHTML = data.message || "Si el correo está registrado, recibirás un enlace";
-                resultadoDiv.style.display = "block";
-                document.getElementById("recuperacionPaso1").style.display = "none";
+                // Si no es admin, intentar como vendedor
+                if (!data.success) {
+                    response = await fetch('/api/trabajadores/recuperar-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    data = await response.json();
+                }
+
+                if (data.success) {
+                    alert(`✅ ${data.message || 'Se ha enviado un enlace a tu correo'}`);
+                    cerrarModalRecuperacion();
+                } else {
+                    mostrarError(data.message || 'No se encontró una cuenta con ese correo');
+                }
             } catch (error) {
-                console.error("Error:", error);
-                resultadoTexto.innerHTML = "Error de conexión con el servidor";
-                resultadoDiv.style.display = "block";
-                document.getElementById("recuperacionPaso1").style.display = "none";
-            } finally {
-                btn.textContent = originalText;
-                btn.disabled = false;
+                mostrarError('Error de conexión: ' + error.message);
             }
         }
-
-        window.onclick = function (event) {
-            const modal = document.getElementById("modalRecuperacion");
-            if (event.target === modal) {
-                cerrarModalRecuperacion();
-            }
-        };
 
         function actualizarFechaHora() {
             const ahora = new Date();
-            const opcionesFecha = { year: "numeric", month: "long", day: "numeric" };
-            const fechaStr = ahora.toLocaleDateString("es-ES", opcionesFecha);
-            const horaStr = ahora.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-
-            document.getElementById("fecha").textContent = fechaStr;
-            document.getElementById("hora").textContent = horaStr;
+            const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
+            const fechaStr = ahora.toLocaleDateString('es-ES', opcionesFecha);
+            const horaStr = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            
+            document.getElementById('fecha').textContent = fechaStr;
+            document.getElementById('hora').textContent = horaStr;
         }
 
+        // Inicializar
         actualizarFechaHora();
         setInterval(actualizarFechaHora, 60000);
-        cargarUsuarios();
+        cargarVendedores();
+
+        // Enter para enviar formulario
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const form = document.getElementById('loginForm');
+                if (form.contains(e.target)) {
+                    e.preventDefault();
+                    iniciarSesion();
+                }
+            }
+        });
+
+        // Auto-focus en el campo de usuario
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('usuarioInput').focus();
+        });
     </script>
 </body>
 </html>
